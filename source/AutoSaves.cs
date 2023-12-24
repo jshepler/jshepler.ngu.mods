@@ -1,0 +1,76 @@
+﻿using System;
+using System.IO;
+using System.Reflection;
+using HarmonyLib;
+using UnityEngine;
+
+namespace jshepler.ngu.mods
+{
+    [HarmonyPatch]
+    internal class AutoSaves
+    {
+        private static HoverTooltip _tooltip;
+
+        [HarmonyPrepare]
+        private static void prep(MethodBase original)
+        {
+            if (original != null)
+                return;
+
+            Plugin.OnSaveLoaded += (o, e) =>
+            {
+                _tooltip = e.Character.tooltip;
+            };
+
+            Plugin.OnUpdate += (o, e) =>
+            {
+                if (Input.GetKeyDown(KeyCode.F5))
+                    DoSave(e.Character, $"QuickSave");
+            };
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(Rebirth), "engage", typeof(bool))]
+        private static void Rebirth_engage_bool_prefix(bool hardReset, Rebirth __instance)
+        {
+            DoSave(__instance.character, hardReset ? "Challenge" : "Rebirth");
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(PitController), "engage")]
+        private static void PitController_engage_prefix(PitController __instance)
+        {
+            DoSave(__instance.character, "PitThrow");
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(Wandoos98Controller), "setOSType")]
+        private static void Wandoos98_changeOS_prefix(Wandoos98Controller __instance, int ___nextOS)
+        {
+            var newOS = ___nextOS switch
+            {
+                0 => OSType.wandoos98,
+                1 => OSType.wandoosMEH,
+                _ => OSType.wandoosXL
+            };
+
+            if (newOS != __instance.character.wandoos98.os)
+            {
+                DoSave(__instance.character, "Change_Wandoos_OS");
+            }
+        }
+
+        public static void DoSave(Character character, string saveName)
+        {
+            character.lastTime = Epoch.Current();
+            var data = character.importExport.getBase64Data();
+
+            try
+            {
+                File.WriteAllText($"{Application.persistentDataPath}/{saveName}_{DateTime.UtcNow:yyyy-MM-dd_HH-mm-ss}.txt", data);
+                _tooltip.showOverrideTooltip($"game saved: {saveName}", 1);
+            }
+            catch (Exception ex)
+            {
+                Plugin.LogInfo($"Failed to write {saveName}.txt: " + ex.Message);
+            }
+        }
+    }
+}

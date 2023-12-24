@@ -1,0 +1,102 @@
+﻿using System.Collections.Generic;
+using System.Reflection.Emit;
+using HarmonyLib;
+using jshepler.ngu.mods.Popups;
+using UnityEngine;
+
+namespace jshepler.ngu.mods
+{
+    [HarmonyPatch]
+    internal class WishQueue
+    {
+        internal static List<int> Queue = new();
+        private static WishesController _controller;
+        private static WishQueuePopup _popup;
+
+        [HarmonyPostfix, HarmonyPatch(typeof(WishesController), "Start")]
+        private static void WishesController_Start_postfix(WishesController __instance)
+        {
+            _controller = __instance;
+            _popup = new WishQueuePopup(__instance.character);
+
+            Plugin.OnSaveLoaded += (o, e) => Queue = ModSave.Data.WishQueue ?? new();
+            Plugin.OnPreSave += (o, e) => ModSave.Data.WishQueue = Queue;
+            Plugin.OnUpdate += (o, e) =>
+            {
+                if (e.Character.InMenu(Menu.Wishes) && Input.GetKeyDown(KeyCode.Q))
+                {
+                    _popup.Toggle();
+                }
+            };
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(WishesController), "selectNewWish")]
+        private static bool WishesController_selectNewWish_pretfix(int id, WishesController __instance)
+        {
+            if (!Input.GetKey(KeyCode.LeftShift))
+                return true;
+
+            if (Queue.Contains(id))
+            {
+                Queue.Remove(id);
+                __instance.tooltip.showOverrideTooltip($"removed wishId {id} from queue", 1);
+            }
+            else
+            {
+                Queue.Add(id);
+                __instance.tooltip.showOverrideTooltip($"added wishId {id} to queue", 1);
+            }
+
+            return false;
+        }
+
+        // in WishesController.updateAllWishes(), when a wish reaches max level, removeAllResources is called;
+        // this transpiler replaces the call to removeAllResources with a call to CheckQueue below
+        [HarmonyTranspiler, HarmonyPatch(typeof(WishesController), "updateAllWishes")]
+        private static IEnumerable<CodeInstruction> WishesController_updateAllWishes_transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var removeAllResourcesMethod = typeof(WishesController).GetMethod("removeAllResources", new[] { typeof(int) });
+
+            var cm = new CodeMatcher(instructions)
+                .MatchForward(false, new CodeMatch(OpCodes.Call, removeAllResourcesMethod));
+
+            if (cm.IsInvalid)
+            {
+                Plugin.LogInfo("call to removeAllResources not found, not patching");
+                return instructions;
+            }
+
+            cm.Advance(-2)
+                .RemoveInstruction() // removes ldarg.0
+                .Advance(1)
+                .SetInstruction(Transpilers.EmitDelegate(CheckQueue));
+
+            return cm.InstructionEnumeration();//.DumpToLog();
+        }
+
+        private static void CheckQueue(int currentId)
+        {
+            if (Queue.Count == 0)
+            {
+                _controller.removeAllResources(currentId);
+                return;
+            }
+
+            var nextId = Queue[0];
+            Queue.RemoveAt(0);
+
+            var current = _controller.character.wishes.wishes[currentId];
+            var next = _controller.character.wishes.wishes[nextId];
+
+            next.energy = current.energy;
+            next.magic = current.magic;
+            next.res3 = current.res3;
+            _controller.updatebyID(nextId);
+
+            current.energy = 0;
+            current.magic = 0;
+            current.res3 = 0;
+            // no need to do updateByID for current, the patched method will do it after return
+        }
+    }
+}

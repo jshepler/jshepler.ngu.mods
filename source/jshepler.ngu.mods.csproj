@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net46</TargetFramework>
+        <AssemblyName>jshepler.ngu.mods</AssemblyName>
+        <Version>1.0.0</Version>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>latest</LangVersion>
+        <GameFolder>D:\Steam\steamapps\common\NGU IDLE</GameFolder>
+        <PluginsFolder>$(GameFolder)\BepInEx\plugins</PluginsFolder>
+        <GameLibrariesFolder>$(GameFolder)\NGUIdle_Data\Managed\</GameLibrariesFolder>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
+        <PackageReference Include="BepInEx.Core" Version="5.*" />
+        <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
+        <PackageReference Include="UnityEngine.Modules" Version="2019.4.22" IncludeAssets="compile" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="$(GameLibrariesFolder)Assembly-CSharp.dll" />
+        <Reference Include="$(GameLibrariesFolder)UnityEngine.UI.dll" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
+        <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
+    </ItemGroup>
+
+    <Target Name="CopyDLL" AfterTargets="Build">
+        <Copy SourceFiles="$(TargetDir)$(AssemblyName).dll" DestinationFolder="$(PluginsFolder)" />
+    </Target>
+</Project>
