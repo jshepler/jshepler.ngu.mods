@@ -69,12 +69,12 @@ namespace jshepler.ngu.mods
             if (zone.TitanV1Drops != null)
             {
                 if (zone.TitanV2Drops == null)
-                    text += $"\n\n<b>Titan Drops:</b>{DropsString(zone.TitanV1Drops)}";
+                    text += $"\n\n<b>Titan Drops:</b>{DropsString(zone.TitanV1Drops, true)}";
                 else
-                    text += $"\n\n<b>Titan V1 Drops:</b>{DropsString(zone.TitanV1Drops)}"
-                          + $"\n\n<b>Titan V2 adds:</b>{DropsString(zone.TitanV2Drops)}"
-                          + $"\n\n<b>Titan V3 adds:</b>{DropsString(zone.TitanV3Drops)}"
-                          + $"\n\n<b>Titan V4 adds:</b>{DropsString(zone.TitanV4Drops)}";
+                    text += $"\n\n<b>Titan V1 Drops:</b>{DropsString(zone.TitanV1Drops, true)}"
+                          + $"\n\n<b>Titan V2 adds:</b>{DropsString(zone.TitanV2Drops, true)}"
+                          + $"\n\n<b>Titan V3 adds:</b>{DropsString(zone.TitanV3Drops, true)}"
+                          + $"\n\n<b>Titan V4 adds:</b>{DropsString(zone.TitanV4Drops, true)}";
             }
 
             if (zone.EnemyDrops != null)
@@ -134,7 +134,7 @@ namespace jshepler.ngu.mods
             return false;
         }
 
-        private static string DropsString(DropGroup group)
+        private static string DropsString(DropGroup group, bool isTitan = false)
         {
             var text = string.Empty;
 
@@ -177,7 +177,7 @@ namespace jshepler.ngu.mods
                         break;
 
                     case (int)Items.Exp:
-                        var exp = Evaluators.TitanExp(_zoneId);
+                        var exp = isTitan ? Evaluators.TitanExp(_zoneId) : Plugin.Character.checkExpAdded(idc.BaseAmount);
                         text += $"{_number(exp)} EXP ({_number(idc.BaseAmount)} base)";
                         break;
 
