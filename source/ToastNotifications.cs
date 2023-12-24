@@ -10,21 +10,31 @@ namespace jshepler.ngu.mods
     [HarmonyPatch]
     internal class ToastNotifications
     {
-        private static GameObject _orig;
+        private static GameObject _baseTooltip;
         private static List<Toast> _pool = new();
         private static List<Toast> _active = new();
         private static Queue<ToastMessage> _overflow = new();
         private static float _xPos;
         private static float _scaleFactor;
 
-        [HarmonyPostfix, HarmonyPatch(typeof(Character), "Start")]
-        private static void Character_Start_postfix(Character __instance)
+        [HarmonyPostfix, HarmonyPatch(typeof(UIThemeController), "changeTheme")]
+        private static void UIThemeController_changeTheme_postfix(int newID)
         {
-            _orig = __instance.tooltip.tooltip;
-            _scaleFactor = __instance.tooltip.canvas.scaleFactor;
+            _scaleFactor = Plugin.Character.tooltip.canvas.scaleFactor;
 
-            var rect = Traverse.Create(__instance.tooltip).Field<RectTransform>("tooltipRect").Value.rect;
+            var rect = Traverse.Create(Plugin.Character.tooltip).Field<RectTransform>("tooltipRect").Value.rect;
             _xPos = Screen.width - (rect.width * _scaleFactor) - 5;
+
+            _baseTooltip = GameObject.Instantiate(Plugin.Character.tooltip.tooltip, Plugin.Character.tooltip.tooltip.transform.parent);
+            _baseTooltip.transform.position = new Vector3(_xPos, -1000);
+
+            var script = _baseTooltip.GetComponent<HoverTooltip>();
+            GameObject.DestroyImmediate(script);
+
+            var image = _baseTooltip.transform.Find("Image");
+            GameObject.DestroyImmediate(image.gameObject);
+
+            _pool.Clear();
         }
 
 
@@ -118,8 +128,8 @@ namespace jshepler.ngu.mods
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Method Declaration", "Harmony003:Harmony non-ref patch parameters modified", Justification = "not a patch method, nor is tm modified")]
         private static IEnumerator ShowToast(ToastMessage tm)
         {
-            // ignore killed bosses - nuking more than 50 or so bosses has negative impact on UX, imo
-            if (_killedBoss)
+            // ignore nuking bosses - nuking more than 50 or so bosses has negative impact on UX, imo
+            if (_killedBoss && Plugin.Character.bossController.nukeBoss)
                 yield break;
 
             if (_splashScreenIsOpen)
@@ -155,8 +165,10 @@ namespace jshepler.ngu.mods
         private static void RemoveActive(Toast n)
         {
             var index = _active.IndexOf(n);
-            var height = n.Height * _scaleFactor;
+            if (index == -1)
+                return;
 
+            var height = n.Height * _scaleFactor;
             for (var x = index + 1; x < _active.Count; x++)
             {
                 var p = _active[x].Position;
@@ -178,7 +190,7 @@ namespace jshepler.ngu.mods
                 return n;
             }
 
-            var clone = GameObject.Instantiate(_orig, _orig.transform.parent);
+            var clone = GameObject.Instantiate(_baseTooltip, _baseTooltip.transform.parent);
             return new Toast(clone);
         }
     }
@@ -206,11 +218,6 @@ namespace jshepler.ngu.mods
             _gob = gob;
             _text = _gob.GetComponentInChildren<Text>();
             _rect = _gob.GetComponent<RectTransform>();
-
-            var script = _gob.GetComponent<HoverTooltip>();
-            GameObject.Destroy(script);
-
-            _gob.SetActive(false);
         }
 
         internal float Width => _rect.rect.width;

@@ -51,6 +51,12 @@ namespace jshepler.ngu.mods
             set => Options.RemoteTriggers.FightBoss.Enabled.Value = value;
         }
 
+        private static bool _kittyEnabled
+        {
+            get => Options.RemoteTriggers.Kitty.Enabled.Value;
+            set => Options.RemoteTriggers.Kitty.Enabled.Value = value;
+        }
+
         [HarmonyPostfix, HarmonyPatch(typeof(Character), "Start")]
         private static void Character_Start_prefix()
         {
@@ -133,6 +139,8 @@ namespace jshepler.ngu.mods
         private static bool _tossingGold = false;
         private static bool _fightBoss = false;
         private static bool _fightingBoss = false;
+        private static bool _startKitty = false;
+        private static bool _kittyRunning = false;
 
         private static string SetCommandFlags(string command)
         {
@@ -195,6 +203,16 @@ namespace jshepler.ngu.mods
                     _fightBoss = true;
                     return "fight boss: triggered";
 
+                case "kitty":
+                    if (!_kittyEnabled)
+                        return "kitty: disabled";
+
+                    if (_kittyRunning)
+                        return "kitty: ignored - already running";
+
+                    _startKitty = true;
+                    return "kitty: triggered";
+
                 default:
                     return null;
             };
@@ -245,6 +263,13 @@ namespace jshepler.ngu.mods
                 _fightBoss = false;
                 Plugin.Character.StartCoroutine(DoFight());
             }
+
+            if (_startKitty)
+            {
+                _kittyRunning = true;
+                _startKitty = false;
+                Plugin.Character.StartCoroutine(RunKitty());
+            }
         }
 
 
@@ -277,6 +302,24 @@ namespace jshepler.ngu.mods
 
             Plugin.Character.menuSwapper.SwapMenu(currentMenu);
             _tossingGold = false;
+        }
+
+        private static WaitUntil _waitUntilKittyStopped = new WaitUntil(() => _kittyRunning);
+
+        [HarmonyPostfix, HarmonyPatch(typeof(TrollChallengeController), "trollKittyOff")]
+        private static void TrollChallengeController_trollKittyOff_postfix()
+        {
+            _kittyRunning = false;
+        }
+
+        private static IEnumerator RunKitty()
+        {
+            var kitty = Plugin.Character.allChallenges.trollChallenge.kitty;
+            kitty.transform.SetAsLastSibling();
+            kitty.color = Color.white;
+            kitty.gameObject.transform.localPosition = new Vector3(0f, -550f);
+
+            return _waitUntilKittyStopped;
         }
 
         private static string GetTotalTimePlayed()

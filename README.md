@@ -32,7 +32,7 @@ There are only a few config options at the moment. I'll probably add options in 
 
 5. auto-save on rebirth, challenge, pit throw, changing wandoos OS
 
-6. press F5 to do quicksave
+6. press F5 to do quicksave, F6 to load latest quicksave
 
 7. the lazy ITOPOD shifter can raise max floor
 
@@ -145,7 +145,7 @@ There are only a few config options at the moment. I'll probably add options in 
 
 40. Upgrade All Diggers by right-clicking the "Gold Digger" button; will upgrade all diggers in order of cost, repeating until not enough gold for any upgrade
 
-41. fruit tooltips show what was last gained
+41. fruit tooltips show what was last gained (persisted in save)
 
 42. added the current softcaps to infinity cube's power and toughness stats (red means < softcap, green means >= softcap)
 
@@ -154,6 +154,8 @@ There are only a few config options at the moment. I'll probably add options in 
     added uncapped power and toughness (what's used to determine tier) and amount needed for next tier
 
 43. temp loadout saves currently equipped gear when loading a loadout (regular or temp), load temp loadout by pressing the X key while on inventory screen
+
+    (persisted in save)
 
 44. change daycare bars from "Levels Gained" to show the level the item will be if taken out; if non-macguffin, shows time remaining until level 100. also adds item's current time per level to tooltip
 
@@ -235,7 +237,7 @@ There are only a few config options at the moment. I'll probably add options in 
 
 67. added wish queue
     shift-click a wish to add/remove to/from the queue
-    press q to toggle the queue window where can re-order wishes or clear the queue
+    press q to toggle the queue window where can delete a wish, re-order wishes, and clear the queue
 
 68. added number of clicks remaining before button swap on small troll's "click ok 50 times" popup
 
@@ -259,11 +261,11 @@ There are only a few config options at the moment. I'll probably add options in 
 
     display time remaining before that level
 
-72. click the cap button on a basic training skill while having the sync training setting enabled will split evenly between the two skills
+72. clicking the cap button on a basic training skill while having the sync training setting enabled will split evenly between the two skills
 
 73. press B or right-click Fight Boss button to start a boss fight (will nuke if able)
 
-74. on wishes screen, can use number keys to select pages and arrow keys to move current wish selection
+74. on wishes screen, can use arrow keys to move current wish selection
 
 75. press F2 to open a popup to change titans' version without having to go to their zone
 
@@ -271,30 +273,39 @@ There are only a few config options at the moment. I'll probably add options in 
 
 77. auto-sniping: skips normal enemies on adventure screen, if < 50% health after boss dies (or if player dies) stays in safe zone until full health
 
-    go to desired zone and press F1 (or right-click idle button) to toggle auto-snipe
+    go to desired zone and press F1 (or right-click idle button) to toggle auto-snipe (changes border of the Idle Mode button to red)
 
-    (changes border of the Idle Mode button to red)
-
-    there's a config option to snipe Droop when in the Forest zone, instead of bosses (you'll know when you need to do this)
+    there's a config option to snipe specified target when in specified zone, instead of that zone's bosses
 
 78. on the rebirth screen, the rebirth button will be red if there is "Crap to do before rebirthing"
 
-79. removed "not less than 10k" limit on buy custom energy/magic cap, lowest is what you can get for 1 exp (250 cap)
+79. removed "not less than 10k" limit on buy custom energy/magic cap, lowest is what you can get for 1 exp (e.g. 250 energy cap)
 
 80. fixed bug with Jake's (T3) locusts attack - the attacks aren't supposed to start until the turn after the warning, currently it's the next frame
 
     (also changed the color of the warning to blue so it's more noticeable)
 
-81. added http listener that accepts specific requests to trigger functions in game, `http://localhost:8088/ngu/<command>/`
+81. added remote triggers (using HttpListener) that accepts specific requests to trigger functions in game, `http://localhost:8088/ngu/<command>/`
 
-    current commands: autoBoost, autoMerge, tossGold, fightBoss, totalTimePlayed
+    current commands:
+    - autoBoost: executes in-game auto-boost code
+    - autoMerge: executes in-game auto-merge code
+    - tossGold: executes in-game money pit's "Feed Me"
+    - fightBoss: if able to win fight, switches to boss screen, nukes (if able), fight boss (if winable), returns to prev screen
+    - kitty: starts troll challenge big troll's kitty event (for fun)
+    - totalTimePlayed: generates html to display timer starting from current Total Time Player
 
-    (totalTimePlayed generates html to display a timer starting from current total time played)
+    has config options:
+    - Enabled: if disabled, ignores commands (except totalTimePlayed)
+    - UrlPrefix: what appears before \<command\>, can be used to specify machine name or IP
+    - enable/disable individual commands
 
 82. added confg file:
-    - option to enable/disable remote triggers (totalTimePlayed ignores this setting)
-    - options to enable/disable autoBoost, autoMerge, tossGold, fightBoss
+    - option to control remote triggers
     - option to enable/disable auto-harvest/eat fruits when fully grown
+    - options to control how zone drop table tooltip displays items
+    - option to target zone/enemy for auto-sniping
+    - option to replace default player portrait with specified boss id
 
 83. separated notifications (aka timed tooltips) from tooltips (doesn't share same window) and made them toasts - allowing multiple notifications
 
@@ -319,14 +330,29 @@ There are only a few config options at the moment. I'll probably add options in 
 
 86. adds current zone's drop table as an alternate zone tooltip (hold alt key while hovering mouse over zone description)
 
+    (has options in config file to control when/how some items are displayed)
+
 87. fixed bug with clock zone's drops - it's supposed to have a chance to drop A Busted Copy of Wandoos 98
 
 88. on the start screen, added timestamps to the autosave and steam cloud details
 
-89. F6 loads last quicksave (from F5)
+89. when fighting bosses, the Fight Boss button turns red, shows current boss #, and depletes in sync with boss hp
 
-90. when fighting bosses, the Fight Boss button turns red, shows current boss #, and depletes in sync with boss hp
-
-91. tracks total time played per difficulty and displays each on the Misc Stats page
+90. tracks total time played per difficulty and displays each on the Misc Stats page
 
     if installing mod into an existing game that's no longer in normal, there's no way to know how much of the existing playtime is normal, so it assigns all of it to normal
+
+91. modified manual combat moves to be colored based on state:
+    - disabled/paralyzed (red)
+    - buff running (blue)
+    - on cooldown (yellow)
+    - on GCD (grey)
+    - ready (green)
+
+92. fixed zone dropdown bug that prevented selecting safe zone
+
+93. adds hotkeys to do an auto-merge (shift-m) and auto-boost (shift-b)
+
+94. notifications are generated for zones being unlocked
+
+95. right-clicking the Auto Transform buttons on inventory screen will transform all unprotected boosts in inventory

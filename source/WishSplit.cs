@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using HarmonyLib;
 using UnityEngine;
-using UnityEngine.TextCore;
 
 namespace jshepler.ngu.mods
 {
@@ -12,30 +11,21 @@ namespace jshepler.ngu.mods
         private static HashSet<int> _selectedIds = new();
         private static int MaxWishes => Plugin.Character.wishesController.curWishSlots();
 
-        [HarmonyPrefix, HarmonyPatch(typeof(WishPodUIController), "selectThisWish")]
-        private static bool WishPodUIController_selectThisWish_prefix(WishPodUIController __instance)
+        [HarmonyPostfix, HarmonyPatch(typeof(WishPodUIController), "selectThisWish")]
+        private static void WishPodUIController_selectThisWish_postfix(WishPodUIController __instance)
         {
-            if (!Input.GetKey(KeyCode.LeftAlt))
+            if (Input.GetKey(KeyCode.LeftAlt))
             {
-                ClearSelected();
-                return true;
-            }
+                var id = __instance.id;
+                if (_selectedIds.Contains(id))
+                    _selectedIds.Remove(id);
+                else if (_selectedIds.Count < MaxWishes)
+                    _selectedIds.Add(id);
 
-            var id = __instance.id;
-
-            if (_selectedIds.Contains(id))
-            {
-                _selectedIds.Remove(id);
                 __instance.updateIcon();
-                return false;
             }
-
-            if (_selectedIds.Count >= MaxWishes)
-                return false;
-
-            _selectedIds.Add(id);
-            __instance.updateIcon();
-            return false;
+            else
+                ClearSelected();
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(WishPodUIController), "updateIcon")]

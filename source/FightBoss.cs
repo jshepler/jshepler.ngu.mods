@@ -113,8 +113,8 @@ namespace jshepler.ngu.mods
 
             if (Plugin.Character.challenges.blindChallenge.inChallenge)
             {
-                _image.fillAmount = 1f;
-                _image.color = Color.white;
+                _image.fillAmount = 0f;
+                //_image.color = Color.white;
                 _text.text = "Fight Boss";
             }
             else if (fighting || nuking)
@@ -123,10 +123,15 @@ namespace jshepler.ngu.mods
                 _image.fillAmount = Plugin.Character.bossController.bossHPBar.value;
                 _text.text = $"Boss {Plugin.Character.bossID + 1}";
             }
-            else
+            else if (CanNuke || CanFight)
             {
                 _image.fillAmount = 1f;
-                _image.color = CanNuke ? Plugin.ButtonColor_Green : CanFight ? Plugin.ButtonColor_Yellow : Color.white;
+                _image.color = CanNuke ? Plugin.ButtonColor_Green : Plugin.ButtonColor_Yellow;
+                _text.text = "Fight Boss";
+            }
+            else
+            {
+                _image.fillAmount = 0f;
                 _text.text = "Fight Boss";
             }
         }

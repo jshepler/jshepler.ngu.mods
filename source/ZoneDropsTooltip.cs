@@ -153,7 +153,8 @@ namespace jshepler.ngu.mods
                 var moddedDC = idc.BaseDC * _dcMulti + idc.BonuseDC;
                 var dc = Math.Min(moddedDC, idc.MaxDC);
                 var color = dc == idc.MaxDC ? "green" : "red";
-                text += $"\n<b><color={color}>{_dcP(dc)}</color></b> for ";
+                var showMax = idc.MaxDC < 1f && dc < idc.MaxDC;
+                text += $"\n<b><color={color}>{_dcP(dc)}</color></b>{(showMax ? " (max: " + _dcP(idc.MaxDC) + ")" : string.Empty)} for ";
 
                 switch (idc.ItemIds[0])
                 {

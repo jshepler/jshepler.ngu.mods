@@ -91,9 +91,12 @@ namespace jshepler.ngu.mods
             if (_waiting)
                 return false;
 
-            // only fight droop
-            if (Controller.zone == 2 && Options.AutoSnipe.SnipeDroop.Enabled.Value == true)
-                return Controller.currentEnemy.spriteID != 9;
+            // snipe target enemy when in target zone
+            var targetZone = Options.AutoSnipe.TargetZone.Value - 2;
+            var targetEnemy = Options.AutoSnipe.TargetEnemy.Value;
+
+            if (targetZone >= 0 && targetEnemy > 0 && Controller.zone == targetZone)
+                return Controller.currentEnemy.spriteID != targetEnemy;
 
             return Controller.currentEnemy.enemyType != enemyType.boss;
         }
