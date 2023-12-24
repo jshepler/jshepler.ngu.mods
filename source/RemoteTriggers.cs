@@ -189,7 +189,7 @@ namespace jshepler.ngu.mods
                     if (Plugin.Character.bossController.isFighting)
                         return "fight boss: ignoring - fight in progress";
 
-                    if (!CanFightBoss.CanFight)
+                    if (!FightBoss.CanFight)
                         return "fight boss: ignored - boss not beatable";
 
                     _fightBoss = true;
@@ -254,27 +254,11 @@ namespace jshepler.ngu.mods
         private static IEnumerator DoFight()
         {
             var currentMenu = Plugin.Character.CurrentMenu();
-
             Plugin.Character.menuSwapper.SwapMenu(Menu.FightBoss);
-            yield return _waitQuarterSecond;
 
-            if (CanFightBoss.CanNuke)
-            {
-                Plugin.Character.bossController.startNuke();
-
-                while (Plugin.Character.bossController.isFighting)
-                    yield return _waitQuarterSecond;
-            }
-
-            if (CanFightBoss.CanFight)
-            {
-                Plugin.Character.bossController.beginFight();
-
-                while (Plugin.Character.bossController.isFighting)
-                    yield return _waitQuarterSecond;
-            }
-
+            yield return FightBoss.RunFight();
             yield return _waitHalfSecond;
+
             Plugin.Character.menuSwapper.SwapMenu(currentMenu);
             _fightingBoss = false;
         }

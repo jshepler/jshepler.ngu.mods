@@ -10,7 +10,7 @@ namespace jshepler.ngu.mods.BarTooltips
         private static void Wandoos98Controller_showEnergyTooltip_postfix(Wandoos98Controller __instance, ref string ___message)
         {
             var character = __instance.character;
-            var baseSpeeds = GameData.WandoosBaseTimes[character.settings.rebirthDifficulty];
+            var baseSpeeds = GameData.Wandoos.BaseTimes[character.settings.rebirthDifficulty];
             var energySpeed = character.totalWandoosEnergySpeed();
 
             var wan98 = baseSpeeds[OSType.wandoos98] / energySpeed + 1;
@@ -36,7 +36,7 @@ namespace jshepler.ngu.mods.BarTooltips
         private static void Wandoos98Controller_showMagicTooltip_postfix(Wandoos98Controller __instance, ref string ___message)
         {
             var character = __instance.character;
-            var baseSpeeds = GameData.WandoosBaseTimes[character.settings.rebirthDifficulty];
+            var baseSpeeds = GameData.Wandoos.BaseTimes[character.settings.rebirthDifficulty];
             var magicSpeed = character.totalWandoosMagicSpeed();
 
             var wan98 = baseSpeeds[OSType.wandoos98] / magicSpeed + 1;

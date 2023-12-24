@@ -6,7 +6,7 @@ namespace jshepler.ngu.mods
     internal class AutoHarvestFruits
     {
         // auto harvest/eat all max tier fruits when any are max tier
-        //[HarmonyPostfix, HarmonyPatch(typeof(AllYggdrasil), "updateFruitTimers")]
+        [HarmonyPostfix, HarmonyPatch(typeof(AllYggdrasil), "updateFruitTimers")]
         private static void AllYggdrasil_updateFruitTimers_postfix(AllYggdrasil __instance)
         {
             if (Options.AutoHarvest.Enabled.Value && __instance.anyFruitMaxxed())
@@ -17,8 +17,7 @@ namespace jshepler.ngu.mods
         [HarmonyPrefix, HarmonyPatch(typeof(Rebirth), "engage", typeof(bool))]
         private static void Rebirth_engage_bool_prefix(Rebirth __instance)
         {
-            if (Options.AutoHarvest.Enabled.Value)
-                __instance.character.yggdrasilController.consumeAll(true);
+            __instance.character.yggdrasilController.consumeAll(true);
         }
     }
 }

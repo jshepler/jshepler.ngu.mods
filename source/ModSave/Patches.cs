@@ -49,7 +49,10 @@ namespace jshepler.ngu.mods.ModSave
         private static PlayerData CreatePlayerData()
         {
             if (_cleanSave)
+            {
+                _cleanSave = false;
                 return new PlayerData();
+            }
 
             return new ModPlayerData() { Data = Data.Values };
         }

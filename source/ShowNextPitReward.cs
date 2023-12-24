@@ -61,7 +61,7 @@ namespace jshepler.ngu.mods
             if (log > 30 && _character.wishes.wishes[4].level < 1)
                 log = 30;
 
-            foreach (var tier in GameData.PitTierRewards)
+            foreach (var tier in GameData.MoneyPit.TierRewards)
             {
                 if (log < tier.Key)
                     return SelectRandomString(tier.Value);

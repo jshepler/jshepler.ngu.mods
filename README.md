@@ -261,7 +261,7 @@ There are only a few config options at the moment. I'll probably add options in 
 
 72. click the cap button on a basic training skill while having the sync training setting enabled will split evenly between the two skills
 
-73. when on Fight Boss screen, press f to toggle fight on/off
+73. press B or right-click Fight Boss button to start a boss fight (will nuke if able)
 
 74. on wishes screen, can use number keys to select pages and arrow keys to move current wish selection
 
@@ -316,3 +316,17 @@ There are only a few config options at the moment. I'll probably add options in 
     \<= optimal floor, 1-shot kills using respawn time + idle attack time
 
     \> optimal floor, uses rolling average times of last 5 kills
+
+86. adds current zone's drop table as an alternate zone tooltip (hold alt key while hovering mouse over zone description)
+
+87. fixed bug with clock zone's drops - it's supposed to have a chance to drop A Busted Copy of Wandoos 98
+
+88. on the start screen, added timestamps to the autosave and steam cloud details
+
+89. F6 loads last quicksave (from F5)
+
+90. when fighting bosses, the Fight Boss button turns red, shows current boss #, and depletes in sync with boss hp
+
+91. tracks total time played per difficulty and displays each on the Misc Stats page
+
+    if installing mod into an existing game that's no longer in normal, there's no way to know how much of the existing playtime is normal, so it assigns all of it to normal

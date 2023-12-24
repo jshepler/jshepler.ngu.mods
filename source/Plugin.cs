@@ -336,7 +336,7 @@ mods:
 
 72 - click the cap button on a basic training skill while having the sync training setting enabled will split evenly between the two skills
 
-73 - when on Fight Boss screen, press f to toggle fight on/off
+73 - press B or right-click Fight Boss button to start a boss fight (will nuke if able)
 
 74 - on wishes screen, can use number keys to select pages and arrow keys to move current wish selection
 
@@ -364,6 +364,7 @@ mods:
         option to enable/disable remote triggers (totalTimePlayed ignores this setting)
         options to enable/disable autoBoost, autoMerge, tossGold, fightBoss
         option to enable/disable auto-harvest/eat fruits when fully grown
+        options to configure how zones' drops tooltip shows items
 
 83 - separated notifications (aka timed tooltips) from tooltips (doesn't share same window) and made them toasts - allowing multiple notifications
     (ignores boss kills - nuking 50+ bosses generates way too many toasts)
@@ -376,5 +377,19 @@ mods:
     time to next PP uses 2 calcs: one for when floor <= optimal floor and another > optimal floor
         <= optimal floor, 1-shot kills using respawn time + idle attack time
         > optimal floor, uses rolling average times of last 5 kills
+
+86 - adds current zone's drop table as an alternate zone tooltip (hold alt key while hovering mouse over zone description)
+    (has options in config file to control when/how some items are displayed)
+
+87 - fixed bug with clock zone's drops - it's supposed to have a chance to drop A Busted Copy of Wandoos 98
+
+88 - on the start screen, added timestamps to the autosave and steam cloud details
+
+89 - F6 loads last quicksave (from F5)
+
+90 - when fighting bosses, the Fight Boss button turns red, shows current boss #, and depletes in sync with boss hp
+
+91 - tracks total time played per difficulty and displays each on the Misc Stats page
+    if installing mod into an existing game that's no longer in normal, there's no way to know how much of the existing playtime is normal, so it assigns all of it to normal
 
  */

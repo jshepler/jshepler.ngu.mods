@@ -14,7 +14,7 @@ namespace jshepler.ngu.mods
                 return;
 
             var currentZone = character.adventure.zone;
-            if (!GameData.ZoneQuestItemIDs.ContainsKey(currentZone))
+            if (!GameData.Quests.ZoneItemIDs.ContainsKey(currentZone))
                 return;
 
             // from BeastQuestController.constructQuestList()
@@ -37,7 +37,7 @@ namespace jshepler.ngu.mods
             if (!setUnlocked)
                 return;
 
-            var questItemId = GameData.ZoneQuestItemIDs[currentZone];
+            var questItemId = GameData.Quests.ZoneItemIDs[currentZone];
             var possibleQuests = __instance.possibleQuests;
             if (!possibleQuests.Contains(questItemId))
                 return;

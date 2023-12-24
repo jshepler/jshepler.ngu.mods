@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
@@ -26,6 +27,8 @@ namespace jshepler.ngu.mods
             {
                 if (Input.GetKeyDown(KeyCode.F5))
                     DoSave(e.Character, $"QuickSave");
+                else if (Input.GetKeyDown(KeyCode.F6))
+                    LoadLastQuicksave();
             };
         }
 
@@ -57,7 +60,7 @@ namespace jshepler.ngu.mods
             }
         }
 
-        public static void DoSave(Character character, string saveName)
+        private static void DoSave(Character character, string saveName)
         {
             character.lastTime = Epoch.Current();
             var data = character.importExport.getBase64Data();
@@ -71,6 +74,31 @@ namespace jshepler.ngu.mods
             {
                 Plugin.LogInfo($"Failed to write {saveName}.txt: " + ex.Message);
             }
+        }
+
+        private static void LoadLastQuicksave()
+        {
+            var folder = new DirectoryInfo(Application.persistentDataPath);
+            if (!folder.Exists)
+                return;
+
+            var quickSaves = folder.GetFiles("QuickSave*").OrderByDescending(f => f.LastWriteTimeUtc).ToArray();
+            if (quickSaves.Length == 0 || quickSaves[0] == null)
+                return;
+
+            // modelled on OpenFileDialog.setLocalSaveSteam()
+            var character = Plugin.Character;
+            var importExport = character.importExport;
+
+            var text = File.ReadAllText(quickSaves[0].FullName);
+            var saveDataFromString = importExport.getSaveDataFromString(text);
+            var dataFromString = importExport.getDataFromString(text);
+
+            character.mainMenu.setLocalSave(saveDataFromString);
+            character.mainMenu.setLocalPlayerData(dataFromString);
+            character.mainMenu.setLocalSaveValidity(validity: true);
+
+            character.mainMenu.loadAutosaveSteam();
         }
     }
 }

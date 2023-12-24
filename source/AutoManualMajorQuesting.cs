@@ -71,14 +71,14 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(BeastQuestController), "startQuest")]
         private static void BeastQuestController_startQuest_postfix(BeastQuestController __instance)
         {
-            if (!_enabled || !_character.beastQuest.inQuest)
+            if (!_enabled || !InManualQuest())
                 return;
 
             var itemId = _character.beastQuest.questID;
-            if (!GameData.ZoneQuestItemIDs.ContainsValue(itemId))
+            if (!GameData.Quests.ZoneItemIDs.ContainsValue(itemId))
                 return;
 
-            var questZone = GameData.ZoneQuestItemIDs.First(kv => kv.Value == itemId).Key;
+            var questZone = GameData.Quests.ZoneItemIDs.First(kv => kv.Value == itemId).Key;
             if (_character.adventure.zone != questZone)
                 _character.adventureController.zoneSelector.changeZone(questZone);
         }

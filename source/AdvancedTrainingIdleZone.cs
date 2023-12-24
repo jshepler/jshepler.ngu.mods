@@ -1,5 +1,6 @@
 ﻿using System;
 using HarmonyLib;
+using UnityEngine;
 
 namespace jshepler.ngu.mods
 {
@@ -15,7 +16,7 @@ namespace jshepler.ngu.mods
             var advancedTraining = character.advancedTrainingController;
             var advController = character.adventureController;
 
-            if (__instance.zone == -1 || __instance.zone >= 1000) return;
+            if (__instance.zone == -1 || __instance.zone >= 1000 || Input.GetKey(KeyCode.LeftAlt)) return;
 
             //var enemies = __instance.enemyList[__instance.zone];
             //if (enemies == null || enemies.Count == 0) return;

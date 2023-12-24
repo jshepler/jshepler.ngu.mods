@@ -69,5 +69,23 @@ namespace jshepler.ngu.mods.ModSave
             get => Get<Dictionary<int, int[]>>("EnabledRes3IDs", new());
             set => Set("EnabledRes3IDs", value);
         }
+
+        internal static double TotalTimePlayedNormal
+        {
+            get => Get<double>("TotalTimePlayedNormal");
+            set => Set("TotalTimePlayedNormal", value);
+        }
+
+        internal static double TotalTimePlayedEvil
+        {
+            get => Get<double>("TotalTimePlayedEvil");
+            set => Set("TotalTimePlayedEvil", value);
+        }
+
+        internal static double TotalTimePlayedSadistic
+        {
+            get => Get<double>("TotalTimePlayedSadistic");
+            set => Set("TotalTimePlayedSadistic", value);
+        }
     }
 }

@@ -1,29 +1,10 @@
 ﻿using System.Collections.Generic;
 
-namespace jshepler.ngu.mods
+namespace jshepler.ngu.mods.GameData
 {
-    internal static class GameData
+    internal static class MoneyPit
     {
-        public static Dictionary<difficulty, Dictionary<OSType, float>> WandoosBaseTimes = new()
-        {
-            { difficulty.normal, new() {
-                { OSType.wandoos98, 1E+09f },
-                { OSType.wandoosMEH, 1E+12f },
-                { OSType.wandoosXL, 1E+15f }
-            }},
-            { difficulty.evil, new() {
-                { OSType.wandoos98, 1E+21f },
-                { OSType.wandoosMEH, 1E+27f },
-                { OSType.wandoosXL, 1E+33f }
-            }},
-            { difficulty.sadistic, new() {
-                { OSType.wandoos98, 1E+21f },
-                { OSType.wandoosMEH, 1E+27f },
-                { OSType.wandoosXL, 1E+33f }
-            }}
-        };
-
-        public static Dictionary<int, List<string>> PitTierRewards = new()
+        public static Dictionary<int, List<string>> TierRewards = new()
         {
             // tier 1
             { 7, new() {
@@ -104,22 +85,9 @@ namespace jshepler.ngu.mods
                 , "ALL Daycare Items LevelUp"
             } },
         };
-
-        internal static Dictionary<int, int> ZoneQuestItemIDs = new()
-        {
-            {1, 278 },
-            {2, 281 },
-            {5, 283 },
-            {9, 279 },
-            {12, 282 },
-            {13, 287 },
-            {15, 285 },
-            {20, 280 },
-            {21, 284 },
-            {22, 286 }
-        };
     }
 }
+
 
 /*
         public static Dictionary<int, List<string>> PitTierRewards = new()
