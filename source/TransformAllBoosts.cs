@@ -55,6 +55,7 @@ namespace jshepler.ngu.mods
                 
                 var id = (item.id - 1) % 13 + 1 + (selection - 1) * 13;
                 item.id = id;
+                item.type = (part)(selection + 5);
 
                 _controller.updateItem(slotIndex);
             }
