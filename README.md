@@ -300,7 +300,7 @@ There are only a few config options at the moment. I'll probably add options in 
     - UrlPrefix: what appears before \<command\>, can be used to specify machine name or IP
     - enable/disable individual commands
 
-82. added confg file:
+82. added config file:
     - option to control remote triggers
     - option to enable/disable auto-harvest/eat fruits when fully grown
     - options to control how zone drop table tooltip displays items
@@ -313,7 +313,7 @@ There are only a few config options at the moment. I'll probably add options in 
 
 84. evenly split resources between selected wishes
 
-    control-click to select multiple wishes (up to max wish slots)
+    alt-click to select multiple wishes (up to max wish slots)
 
     alt-click any of the resource + buttons to remove all resources from all wishes, and then split all idle resources to selected wishes
 
@@ -351,8 +351,22 @@ There are only a few config options at the moment. I'll probably add options in 
 
 92. fixed zone dropdown bug that prevented selecting safe zone
 
-93. adds hotkeys to do an auto-merge (shift-m) and auto-boost (shift-b)
+93. adds hotkeys to do an merge all (shift-m) and boost all (shift-b)
 
 94. notifications are generated for zones being unlocked
 
 95. right-clicking the Auto Transform buttons on inventory screen will transform all unprotected boosts in inventory
+
+96. show Total Attack/Defense Modifier from augs to the Augments stat breakdown screen
+
+97. display inventory count (used / max) next to the "INVENTORY" label above the inventory grid
+
+98. compare items: while hovering over an item in inventory, press c to lock its tooltip to the top-left of screen, press esc to close it
+
+99. option to change default player portrait to boss portait specified in cfg file
+
+    in `[DefaultPlayerPortait]` section, set `BossId` to the number from the in-game bestiary
+
+100. hold alt when viewing an item's tooltip to see a list of where that item drops
+
+101. appends inventory counter to the "INVENTORY" label above inventory grid

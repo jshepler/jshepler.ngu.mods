@@ -6,9 +6,14 @@ namespace jshepler.ngu.mods
     {
         internal static void Init(ConfigFile Config)
         {
+            Options.Allocators.AutoAllocatorEnabled = Config.Bind("Allocators", "AutoAllocator.Enabled", false, "auto allocates idle resources, maintaining speed cap");
+            Options.Allocators.OverCapAllocatorEnabled = Config.Bind("Allocators", "OverCapAllocator.Enabled", false, "allocates enough of a resource to keep BB until target level or RB time");
+            Options.Allocators.RatioSplitAllocatorEnabled = Config.Bind("Allocators", "RatioSplitAllocator.Enabled", false, "splits resource between bars, using their ratios, to keep even leveling speed");
+
             Options.AutoHarvest.Enabled = Config.Bind("AutoHarvest", "Enabled", false, "enable auto harvest/eat fruits when fully grown (max tier)");
             Options.AutoSnipe.TargetZone = Config.Bind("AutoSnipe", "TargetZone", 0, "used to target specific enemy in specific zone, other zones always snipe bosses; enter zone number (from wiki: https://ngu-idle.fandom.com/wiki/Adventure_Mode#Zones)");
             Options.AutoSnipe.TargetEnemy = Config.Bind("AutoSnipe", "TargetEnemy", 0, "used to target specific enemy in specific zone; enter enemy number (from bestiary), 0 = bosses");
+
             Options.DefaultPlayerPortait.BossId = Config.Bind("DefaultPlayerPortait", "BossId", 0, "replaces default player portrait with the portrait of boss id (enemy # from bestiary), 0 = disabled");
 
             Options.DropTableTooltip.Enabled = Config.Bind("DropTableTooltip", "Enabled", true, "enables display of zones' Drop Table tooltip by holding the alt key");
@@ -73,6 +78,13 @@ namespace jshepler.ngu.mods
             internal static ConfigEntry<bool> Enabled;
             internal static ConfigEntry<bool> OnlyUnlocked;
             internal static ConfigEntry<UnknownItemDisplay> UnknownItems;
+        }
+
+        internal static class Allocators
+        {
+            internal static ConfigEntry<bool> AutoAllocatorEnabled;
+            internal static ConfigEntry<bool> OverCapAllocatorEnabled;
+            internal static ConfigEntry<bool> RatioSplitAllocatorEnabled;
         }
 
         internal static class DefaultPlayerPortait

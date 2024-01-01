@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
-using jshepler.ngu.mods.GameData;
 using jshepler.ngu.mods.GameData.DropConditions;
 
-namespace jshepler.ngu.mods
+namespace jshepler.ngu.mods.GameData
 {
     internal class DropTable
     {

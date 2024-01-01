@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using HarmonyLib;
 using UnityEngine;
 
 namespace jshepler.ngu.mods.Popups
@@ -13,18 +14,18 @@ namespace jshepler.ngu.mods.Popups
         private static GUIStyle _selected;
         private static GUIStyle _notSelected;
 
-        private static Dictionary<int, string> _names = new()
+        private static List<Titan> _titans = new()
         {
-            { 6, "The Beast" },
-            { 7, "Greasy Nerd" },
-            { 8, "The Godmother" },
-            { 9, "The Exile" },
-            { 10, "IT HUNGERS" },
-            { 11, "Rock Lobster" },
-            { 12, "AMALGAMATE" }
+            new Titan(6, "The Beast"),
+            new Titan(7, "Greasy Nerd"),
+            new Titan(8, "The Godmother"),
+            new Titan(9, "The Exile"),
+            new Titan(10, "IT HUNGERS"),
+            new Titan(11, "Rock Lobster"),
+            new Titan(12, "AMALGAMATE"),
         };
 
-        private Dictionary<int, int> _titanVersions = new();
+        private static List<Titan> _killedTitans;
 
         internal TitanVersionsPopup(Character c)
             : base(new Rect(Screen.width / 2 - 200, Screen.height / 2 - 114, 400, 260))
@@ -34,10 +35,7 @@ namespace jshepler.ngu.mods.Popups
 
         internal override void Open()
         {
-            _titanVersions.Clear();
-            for (var x = 6; x < 13; x++)
-                _titanVersions.Add(x, GetTitanVersion(x));
-
+            _killedTitans = _titans.Where(t => t.HasKilled()).ToList();
             base.Open();
         }
 
@@ -71,75 +69,93 @@ namespace jshepler.ngu.mods.Popups
             if (GUILayout.Button("×", GUILayout.Width(25))) Close();
             GUILayout.EndHorizontal();
 
-            foreach (var titan in _titanVersions.Keys.ToList())
-            {
-                DrawTitan(titan, _titanVersions[titan]);
-            }
+            _killedTitans.Do(DrawTitan);
 
             GUILayout.EndVertical();
             GUILayout.EndArea();
         }
 
-        private void DrawTitan(int titan, int version)
+        private void DrawTitan(Titan titan)
         {
             GUILayout.BeginHorizontal("box");
 
-            GUILayout.Label(_names[titan]);
+            GUILayout.Label(titan.name);
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button("Easy", version == 0 ? _selected : _notSelected)) SetTitanVersion(titan, 0);
-            if (GUILayout.Button("Normal", version == 1 ? _selected : _notSelected)) SetTitanVersion(titan, 1);
-            if (GUILayout.Button("Hard", version == 2 ? _selected : _notSelected)) SetTitanVersion(titan, 2);
-            if (GUILayout.Button("Brutal", version == 3 ? _selected : _notSelected)) SetTitanVersion(titan, 3);
+            if (GUILayout.Button("Easy", titan.version == 0 ? _selected : _notSelected))
+                titan.version = 0;
+
+            if (GUILayout.Button("Normal", titan.version == 1 ? _selected : _notSelected))
+                titan.version = 1;
+
+            if (GUILayout.Button("Hard", titan.version == 2 ? _selected : _notSelected))
+                titan.version = 2;
+
+            if (GUILayout.Button("Brutal", titan.version == 3 ? _selected : _notSelected))
+                titan.version = 3;
 
             GUILayout.EndHorizontal();
         }
 
-        private bool IsTitanUnlocked(int titan)
+        private class Titan
         {
-            return titan switch
-            {
-                6 => _character.adventure.titan6Unlocked,
-                7 => _character.adventure.titan7Unlocked,
-                8 => _character.adventure.titan8Unlocked,
-                9 => _character.adventure.titan9Unlocked,
-                10 => _character.adventure.titan10Unlocked,
-                11 => _character.adventure.titan11Unlocked,
-                12 => _character.adventure.titan12Unlocked,
-                _ => false
-            };
-        }
+            private int id;
 
-        private int GetTitanVersion(int titan)
-        {
-            return titan switch
-            {
-                6 => _character.adventure.titan6Version,
-                7 => _character.adventure.titan7Version,
-                8 => _character.adventure.titan8Version,
-                9 => _character.adventure.titan9Version,
-                10 => _character.adventure.titan10Version,
-                11 => _character.adventure.titan11Version,
-                12 => _character.adventure.titan12Version,
-                _ => 0
-            };
-        }
+            internal string name;
 
-        private void SetTitanVersion(int titan, int version)
-        {
-            _titanVersions[titan] = version;
-
-            _ = titan switch
+            internal Titan(int id, string name)
             {
-                6 => _character.adventure.titan6Version = version,
-                7 => _character.adventure.titan7Version = version,
-                8 => _character.adventure.titan8Version = version,
-                9 => _character.adventure.titan9Version = version,
-                10 => _character.adventure.titan10Version = version,
-                11 => _character.adventure.titan11Version = version,
-                12 => _character.adventure.titan12Version = version,
-                _ => 0
-            };
+                this.id = id;
+                this.name = name;
+            }
+
+            internal int version
+            {
+                get
+                {
+                    return id switch
+                    {
+                        6 => Plugin.Character.adventure.titan6Version,
+                        7 => Plugin.Character.adventure.titan7Version,
+                        8 => Plugin.Character.adventure.titan8Version,
+                        9 => Plugin.Character.adventure.titan9Version,
+                        10 => Plugin.Character.adventure.titan10Version,
+                        11 => Plugin.Character.adventure.titan11Version,
+                        12 => Plugin.Character.adventure.titan12Version,
+                        _ => 0
+                    };
+                }
+
+                set
+                {
+                    _ = id switch
+                    {
+                        6 => Plugin.Character.adventure.titan6Version = value,
+                        7 => Plugin.Character.adventure.titan7Version = value,
+                        8 => Plugin.Character.adventure.titan8Version = value,
+                        9 => Plugin.Character.adventure.titan9Version = value,
+                        10 => Plugin.Character.adventure.titan10Version = value,
+                        11 => Plugin.Character.adventure.titan11Version = value,
+                        12 => Plugin.Character.adventure.titan12Version = value,
+                        _ => 0
+                    };
+                }
+            }
+
+            internal bool HasKilled()
+            {
+                return id switch
+                {
+                    6 => Plugin.Character.adventure.boss6Kills > 0,
+                    7 => Plugin.Character.adventure.boss7Kills > 0,
+                    8 => Plugin.Character.adventure.boss8Kills > 0,
+                    9 => Plugin.Character.adventure.boss9Kills > 0,
+                    10 => Plugin.Character.adventure.boss10Kills > 0,
+                    11 => Plugin.Character.adventure.boss11Kills > 0,
+                    12 => Plugin.Character.adventure.boss12Kills > 0,
+                    _ => false
+                };
+            }
         }
     }
 }

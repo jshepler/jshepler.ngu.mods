@@ -180,7 +180,7 @@ namespace jshepler.ngu.mods
             _pool.Add(n);
         }
 
-        private static Toast GetAvailableToast()
+        internal static Toast GetAvailableToast()
         {
             if (_pool.Count > 0)
             {

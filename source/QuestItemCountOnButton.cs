@@ -32,25 +32,41 @@ namespace jshepler.ngu.mods
             _questButtonTextComponenet = __instance.beast.GetComponentInChildren<Text>();
         }
 
+        private static bool _questItemDropped = false;
+
         [HarmonyPostfix, HarmonyPatch(typeof(ItemNameDesc), "makeLoot", typeof(int))]
         private static void ItemNameDesc_makeLoot_postfix(int id, ItemNameDesc __instance)
         {
             if (InManualQuest() && id == _character.beastQuest.questID)
+            {
+                _questItemDropped = true;
+            }
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(ItemNameDesc), "addLoot")]
+        private static void ItemNameDesc_addLoot_postfix(int __result)
+        {
+            if (_questItemDropped && __result >= 0)
             {
                 if (_invItemCount < 1)
                     SetInvItemCount();
                 else
                     _invItemCount++;
             }
+
+            _questItemDropped = false;
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(Inventory), "deleteItem", typeof(int))]
         private static void Inventory_deleteItem_prefix(int id, Inventory __instance)
         {
+            //Plugin.LogInfo($"slotId: {id}, InManualQuest: {InManualQuest()}, itemID: {__instance.inventory[id].id}, questID: {_character.beastQuest.questID}");
+            //Plugin.LogInfo($"_invItemCount (before): {_invItemCount}");
             if (InManualQuest() && __instance.inventory[id].id == _character.beastQuest.questID)
             {
                 _invItemCount--;
             }
+            //Plugin.LogInfo($"_invItemCount (after): {_invItemCount}");
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(BeastQuestController), "startQuest")]

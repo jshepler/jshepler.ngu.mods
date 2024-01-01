@@ -1,4 +1,6 @@
-﻿using HarmonyLib;
+﻿using System.Linq;
+using System.Runtime.Remoting.Messaging;
+using HarmonyLib;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -60,9 +62,19 @@ namespace jshepler.ngu.mods.AutoAllocator
         {
             var id = __instance.id;
 
-            if (Input.GetKey(KeyCode.LeftShift))
+            if (Input.GetKey(KeyCode.LeftShift) && Options.Allocators.AutoAllocatorEnabled.Value == true)
             {
-                Instance[id] = !Instance[id];
+                var rit8Unlocked = character.allChallenges.trollChallenge.completions() >= 6;
+
+                if (Input.GetKey(KeyCode.LeftAlt))
+                    Enumerable.Range(0, rit8Unlocked ? 8 : 7).Do(i => Instance[i] = !Instance[i]);
+
+                else if (id == 7 && !rit8Unlocked)
+                    return true;
+
+                else
+                    Instance[id] = !Instance[id];
+                
                 return false;
             }
 

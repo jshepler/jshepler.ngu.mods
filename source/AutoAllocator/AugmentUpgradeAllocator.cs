@@ -54,13 +54,13 @@ namespace jshepler.ngu.mods.AutoAllocator
         {
             var id = __instance.id;
 
-            if (Input.GetKey(KeyCode.LeftShift))
+            if (Input.GetKey(KeyCode.LeftShift) && Options.Allocators.AutoAllocatorEnabled.Value == true)
             {
                 Instance[id] = !Instance[id];
                 return false;
             }
 
-            if (Input.GetKey(KeyCode.LeftControl))
+            if (Input.GetKey(KeyCode.LeftControl) && Options.Allocators.OverCapAllocatorEnabled.Value == true)
             {
                 Instance[id] = false;
                 OverCap(id);

@@ -3,6 +3,7 @@ using System.Reflection.Emit;
 using HarmonyLib;
 using jshepler.ngu.mods.Popups;
 using UnityEngine;
+using UnityEngine.TextCore;
 
 namespace jshepler.ngu.mods
 {
@@ -48,6 +49,16 @@ namespace jshepler.ngu.mods
             }
 
             return false;
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(WishPodUIController), "updateIcon")]
+        private static void WishPodUIController_updateIcon_prefix(WishPodUIController __instance)
+        {
+            if (__instance.character.menuID != 53 || __instance.invalidID())
+                return;
+
+            if (Queue.Contains(__instance.id))
+                __instance.wishBorder.sprite = __instance.character.wishesController.goldBorder;
         }
 
         // in WishesController.updateAllWishes(), when a wish reaches max level, removeAllResources is called;

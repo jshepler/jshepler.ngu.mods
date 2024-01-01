@@ -31,11 +31,11 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(WishPodUIController), "updateIcon")]
         private static void WishPodUIController_updateIcon_prefix(WishPodUIController __instance)
         {
-            var id = __instance.id;
-            var wish = __instance.character.wishes.wishes[id];
-
             if (__instance.character.menuID != 53 || __instance.invalidID())
                 return;
+
+            var id = __instance.id;
+            var wish = __instance.character.wishes.wishes[id];
 
             if(_selectedIds.Contains(id))
                 __instance.wishIcon.color = Color.yellow;

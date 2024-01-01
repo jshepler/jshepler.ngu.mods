@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Reflection.Emit;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -96,12 +99,29 @@ namespace jshepler.ngu.mods
                 LogInfo($"Character.addOfflineProgress threw exception:\n{__exception}");
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(BossController), "Start")]
-        private static void BossController_Start_postfix(BossController __instance)
+        // patch TextEditor so that typing past the end of a textbox will scroll the text appropriately
+        //[HarmonyTranspiler, HarmonyPatch(typeof(UnityEngine.TextEditor), "UpdateScrollOffset")]
+        private static IEnumerable<CodeInstruction> UpdateScrollOffset_trans(IEnumerable<CodeInstruction> instructions)
         {
-            var bossId = Options.DefaultPlayerPortait.BossId.Value;
-            if(bossId > 0)
-                __instance.playerPortraitSprites[0] = __instance.bossPortraitSprites[bossId - 1];
+            var cm = new CodeMatcher(instructions)
+                .End()
+                .Advance(-3)
+                .RemoveInstructions(3);
+
+            return cm.InstructionEnumeration();
+        }
+
+        //[HarmonyTranspiler, HarmonyPatch(typeof(UnityEngine.TextEditor), "position", MethodType.Setter)]
+        private static IEnumerable<CodeInstruction> TextEditor_set_position_trans(IEnumerable<CodeInstruction> instructions)
+        {
+            var scrollOffset = typeof(UnityEngine.TextEditor).GetField("scrollOffset");
+
+            var cm = new CodeMatcher(instructions)
+                .MatchForward(false, new CodeMatch(OpCodes.Stfld, scrollOffset))
+                .Advance(-1)
+                .RemoveInstructions(3);
+
+            return cm.InstructionEnumeration();
         }
     }
 

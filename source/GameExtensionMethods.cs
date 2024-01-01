@@ -7,7 +7,7 @@ namespace jshepler.ngu.mods
 {
     internal static class GameExtensionMethods
     {
-        #region inventory
+        #region loadouts
 
         internal static void SetInventorySlotId(this LoadoutDisplayController ldc, int invSlotId)
         {
@@ -82,6 +82,13 @@ namespace jshepler.ngu.mods
                 -6 => loadout.weapon2,
                 _ => loadout.accessories[loadoutSlotId - 10000]
             };
+        }
+
+        internal static bool IsEmpty(this Loadout l)
+        {
+            return l.head == -1000 && l.chest == -1000 && l.legs == -1000 && l.boots == -1000
+                && l.weapon == -1000 && l.weapon2 == -1000
+                && l.accessories.TrueForAll(i => i == -1000);
         }
 
         #endregion

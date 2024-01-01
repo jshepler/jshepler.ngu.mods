@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.TextCore;
 using UnityEngine.UI;
 
 namespace jshepler.ngu.mods.AutoAllocator
@@ -85,13 +86,20 @@ namespace jshepler.ngu.mods.AutoAllocator
 
             var id = __instance.id;
 
-            if (Input.GetKey(KeyCode.LeftShift))
+            if (Input.GetKey(KeyCode.LeftShift) && Options.Allocators.AutoAllocatorEnabled.Value == true)
             {
-                Instance[id] = !Instance[id];
+                var wandoosOn = _character.settings.wandoos98On;
+
+                if (Input.GetKey(KeyCode.LeftAlt))
+                    Enumerable.Range(0, wandoosOn ? 5 : 3).Do(i => Instance[i] = !Instance[i]);
+
+                else
+                    Instance[id] = !Instance[id];
+
                 return false;
             }
 
-            if (Input.GetKey(KeyCode.LeftControl))
+            if (Input.GetKey(KeyCode.LeftControl) && Options.Allocators.OverCapAllocatorEnabled.Value == true)
             {
                 Instance[id] = false;
                 OverCap(id);
@@ -99,7 +107,7 @@ namespace jshepler.ngu.mods.AutoAllocator
                 return false;
             }
 
-            if (Input.GetKey(KeyCode.LeftAlt))
+            if (Input.GetKey(KeyCode.LeftAlt) && Options.Allocators.RatioSplitAllocatorEnabled.Value == true)
             {
                 Instance.DisableAll();
                 SplitEnergy();
