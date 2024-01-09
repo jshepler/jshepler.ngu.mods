@@ -59,7 +59,7 @@ namespace jshepler.ngu.mods
             __instance.tooltip.showTooltip(text);
         }
 
-        private static long GetReducerCount(Character character, int id)
+        internal static long GetReducerCount(Character character, int id)
         {
             var qc = character.beastQuest;
             var pc = character.adventure.itopod;

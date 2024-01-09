@@ -31,7 +31,7 @@ namespace jshepler.ngu.mods
                 _last5KillTimes.Dequeue();
 
             var time = Time.time;
-            if(_lastTime > 0f)
+            if (_lastTime > 0f)
                 _last5KillTimes.Enqueue(time - _lastTime);
 
             _lastTime = time;
@@ -47,7 +47,7 @@ namespace jshepler.ngu.mods
             var maxFloor = character.adventure.highestItopodLevel;
             var currentFloor = __instance.itopodLevel;
             var progressPerKill = Plugin.Character.adventureController.itopod.progressGained(currentFloor);
-            //var killsPerPP = Mathf.CeilToInt(pointsPerPP / progressPerKill);
+            var killsPerPP = Mathf.CeilToInt(pointsPerPP / progressPerKill);
             var killsRemaining = Mathf.CeilToInt((pointsPerPP - ppProgress) / progressPerKill);
 
             if (currentFloor <= optimalFloor)
@@ -55,17 +55,22 @@ namespace jshepler.ngu.mods
                 var respawnTime = Plugin.Character.adventureController.respawnTime();
                 var idleAttackSpeed = Plugin.Character.adventure.attackSpeed;
                 var secondsPerKill = respawnTime + idleAttackSpeed;
+                var secondsPerPP = killsPerPP * secondsPerKill;
                 var secondsRemaining = (pointsPerPP - ppProgress) / progressPerKill * secondsPerKill;
-                _killsToNextPPText = $"\n\n<b>Kills to next PP:</b> {killsRemaining} in {NumberOutput.timeOutput(secondsRemaining)} ({(currentFloor < optimalFloor ? "sub-optimal" : "optimal")})";
+                _killsToNextPPText = $"\n\n<b>Kills to next PP:</b> {killsRemaining} in {NumberOutput.timeOutput(secondsRemaining)} ({(currentFloor < optimalFloor ? "sub-optimal" : "optimal")})"
+                    + $"\n<b>Kills per PP:</b> {killsPerPP} taking {NumberOutput.timeOutput(secondsPerPP)}";
             }
             else if (_last5KillTimes.Count == 0)
             {
-                _killsToNextPPText = $"\n\n<b>Kills to next PP:</b> {killsRemaining} in ??? (estimated)";
+                _killsToNextPPText = $"\n\n<b>Kills to next PP:</b> {killsRemaining} in ??? (estimated)"
+                    + $"\n<b>Kills per PP:</b> {killsPerPP} taking ??? (estimated)";
             }
             else
             {
                 var estimatedSecondsRemaining = killsRemaining * rollingAvgSecondsPerKill;
-                _killsToNextPPText = $"\n\n<b>Kills to next PP:</b> {killsRemaining} in {NumberOutput.timeOutput(estimatedSecondsRemaining)} (estimated)";
+                var estimatedSecondsPerPP = killsPerPP * rollingAvgSecondsPerKill;
+                _killsToNextPPText = $"\n\n<b>Kills to next PP:</b> {killsRemaining} in {NumberOutput.timeOutput(estimatedSecondsRemaining)} (estimated)"
+                    + $"\n<b>Kills per PP:</b> {killsPerPP} taking {NumberOutput.timeOutput(estimatedSecondsPerPP)} (estimated)";
             }
 
 
@@ -83,7 +88,7 @@ namespace jshepler.ngu.mods
 
             _floorsText = $"\n\n<b>Max Floor: </b> {maxFloor}"
                 + $"\n<b>Optimal Floor:</b> {optimalFloor}";
-                //+ $"\n\n<b>Total ITOPOD Kills:</b> {character.display(character.adventure.itopod.enemiesKilled)}";
+            //+ $"\n\n<b>Total ITOPOD Kills:</b> {character.display(character.adventure.itopod.enemiesKilled)}";
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(AdventureController), "zoneDescriptions")]

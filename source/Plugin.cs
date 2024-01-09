@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Reflection.Emit;
 using BepInEx;
 using BepInEx.Logging;
@@ -13,11 +12,17 @@ namespace jshepler.ngu.mods
     [BepInPlugin(PluginInfo.PLUGIN_GUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
     public class Plugin : BaseUnityPlugin
     {
-        internal static Color ButtonColor_Green = new Color(0.5f, 0.827f, 0.235f);
-        internal static Color ButtonColor_Yellow = new Color(1f, 0.827f, 0.235f);
-        internal static Color ButtonColor_Red = new Color(0.925f, 0.204f, 0.204f);
-        internal static Color ButtonColor_LightBlue = new Color32(127, 208, 255, 255);
-        
+        //internal static Color ButtonColor_Green = new Color(0.5f, 0.827f, 0.235f);
+        //internal static Color ButtonColor_Yellow = new Color(1f, 0.827f, 0.235f);
+        //internal static Color ButtonColor_Red = new Color(0.925f, 0.204f, 0.204f);
+        //internal static Color ButtonColor_LightBlue = new Color32(127, 208, 255, 255);
+
+        // https://www.schemecolor.com/blue-red-yellow-green.php
+        internal static Color ButtonColor_Green = new Color32(40, 204, 45, 255);
+        internal static Color ButtonColor_Yellow = new Color32(255, 244, 79, 255);
+        internal static Color ButtonColor_Red = new Color32(216, 46, 63, 255);
+        internal static Color ButtonColor_LightBlue = new Color32(99, 202, 216, 255);
+
         private readonly Harmony harmony = new Harmony(PluginInfo.PLUGIN_GUID);
         private static ManualLogSource Log;
         internal static void LogInfo(string text) => Log.LogInfo(text);
@@ -30,6 +35,7 @@ namespace jshepler.ngu.mods
         internal static event EventHandler<CharacterEventArgs> onGUI;
 
         internal static Character Character = null;
+        internal static Action<string> ShowNotification = m => Character?.tooltip.showOverrideTooltip(m, 3f);
 
         private void Awake()
         {

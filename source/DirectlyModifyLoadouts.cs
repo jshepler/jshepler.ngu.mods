@@ -41,6 +41,7 @@ namespace jshepler.ngu.mods
             {
                 __instance.SetInventorySlotId(EMPTY_SLOT_ID);
                 __instance.updateItem();
+                Plugin.Character.inventoryController.updateLoadoutButtons();
             });
 
             handler.OnLeftClick(e =>
@@ -79,7 +80,7 @@ namespace jshepler.ngu.mods
                     _slotBeingAssigned = null;
                     _multiLoadoutController.showPanel();
                     UpdateLoadoutsButton();
-
+                    Plugin.Character.inventoryController.updateLoadoutButtons();
 
                     return false;
                 }
@@ -104,6 +105,7 @@ namespace jshepler.ngu.mods
                 _slotBeingAssigned = null;
                 _multiLoadoutController.showPanel();
                 UpdateLoadoutsButton();
+                Plugin.Character.inventoryController.updateLoadoutButtons();
 
                 return false;
             }

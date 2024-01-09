@@ -99,8 +99,8 @@ namespace jshepler.ngu.mods
             }
 
             // taken from BossController.nukeBosses() to know if boss is nukable
-            CanNuke = (character.attack / 5.0 > character.bossDefense && character.defense / 5.0 > character.bossAttack);
-            CanFight = (_dmgDonePct > _dmgTakenPct);
+            CanNuke = (Plugin.Character.bossID < 301 && character.attack / 5.0 > character.bossDefense && character.defense / 5.0 > character.bossAttack);
+            CanFight = (Plugin.Character.bossID < 301 && _dmgDonePct > _dmgTakenPct);
 
             if (Input.GetKeyDown(KeyCode.B))
                 character.StartCoroutine(RunFight());
@@ -132,7 +132,7 @@ namespace jshepler.ngu.mods
             else
             {
                 _image.fillAmount = 0f;
-                _text.text = "Fight Boss";
+                _text.text = Plugin.Character.bossID < 301 ? "Fight Boss" : "No More Bosses";
             }
         }
 

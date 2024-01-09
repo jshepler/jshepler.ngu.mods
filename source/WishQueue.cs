@@ -99,9 +99,16 @@ namespace jshepler.ngu.mods
             var current = _controller.character.wishes.wishes[currentId];
             var next = _controller.character.wishes.wishes[nextId];
 
-            next.energy = current.energy;
-            next.magic = current.magic;
-            next.res3 = current.res3;
+            // if next is completed, skip it, but instead of a while loop, trying a recursion thing, just because
+            if (next.level >= _controller.properties[nextId].maxLevel)
+            {
+                CheckQueue(currentId);
+                return;
+            }
+
+            next.energy += current.energy;
+            next.magic += current.magic;
+            next.res3 += current.res3;
             _controller.updatebyID(nextId);
 
             current.energy = 0;

@@ -12,7 +12,6 @@ namespace jshepler.ngu.mods
     internal class ImrovedItemTooltips
     {
         private static bool _appendDaycareText = false;
-        private static Coroutine _cor;
 
         // daycare
         [HarmonyPrefix, HarmonyPatch(typeof(DaycareItemController), "OnPointerEnter")]
@@ -23,7 +22,7 @@ namespace jshepler.ngu.mods
             {
                 _appendDaycareText = false;
                 var messageField = Traverse.Create(__instance).Field<string>("message");
-                _cor = Plugin.Character.StartCoroutine(ShowTooltip(item, __instance.updateTooltipMessage, () => messageField.Value));
+                StartShowTooltip(item, __instance.updateTooltipMessage, () => messageField.Value);
             }
 
             return false;
@@ -32,7 +31,7 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(DaycareItemController), "OnPointerExit")]
         private static void DaycareItemController_OnPointerExit_postfix()
         {
-            Plugin.Character.StopCoroutine(_cor);
+            StopShowTooltip();
         }
 
         // inventory
@@ -54,7 +53,7 @@ namespace jshepler.ngu.mods
                 _appendDaycareText = true;
 
                 var messageField = Traverse.Create(__instance).Field<string>("message");
-                _cor = Plugin.Character.StartCoroutine(ShowTooltip(item, __instance.updateTooltipMessage, () => messageField.Value));
+                StartShowTooltip(item, __instance.updateTooltipMessage, () => messageField.Value);
             }
 
             return false;
@@ -63,7 +62,7 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(ItemController), "OnPointerExit")]
         private static void ItemController_OnPointerExit_prefix()
         {
-            Plugin.Character.StopCoroutine(_cor);
+            StopShowTooltip();
         }
 
         // equipped
@@ -81,7 +80,7 @@ namespace jshepler.ngu.mods
 
             var item = GetItemFromSlotId(slotId);
             var messageField = Traverse.Create(__instance).Field<string>("message");
-            _cor = Plugin.Character.StartCoroutine(ShowTooltip(item, __instance.updateTooltipMessage, () => messageField.Value));
+            StartShowTooltip(item, __instance.updateTooltipMessage, () => messageField.Value);
 
             return false;
         }
@@ -89,7 +88,22 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(LoadoutController), "OnPointerExit")]
         private static void LoadoutController_OnPointerExit_postfix()
         {
-            Plugin.Character.StopCoroutine(_cor);
+            StopShowTooltip();
+        }
+
+        private static Coroutine _cor;
+        private static void StartShowTooltip(Equipment item, Action updateTooltipMessage, Func<string> getTooltipMessage)
+        {
+            StopShowTooltip();
+            _cor = Plugin.Character.StartCoroutine(ShowTooltip(item, updateTooltipMessage, getTooltipMessage));
+        }
+
+        private static void StopShowTooltip()
+        {
+            if (_cor != null)
+                Plugin.Character.StopCoroutine(_cor);
+
+            _cor = null;
         }
 
         private static WaitForSeconds _waiter = new WaitForSeconds(0.1f);
@@ -129,14 +143,15 @@ namespace jshepler.ngu.mods
                 return null;
 
             var dcLevel = daycare[dcId].level + Plugin.Character.inventoryController.daycares[dcId].levelsAdded();
-            return $"\n\n<b>Item level in Daycare:</b> {dcLevel} ({dcLevel + item.level})";
+            var afterMerge = Math.Min(100, dcLevel + item.level + 1);
+            return $"\n\n<b>Item level in Daycare:</b> {dcLevel} ({afterMerge} after merge)";
         }
 
         private static string BuildItemSourcesString(Equipment item)
         {
             var sources = new List<string>();
 
-            for(var zoneId = 0; zoneId < DropTable.Zones.Count; zoneId++)
+            for (var zoneId = 0; zoneId < DropTable.Zones.Count; zoneId++)
             {
                 var zone = DropTable.Zones[zoneId];
                 var zName = Plugin.Character.adventureController.zoneName(zoneId);

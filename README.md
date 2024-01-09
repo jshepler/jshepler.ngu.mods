@@ -19,6 +19,31 @@ The config file is only read when the game starts, so exit the game before makin
 
 There are only a few config options at the moment. I'll probably add options in the future for the more questionable things.
 
+# GO integration bookmarklets
+These are used in the [Gear Optimizer](https://gmiclotte.github.io/gear-optimizer) to talk to NGU. They require you to use GO v0.9.2 or higher - check the [About](https://gmiclotte.github.io/gear-optimizer/#/about/) tab in GO.
+
+Because the data in GO is held on your computer instead of GO's server, NGU can't talk to GO to get/send any data. I also can't inject new controls into GO to talk to NGU. Therefore, need to use bookmarklets to execute javascript in the context of the active browser tab to talk to NGU.
+
+Create a new bookmark. I like using the bookmark bar for easy access and in a sub-folder. You can name them whatever you want. Here's what I named mine:
+
+![what I called mine](GO_bookmarklets.png)
+
+For the URLs, paste the following javascript:
+
+## sending loadouts from GO to NGU
+`javascript:fetch("http://localhost:8088/ngu/go2ngu/loadouts",{method:"POST",body:JSON.stringify(appState.savedequip)});`
+
+## sending current equipped items from NGU to GO
+`javascript:fetch("http://localhost:8088/ngu/ngu2go/equipped").then(e=>e.json()).then(e=>{let n=appState.savedequip;Object.assign(n.find(e=>"current"==e.name),e),appHandlers.handleSettings("savedequip",n)});`
+
+(note that if you want to use a different name than "current" in GO, edit the above to specificy a different slot name)
+
+## sending hack stats from NGU to GO
+`javascript:fetch("http://localhost:8088/ngu/ngu2go/hacks").then(e=>e.json()).then(e=>{let a=appState.hackstats;a.rpow=e.rpow,a.rcap=e.rcap,a.hackspeed=e.hackspeed;for(let c=0;c<15;c++)a.hacks[c].goal=a.hacks[c].level=e.hacks[c].level,a.hacks[c].reducer=e.hacks[c].reducer;appHandlers.handleSettings("hackstats",a)});`
+
+## sending hack targets from GO to NGU
+`javascript:fetch("http://localhost:8088/ngu/go2ngu/hacks",{method:"POST",body:JSON.stringify(appState.hackstats.hacks.map(a=>a.goal))});`
+
 # Mods
 (in no partiular order)
 
@@ -370,3 +395,29 @@ There are only a few config options at the moment. I'll probably add options in 
 100. hold alt when viewing an item's tooltip to see a list of where that item drops
 
 101. appends inventory counter to the "INVENTORY" label above inventory grid
+
+102. highlight currently equipped loadout button on inventory screen
+
+103. options to enable/disable each of the 3 allocators (defaults to disabled)
+
+104. when right-clicking an accessory, it will get equipped in the first open slot
+
+     order follows same order as auto merge/boost, described in [the wiki](https://ngu-idle.fandom.com/wiki/Inventory#AutoMerge_&_AutoBoost)
+
+105. save pruning: when an autosave or quicksave happens, saves older than DaysToKeep (in cfg file) are deleted
+
+     defaults to being disabled, edit cfg file to change DaysToKeep from 0 to something else
+
+106. right-click the `Adventure` button to change to highest zone - same as right-clicking the right-arrow button on the Adventure page
+
+107. right-click the `Loadouts` button to toggle "mark used" - similar to GO's "mark unused", but highlights items that are in any loadout
+
+108. GO ([gear optimizer](https://gmiclotte.github.io/gear-optimizer)) integration:
+- transfer loadouts from GO to NGU
+- transfer current equipped gear from NGU to GO a save slot that's named "current"
+- transfer hack stats from NGU to GO's hacks tab (rpower, rcap, hack speed, current level and reducer counts for all hacks)
+- transfer hack goals from GO's hacks tab to NGU hacks' targets
+
+    **requires adding bookmarklets to your browser - see [GO integration bookmarklets] above**
+
+109. adds support for my [ratio tool](https://jshepler.github.io/) to import base EMR3 directly from NGU

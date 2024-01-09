@@ -135,6 +135,7 @@ namespace jshepler.ngu.mods
                 _character.beastQuestController.toggleMajorQuestUse();
 
             _character.beastQuestController.startQuest();
+            _character.beastQuestController.refreshMenu();
         }
 
         private static bool InManualQuest()

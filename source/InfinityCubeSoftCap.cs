@@ -62,7 +62,7 @@ namespace jshepler.ngu.mods
             var cubePower = character.inventory.cubePower;
             var softcap = character.inventoryController.cubePowerSoftcap();
             var capped = cubePower <= softcap ? cubePower : softcap + Mathf.Pow(cubePower - softcap, 0.5f);
-            var color = cubePower >= softcap ? "green" : "red";
+            var color = cubePower >= softcap ? "green" : "blue";
 
             return $"<color={color}>{character.display(capped)}</color> / {character.display(softcap)} (sc)\n<b>Power (uncapped):</b> {character.display(cubePower)}";
         }
@@ -73,7 +73,7 @@ namespace jshepler.ngu.mods
             var cubeToughness = character.inventory.cubeToughness;
             var softcap = character.inventoryController.cubeToughnessSoftcap();
             var capped = cubeToughness <= softcap ? cubeToughness : softcap + Mathf.Pow(cubeToughness - softcap, 0.5f);
-            var color = cubeToughness >= softcap ? "green" : "red";
+            var color = cubeToughness >= softcap ? "green" : "blue";
 
             return $"<color={color}>{character.display(capped)}</color> / {character.display(softcap)} (sc)\n<b>Toughness (uncapped):</b> {character.display(cubeToughness)}";
         }

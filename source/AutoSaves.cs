@@ -10,23 +10,16 @@ namespace jshepler.ngu.mods
     [HarmonyPatch]
     internal class AutoSaves
     {
-        private static HoverTooltip _tooltip;
-
         [HarmonyPrepare]
         private static void prep(MethodBase original)
         {
             if (original != null)
                 return;
 
-            Plugin.OnSaveLoaded += (o, e) =>
-            {
-                _tooltip = e.Character.tooltip;
-            };
-
             Plugin.OnUpdate += (o, e) =>
             {
                 if (Input.GetKeyDown(KeyCode.F5))
-                    DoSave(e.Character, $"QuickSave");
+                    DoSave($"QuickSave");
                 else if (Input.GetKeyDown(KeyCode.F6))
                     LoadLastQuicksave();
             };
@@ -35,13 +28,13 @@ namespace jshepler.ngu.mods
         [HarmonyPrefix, HarmonyPatch(typeof(Rebirth), "engage", typeof(bool))]
         private static void Rebirth_engage_bool_prefix(bool hardReset, Rebirth __instance)
         {
-            DoSave(__instance.character, hardReset ? "Challenge" : "Rebirth");
+            DoSave(hardReset ? "Challenge" : "Rebirth");
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(PitController), "engage")]
         private static void PitController_engage_prefix(PitController __instance)
         {
-            DoSave(__instance.character, "PitThrow");
+            DoSave("PitThrow");
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(Wandoos98Controller), "setOSType")]
@@ -56,24 +49,34 @@ namespace jshepler.ngu.mods
 
             if (newOS != __instance.character.wandoos98.os)
             {
-                DoSave(__instance.character, "Change_Wandoos_OS");
+                DoSave("Change_Wandoos_OS");
             }
         }
 
-        private static void DoSave(Character character, string saveName)
+        private static void DoSave(string saveName)
         {
+            var character = Plugin.Character;
             character.lastTime = Epoch.Current();
             var data = character.importExport.getBase64Data();
 
             try
             {
                 File.WriteAllText($"{Application.persistentDataPath}/{saveName}_{DateTime.UtcNow:yyyy-MM-dd_HH-mm-ss}.txt", data);
-                _tooltip.showOverrideTooltip($"game saved: {saveName}", 1);
+                character.tooltip.showOverrideTooltip($"game saved: {saveName}", 1);
             }
             catch (Exception ex)
             {
                 Plugin.LogInfo($"Failed to write {saveName}.txt: " + ex.Message);
             }
+
+            var daysToKeep = Options.PruneSaves.DaysToKeep.Value;
+            if (daysToKeep <= 0)
+                return;
+
+            var folder = new DirectoryInfo(Application.persistentDataPath);
+            var files = folder.GetFiles().Where(f => f.LastWriteTimeUtc < DateTime.UtcNow.AddDays(-daysToKeep));
+            foreach (var f in files)
+                f.Delete();
         }
 
         private static void LoadLastQuicksave()

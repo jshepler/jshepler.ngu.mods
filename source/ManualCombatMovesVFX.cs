@@ -340,11 +340,11 @@ namespace jshepler.ngu.mods
                 rt.anchoredPosition = new Vector2(0f, 0f);
                 rt.sizeDelta = new Vector2(92, 22);
 
-                var tex = new Texture2D(Mathf.CeilToInt(rt.rect.width), Mathf.CeilToInt(rt.rect.height), TextureFormat.Alpha8, false);
-                //var c = new Color(1f, 1f, 1f, 1f);
-                //for (var x = 0; x < tex.width; x++)
-                //    for (var y = 0; y < tex.height; y++)
-                //        tex.SetPixel(x, y, c);
+                var tex = new Texture2D(Mathf.CeilToInt(rt.rect.width), Mathf.CeilToInt(rt.rect.height), TextureFormat.RGB24, false);
+                for (var x = 0; x < tex.width; x++)
+                    for (var y = 0; y < tex.height; y++)
+                        tex.SetPixel(x, y, Color.white);
+                tex.Apply();
 
                 _image = bar.AddComponent<Image>();
                 _image.sprite = Sprite.Create(tex, rt.rect, new Vector2(0.5f, 0.5f));
