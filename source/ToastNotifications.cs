@@ -22,6 +22,8 @@ namespace jshepler.ngu.mods
         private static float _xPos;
         private static float _scaleFactor;
 
+        private static bool _hideToasts = false;
+
         [HarmonyPrepare]
         private static void prep(MethodBase original)
         {
@@ -37,20 +39,41 @@ namespace jshepler.ngu.mods
                 _toastsContainer.transform.SetAsFirstSibling();
             };
 
+            Plugin.OnUpdate += (o, e) =>
+            {
+                if (Input.GetKeyDown(KeyCode.F1))
+                    Plugin.ShowOverrideNotification("test toast", 10f);
+            };
+
             Plugin.OnFixedUpdate += (o, e) =>
             {
                 if (_toastsContainer == null)
                     return;
 
                 var mouse = Input.mousePosition;
-                if (mouse.x < 0 || mouse.x > Screen.width || mouse.y < 0 || mouse.y > Screen.height)
-                    return;
-
-                if (_active.Count > 0 && mouse.x > _xPos && mouse.y > _active.Last().Position.y)
-                    _active.Do(t => t.IsActive = false);
+                if (!Plugin.GameHasFocus || mouse.x < 0 || mouse.x > Screen.width || mouse.y < 0 || mouse.y > Screen.height)
+                    _hideToasts = false;
 
                 else
-                    _active.Do(t => t.IsActive = true);
+                {
+                    var minY = _topDown ? Screen.height : 0f;
+                    var maxY = minY;
+
+                    if (_active.Count > 0)
+                    {
+                        var last = _active.Last();
+
+                        if (_topDown)
+                            minY = last.Position.y;
+
+                        else
+                            maxY = last.Position.y + last.Height;
+                    }
+
+                    _hideToasts = mouse.x > _xPos && mouse.y > minY && mouse.y < maxY;
+                }
+
+                _active.Do(t => t.IsActive = !_hideToasts);
             };
         }
 
@@ -178,7 +201,7 @@ namespace jshepler.ngu.mods
 
             var toast = GetAvailableToast();
             toast.Text = tm.Message;
-            toast.IsActive = true;
+            toast.IsActive = !_hideToasts;
 
             // setting a GameObject active doesn't happen until next frame, and the ContentSizeFitter component won't do its thing until then
             yield return null;
