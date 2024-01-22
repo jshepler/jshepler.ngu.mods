@@ -22,7 +22,7 @@ namespace jshepler.ngu.mods
 
         private static int GetEquippedLoadoutId()
         {
-            if (Plugin.Character == null)
+            if (!Plugin.GameHasStarted)
                 return -1;
 
             var loadouts = Plugin.Character.inventory.loadouts;
@@ -37,7 +37,7 @@ namespace jshepler.ngu.mods
 
         private static bool IsLoadoutEquipped(int loadoutId)
         {
-            if (Plugin.Character == null)
+            if (!Plugin.GameHasStarted)
                 return false;
 
             var l = Plugin.Character.inventory.loadouts[loadoutId];

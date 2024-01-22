@@ -16,11 +16,11 @@ namespace jshepler.ngu.mods.WebService
                 case "base_emr3":
                     json = getBaseEMR();
                     context.Response.SendResponse(HttpStatusCode.OK, json, ContentTypes.JSON);
-                    return () => Plugin.ShowNotification("data: GET base EMR3");
+                    return () => Plugin.ShowOverrideNotification("data: GET base EMR3");
 
                 default:
                     context.Response.SendResponse(HttpStatusCode.BadRequest, $"unknown resource: {segments[1]}");
-                    return () => Plugin.ShowNotification($"data; unknown resource: {segments[1]}");
+                    return () => Plugin.ShowOverrideNotification($"data; unknown resource: {segments[1]}");
             }
         }
 

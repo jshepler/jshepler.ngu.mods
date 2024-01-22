@@ -1,6 +1,7 @@
 ﻿using System;
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace jshepler.ngu.mods
@@ -20,17 +21,19 @@ namespace jshepler.ngu.mods
 
             Plugin.OnUpdate += (o, e) =>
             {
-                if (!_energyPurchases.character.InMenu(Menu.EXP_Energy)) return;
+                if (!Plugin.Character.InMenu(Menu.EXP_Energy))
+                    return;
 
                 var doRefresh = false;
+                var inCustomPurchaseInput = EventSystem.current.currentSelectedGameObject != null;
 
-                if (Input.GetKey(KeyCode.LeftShift) != _shiftDown)
+                if (Input.GetKey(KeyCode.LeftShift) != _shiftDown && !inCustomPurchaseInput)
                 {
                     _shiftDown = !_shiftDown;
                     doRefresh = true;
                 }
 
-                if (Input.GetKey(KeyCode.LeftControl) != _ctrlDown)
+                if (Input.GetKey(KeyCode.LeftControl) != _ctrlDown && !inCustomPurchaseInput)
                 {
                     _ctrlDown = !_ctrlDown;
                     doRefresh = true;
@@ -39,15 +42,27 @@ namespace jshepler.ngu.mods
                 if (doRefresh)
                     _energyPurchases.refresh();
             };
+
+            var buyCustomAll = Traverse.Create(__instance).Method("buyCustomAll");
+            GameObject.Find("Canvas/Exp Energy Canvas /Exp Menu 1/Scroll Rect/Content/Custom All Button")
+                .AddComponent<ClickHandlerComponent>()
+                .OnRightClick(e =>
+                {
+                    if (!_shiftDown)
+                        return;
+
+                    while (Plugin.Character.realExp >= _customAllAllCost)
+                        buyCustomAll.GetValue();
+                });
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(EnergyPurchases), "updateEnergyPurchases")]
         private static void EnergyPurchases_updateEnergyPurchases_postfix(EnergyPurchases __instance)
         {
-            if (_energyPurchases == null) _energyPurchases = __instance;
 
             var character = __instance.character;
-            if (!character.InMenu(Menu.EXP_Energy) || !_shiftDown) return;
+            if (!character.InMenu(Menu.EXP_Energy) || !_shiftDown)
+                return;
             
             var energyPurchases = character.energyPurchases;
             var magicPurchases = character.magicPurchases;
@@ -124,6 +139,58 @@ namespace jshepler.ngu.mods
             EnergyPurchases_updateEnergyPurchases_postfix(__instance);
 
             return false;
+        }
+
+        private class Resources
+        {
+            internal Resource Energy;
+            internal Resource Magic;
+            internal Resource Res3;
+            internal long Total;
+
+            internal class Resource
+            {
+                internal long Power;
+                internal long Cap;
+                internal long Bars;
+                internal long Cost;
+            }
+
+            internal static Resources GetCurrent()
+            {
+                var character = Plugin.Character;
+
+                var resources = new Resources()
+                {
+                    Energy = new()
+                    {
+                        Power = character.settings.customPowerAmount,
+                        Cap = character.settings.customCapAmount,
+                        Bars = character.settings.customBarAmount,
+                        Cost = character.energyPurchases.customAllCost()
+                    },
+
+                    Magic = new()
+                    {
+                        Power = character.settings.customMagicPowerAmount,
+                        Cap = character.settings.customMagicCapAmount,
+                        Bars = character.settings.customMagicBarAmount,
+                        Cost = character.magicPurchases.customAllCost()
+                    },
+
+                    Res3 = new()
+                    {
+                        Power = character.settings.customRes3PowerAmount,
+                        Cap = character.settings.customRes3CapAmount,
+                        Bars = character.settings.customRes3BarAmount,
+                        Cost = character.res3Purchases.customAllCost()
+                    }
+                };
+
+                //resources.Total = 
+
+                return resources;
+            }
         }
     }
 }

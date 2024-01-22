@@ -24,10 +24,10 @@ namespace jshepler.ngu.mods
             Plugin.OnUpdate += (o, e) =>
             {
                 if (IsAltR)
-                    _allocations.Store(e.Character);
+                    _allocations.Store(Plugin.Character);
                     
                 else if(IsControlR)
-                    _allocations.Restore(e.Character);
+                    _allocations.Restore(Plugin.Character);
             };
         }
 

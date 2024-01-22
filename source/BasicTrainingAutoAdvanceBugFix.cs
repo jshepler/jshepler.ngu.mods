@@ -13,7 +13,7 @@ namespace jshepler.ngu.mods
             
             Plugin.OnSaveLoaded += (o, e) =>
             {
-                e.Character.allOffenseController.autoAdvanceController.autoAdvanceToggle.isOn = e.Character.training.autoAdvanceToggle;
+                Plugin.Character.allOffenseController.autoAdvanceController.autoAdvanceToggle.isOn = Plugin.Character.training.autoAdvanceToggle;
             };
         }
 

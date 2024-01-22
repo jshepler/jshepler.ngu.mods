@@ -122,6 +122,9 @@ namespace jshepler.ngu.mods.AutoAllocator
         private static void AdvancedTrainingController_removeEnergy_postfix(AdvancedTrainingController __instance)
         {
             Instance[__instance.id] = false;
+
+            if (Input.GetKey(KeyCode.LeftShift))
+                __instance.removeAllEnergy();
         }
 
         private static long CalcCapForLevel(int id, long level)

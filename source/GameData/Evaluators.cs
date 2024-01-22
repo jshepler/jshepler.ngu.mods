@@ -8,17 +8,19 @@ namespace jshepler.ngu.mods.GameData
         internal static long TitanPP(int zoneId) { return (long)(titanPP(zoneId) * titanVersionMulti(zoneId)); }
         internal static long TitanAP(int zoneId) { return Plugin.Character.checkAPAdded(titanAP(zoneId)); }
 
+        internal static int[] TitanZoneIds = { 6, 8, 11, 14, 16, 19, 23, 26, 30, 34, 38, 42 };
+
         internal static long TitanExp(int zoneId)
         {
             var maxKillsWithBonus = Plugin.Character.adventure.itopod.perkLevel[34] * 3;
-            var kills = titanKills(zoneId);
+            var kills = TitanKills(zoneId);
             var vf = titanVersionMulti(zoneId);
             var exp = titanExp(zoneId) * (kills < maxKillsWithBonus ? 1.5f : 1f) * vf;
 
             return Plugin.Character.checkExpAdded((long)exp);
         }
 
-        private static int titanKills(int zoneId)
+        internal static int TitanKills(int zoneId)
         {
             return zoneId switch
             {
@@ -34,7 +36,7 @@ namespace jshepler.ngu.mods.GameData
                 34 => Plugin.Character.adventure.titan10Kills,
                 38 => Plugin.Character.adventure.titan11Kills,
                 42 => Plugin.Character.adventure.titan12Kills,
-                _ => 0
+                _ => -1
             };
         }
 

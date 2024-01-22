@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
@@ -95,7 +96,7 @@ namespace jshepler.ngu.mods
             _hacksFields = __instance.pods.Select(p => p.target).ToList();
         }
 
-        private static void OnUpdate(object sender, CharacterEventArgs e)
+        private static void OnUpdate(object sender, EventArgs e)
         {
             if (_system == null || _system.currentSelectedGameObject == null || !Input.GetKeyDown(KeyCode.Tab))
                 return;
@@ -106,7 +107,7 @@ namespace jshepler.ngu.mods
 
             if (!_sorted) sortLists();
 
-            var list = e.Character.CurrentMenu() switch
+            var list = Plugin.Character.CurrentMenu() switch
             {
                 Menu.Augments => _augFields,
                 Menu.AdvancedTraining => _atFields,
@@ -132,8 +133,8 @@ namespace jshepler.ngu.mods
             else if (index >= list.Count) index = 0;
 
             // hacks page 2 only has 7 hacks, skip over 8th slot
-            if(e.Character.InMenu(Menu.Hacks)
-                && e.Character.hacksController.curPage == 1
+            if(Plugin.Character.InMenu(Menu.Hacks)
+                && Plugin.Character.hacksController.curPage == 1
                 && index == 7)
             {
                 index = goUp ? 6 : 0;

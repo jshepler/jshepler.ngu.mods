@@ -62,7 +62,7 @@ namespace jshepler.ngu.mods
             try
             {
                 File.WriteAllText($"{Application.persistentDataPath}/{saveName}_{DateTime.UtcNow:yyyy-MM-dd_HH-mm-ss}.txt", data);
-                character.tooltip.showOverrideTooltip($"game saved: {saveName}", 1);
+                Plugin.ShowOverrideNotification($"game saved: {saveName}", 1);
             }
             catch (Exception ex)
             {

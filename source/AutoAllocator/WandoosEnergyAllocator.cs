@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace jshepler.ngu.mods.AutoAllocator
@@ -53,6 +54,13 @@ namespace jshepler.ngu.mods.AutoAllocator
             if (Input.GetKey(KeyCode.LeftShift) && Options.Allocators.AutoAllocatorEnabled.Value == true)
             {
                 Instance[0] = !Instance[0];
+
+                if (Input.GetKey(KeyCode.LeftAlt))
+                {
+                    var magic = Allocators.Magic[Allocators.Feature.Wandoos_Magic];
+                    magic[0] = !magic[0];
+                }
+
                 return false;
             }
 
@@ -63,6 +71,9 @@ namespace jshepler.ngu.mods.AutoAllocator
         private static void Wandoos98Controller_removeEnergy_postfix(Wandoos98Controller __instance)
         {
             Instance[0] = false;
+
+            if (Input.GetKey(KeyCode.LeftShift))
+                __instance.removeAllEnergy();
         }
     }
 }

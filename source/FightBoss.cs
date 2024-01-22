@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -78,7 +79,7 @@ namespace jshepler.ngu.mods
             return cm.InstructionEnumeration();
         }
 
-        private static void OnUpdate(object sender, CharacterEventArgs e)
+        private static void OnUpdate(object sender, EventArgs e)
         {
             var character = Plugin.Character;
 
@@ -106,7 +107,7 @@ namespace jshepler.ngu.mods
                 character.StartCoroutine(RunFight());
         }
 
-        private static void OnGUI(object sender, CharacterEventArgs e)
+        private static void OnGUI(object sender, EventArgs e)
         {
             var nuking = Plugin.Character.bossController.nukeBoss;
             var fighting = Plugin.Character.bossController.isFighting;

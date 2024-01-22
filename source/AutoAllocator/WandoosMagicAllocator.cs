@@ -53,6 +53,12 @@ namespace jshepler.ngu.mods.AutoAllocator
             if (Input.GetKey(KeyCode.LeftShift) && Options.Allocators.AutoAllocatorEnabled.Value == true)
             {
                 Instance[0] = !Instance[0];
+
+                if (Input.GetKey(KeyCode.LeftAlt))
+                {
+                    var energy = Allocators.Energy[Allocators.Feature.Wandoos_Energy];
+                    energy[0] = !energy[0];
+                }
                 return false;
             }
 
@@ -63,6 +69,9 @@ namespace jshepler.ngu.mods.AutoAllocator
         private static void Wandoos98Controller_removeMagic_postfix(Wandoos98Controller __instance)
         {
             Instance[0] = false;
+
+            if (Input.GetKey(KeyCode.LeftShift))
+                __instance.removeAllMagic();
         }
     }
 }

@@ -22,7 +22,7 @@ namespace jshepler.ngu.mods.WebService.GO
             else
             {
                 context.Response.SendResponse(HttpStatusCode.BadRequest, "missing payload");
-                return () => Plugin.ShowNotification($"GO2NGU: bad request \"{resource}\" - missing payload");
+                return () => Plugin.ShowOverrideNotification($"GO2NGU: bad request \"{resource}\" - missing payload");
             }
 
             switch (resource)
@@ -30,16 +30,16 @@ namespace jshepler.ngu.mods.WebService.GO
                 case "loadouts":
                     Loadouts.ImportFromJSON(body);
                     context.Response.SendResponse(HttpStatusCode.OK);
-                    return () => Plugin.ShowNotification("GO2NGU: loadouts");
+                    return () => Plugin.ShowOverrideNotification("GO2NGU: loadouts");
 
                 case "hacks":
                     Hacks.ApplyHackTargets(body);
                     context.Response.SendResponse(HttpStatusCode.OK);
-                    return () => Plugin.ShowNotification("GO2NGU: hacks");
+                    return () => Plugin.ShowOverrideNotification("GO2NGU: hacks");
 
                 default:
                     context.Response.SendResponse(HttpStatusCode.BadRequest, $"unknown resource: {resource}");
-                    return () => Plugin.ShowNotification("GO2NGU: loadouts");
+                    return () => Plugin.ShowOverrideNotification("GO2NGU: loadouts");
             }
         }
     }

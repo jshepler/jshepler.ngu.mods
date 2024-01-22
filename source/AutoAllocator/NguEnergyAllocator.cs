@@ -128,6 +128,9 @@ namespace jshepler.ngu.mods.AutoAllocator
         private static void NGUMagicController_remove_postfix(NGUController __instance)
         {
             Instance[__instance.id] = false;
+
+            if (Input.GetKey(KeyCode.LeftShift))
+                __instance.removeAll();
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(NGUController), "updateText")]

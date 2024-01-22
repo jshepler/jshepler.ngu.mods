@@ -16,11 +16,10 @@ namespace jshepler.ngu.mods.CapCalculators
         internal static Dictionary<int, AugCalculator> AugCalculators = new();
         internal static Dictionary<int, AugUpgradeCalculator> AugUpgradeCalculators = new();
 
-        [HarmonyPostfix, HarmonyPatch(typeof(Character), "Start")]
-        private static void Character_Start_postfix(Character __instance)
+        [HarmonyPostfix, HarmonyPatch(typeof(AdvancedTrainingController), "Start")]
+        private static void Character_Start_postfix(AdvancedTrainingController __instance)
         {
-            var atc = __instance.advancedTrainingController;
-            AdvancedTrainingCalculators = Enumerable.Range(0, 6).ToDictionary(i => i, i => new AdvancedTrainingCalculator(atc, i));
+            AdvancedTrainingCalculators = Enumerable.Range(0, 6).ToDictionary(i => i, i => new AdvancedTrainingCalculator(__instance.alladvancedTraining, i));
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(AllNGUController), "Start")]

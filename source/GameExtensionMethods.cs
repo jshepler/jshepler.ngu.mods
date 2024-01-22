@@ -19,6 +19,11 @@ namespace jshepler.ngu.mods
             return ldc.character.inventory.loadouts[ldc.loadoutID].GetInventorySlotId(ldc.id);
         }
 
+        internal static Equipment GetItem(this LoadoutDisplayController ldc)
+        {
+            return Plugin.Character.inventory.GetItem(ldc.GetInventorySlotId());
+        }
+
         internal static part GetEqupmentType(this LoadoutDisplayController ldc)
         {
             return ldc.id switch
@@ -89,6 +94,23 @@ namespace jshepler.ngu.mods
             return l.head == -1000 && l.chest == -1000 && l.legs == -1000 && l.boots == -1000
                 && l.weapon == -1000 && l.weapon2 == -1000
                 && l.accessories.TrueForAll(i => i == -1000);
+        }
+
+        internal static Equipment GetItem(this Inventory inv, int slotId)
+        {
+            return slotId switch
+            {
+                -1000 => null,
+                -6 => inv.weapon2,
+                -5 => inv.weapon,
+                -4 => inv.boots,
+                -3 => inv.legs,
+                -2 => inv.chest,
+                -1 => inv.head,
+                _ => slotId < 10000 ? inv.inventory[slotId]
+                    : slotId < 100000 ? inv.accs[slotId - 10000]
+                    : inv.macguffins[slotId - 100000]
+            };
         }
 
         #endregion

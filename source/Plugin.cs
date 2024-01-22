@@ -27,15 +27,17 @@ namespace jshepler.ngu.mods
         private static ManualLogSource Log;
         internal static void LogInfo(string text) => Log.LogInfo(text);
 
-        private static CharacterEventArgs _cea = null;
-        internal static event EventHandler<CharacterEventArgs> OnUpdate;
-        internal static event EventHandler<CharacterEventArgs> OnLateUpdate;
-        internal static event EventHandler<CharacterEventArgs> OnSaveLoaded;
-        internal static event EventHandler<CharacterEventArgs> OnPreSave;
-        internal static event EventHandler<CharacterEventArgs> onGUI;
+        internal static event EventHandler OnUpdate;
+        internal static event EventHandler OnFixedUpdate;
+        internal static event EventHandler OnLateUpdate;
+        internal static event EventHandler onGUI; // have to use onGUI instead of OnGUI because OnGUI is the method unity calls
+
+        internal static event EventHandler OnSaveLoaded;
+        internal static event EventHandler OnPreSave;
+        internal static event EventHandler OnGameStart;
 
         internal static Character Character = null;
-        internal static Action<string> ShowNotification = m => Character?.tooltip.showOverrideTooltip(m, 3f);
+        internal static bool GameHasStarted = false;
 
         private void Awake()
         {
@@ -48,43 +50,59 @@ namespace jshepler.ngu.mods
 
         private void Update()
         {
-            if (!_cea)
+            if (Character == null)
                 return;
-                
-            OnUpdate?.Invoke(null, _cea);
+
+            OnUpdate?.Invoke(null, EventArgs.Empty);
 
             // hidden "Krissmuss" screen from christmas 2020 event
             if (Input.GetKeyDown(KeyCode.X) && Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftShift))
                 Character.menuSwapper.swapMenu((int)Menu.Krissmuss);
         }
 
+        private void FixedUpdate()
+        {
+            if (Character == null)
+                return;
+
+            OnFixedUpdate?.Invoke(null, EventArgs.Empty);
+        }
+
         private void LateUpdate()
         {
-            if (_cea) OnLateUpdate?.Invoke(null, _cea);
+            if (Character == null)
+                return;
+
+            OnLateUpdate?.Invoke(null, EventArgs.Empty);
         }
 
         private void OnGUI()
         {
-            if (_cea) onGUI?.Invoke(null, _cea);
+            if (Character == null)
+                return;
+
+            onGUI?.Invoke(null, EventArgs.Empty);
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(Character), "Start")]
         private static void Character_Start_postfix(Character __instance)
         {
             Character = __instance;
-            _cea = new CharacterEventArgs(__instance);
+            GameHasStarted = true;
+
+            OnGameStart?.Invoke(null, EventArgs.Empty);
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(ImportExport), "gameStateToData")]
         private static void ImportExport_gameStateToData_prefix()
         {
-            OnPreSave?.Invoke(null, _cea);
+            OnPreSave?.Invoke(null, EventArgs.Empty);
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(Character), "addOfflineProgress")]
         private static void Character_addOfflineProgress_postfix(Character __instance)
         {
-            OnSaveLoaded?.Invoke(null, _cea);
+            OnSaveLoaded?.Invoke(null, EventArgs.Empty);
 
             // unlocks krissmuss ui theme from christmass 2019 event
             __instance.settings.prizePicked = 6;
@@ -95,7 +113,7 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(MainMenuController), "startNewGame")]
         private static void MainMenuController_startNewGame_postfix()
         {
-            OnSaveLoaded?.Invoke(null, _cea);
+            OnSaveLoaded?.Invoke(null, EventArgs.Empty);
         }
 
         [HarmonyFinalizer, HarmonyPatch(typeof(Character), "addOfflineProgress")]
@@ -129,20 +147,15 @@ namespace jshepler.ngu.mods
 
             return cm.InstructionEnumeration();
         }
-    }
 
-    internal class CharacterEventArgs : EventArgs
-    {
-        public readonly Character Character;
-
-        public CharacterEventArgs(Character c)
+        internal static void ShowNotification(string text, float seconds = 3f)
         {
-            Character = c;
+            Character?.tooltip.showTooltip(text, seconds);
         }
 
-        public static implicit operator bool(CharacterEventArgs cea)
+        internal static void ShowOverrideNotification(string text, float seconds = 3f)
         {
-            return !object.ReferenceEquals(cea, null);
+            Character?.tooltip.showOverrideTooltip(text, seconds);
         }
     }
 }

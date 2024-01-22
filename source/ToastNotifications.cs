@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,6 +11,10 @@ namespace jshepler.ngu.mods
     [HarmonyPatch]
     internal class ToastNotifications
     {
+        private static bool _enabled => Options.NotificationToasts.Enabled.Value;
+        private static bool _topDown => Options.NotificationToasts.TopDown.Value;
+
+        private static GameObject _toastsContainer;
         private static GameObject _baseTooltip;
         private static List<Toast> _pool = new();
         private static List<Toast> _active = new();
@@ -17,6 +22,39 @@ namespace jshepler.ngu.mods
         private static float _xPos;
         private static float _scaleFactor;
 
+        [HarmonyPrepare]
+        private static void prep(MethodBase original)
+        {
+            if (original != null)
+                return;
+
+            Plugin.OnGameStart += (o, e) =>
+            {
+                _toastsContainer = new GameObject();
+                _toastsContainer.name = "Toasts";
+                _toastsContainer.transform.SetParent(Plugin.Character.tooltip.transform.parent);
+                _toastsContainer.transform.localScale = Vector3.one;
+                _toastsContainer.transform.SetAsFirstSibling();
+            };
+
+            Plugin.OnFixedUpdate += (o, e) =>
+            {
+                if (_toastsContainer == null)
+                    return;
+
+                var mouse = Input.mousePosition;
+                if (mouse.x < 0 || mouse.x > Screen.width || mouse.y < 0 || mouse.y > Screen.height)
+                    return;
+
+                if (_active.Count > 0 && mouse.x > _xPos && mouse.y > _active.Last().Position.y)
+                    _active.Do(t => t.IsActive = false);
+
+                else
+                    _active.Do(t => t.IsActive = true);
+            };
+        }
+
+        // this is also called when loading a save
         [HarmonyPostfix, HarmonyPatch(typeof(UIThemeController), "changeTheme")]
         private static void UIThemeController_changeTheme_postfix(int newID)
         {
@@ -25,14 +63,14 @@ namespace jshepler.ngu.mods
             var rect = Traverse.Create(Plugin.Character.tooltip).Field<RectTransform>("tooltipRect").Value.rect;
             _xPos = Screen.width - (rect.width * _scaleFactor) - 5;
 
-            _baseTooltip = GameObject.Instantiate(Plugin.Character.tooltip.tooltip, Plugin.Character.tooltip.tooltip.transform.parent);
+            _baseTooltip = GameObject.Instantiate(Plugin.Character.tooltip.tooltip, _toastsContainer.transform);
             _baseTooltip.transform.position = new Vector3(_xPos, -1000);
 
             var script = _baseTooltip.GetComponent<HoverTooltip>();
             GameObject.DestroyImmediate(script);
 
-            var image = _baseTooltip.transform.Find("Image");
-            GameObject.DestroyImmediate(image.gameObject);
+            var tutorialArrows = _baseTooltip.transform.Find("Image");
+            GameObject.DestroyImmediate(tutorialArrows.gameObject);
 
             _pool.Clear();
         }
@@ -89,7 +127,7 @@ namespace jshepler.ngu.mods
         [HarmonyPrefix, HarmonyPatch(typeof(HoverTooltip), "showOverrideTooltip", typeof(string), typeof(float))]
         private static bool HoverTooltip_showOverrideTooltip_prefix(string message, float seconds, HoverTooltip __instance)
         {
-            if (__instance.character.settings.tutorialState >= 0)
+            if (!_enabled || __instance.character.settings.tutorialState >= 0)
                 return true;
 
             __instance.tutorialKeys.gameObject.SetActive(value: false);
@@ -103,7 +141,7 @@ namespace jshepler.ngu.mods
         [HarmonyPrefix, HarmonyPatch(typeof(HoverTooltip), "showTooltip", typeof(string), typeof(float))]
         private static bool HoverTooltip_showTooltip_prefix(string message, float seconds, HoverTooltip __instance)
         {
-            if (__instance.character.settings.tutorialState >= 0)
+            if (!_enabled || __instance.character.settings.tutorialState >= 0)
                 return true;
 
             __instance.tutorialKeys.gameObject.SetActive(value: false);
@@ -145,11 +183,25 @@ namespace jshepler.ngu.mods
             // setting a GameObject active doesn't happen until next frame, and the ContentSizeFitter component won't do its thing until then
             yield return null;
 
-            var pos = new Vector3(_xPos, Screen.height);
-            if (_active.Count > 0)
-                pos.y = _active.Last().Position.y;
+            Vector3 pos;
+            if (_topDown)
+            {
+                pos = new Vector3(_xPos, Screen.height);
+                if (_active.Count > 0)
+                    pos.y = _active.Last().Position.y;
 
-            pos.y -= (toast.Height * _scaleFactor);
+                pos.y -= (toast.Height * _scaleFactor);
+            }
+            else
+            {
+                pos = new Vector3(_xPos, 0);
+                if (_active.Count > 0)
+                {
+                    var last = _active.Last();
+                    pos.y = last.Position.y + (last.Height * _scaleFactor);
+                }
+            }
+
             toast.Position = pos;
 
             _active.Add(toast);
@@ -168,7 +220,7 @@ namespace jshepler.ngu.mods
             if (index == -1)
                 return;
 
-            var height = n.Height * _scaleFactor;
+            var height = n.Height * _scaleFactor * (_topDown ? 1 : -1);
             for (var x = index + 1; x < _active.Count; x++)
             {
                 var p = _active[x].Position;
@@ -190,7 +242,7 @@ namespace jshepler.ngu.mods
                 return n;
             }
 
-            var clone = GameObject.Instantiate(_baseTooltip, _baseTooltip.transform.parent);
+            var clone = GameObject.Instantiate(_baseTooltip, _toastsContainer.transform);
             return new Toast(clone);
         }
     }
@@ -216,6 +268,7 @@ namespace jshepler.ngu.mods
         public Toast(GameObject gob)
         {
             _gob = gob;
+            _gob.name = "Toast";
             _text = _gob.GetComponentInChildren<Text>();
             _rect = _gob.GetComponent<RectTransform>();
         }

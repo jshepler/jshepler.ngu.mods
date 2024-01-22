@@ -29,7 +29,7 @@ namespace jshepler.ngu.mods
                 if (Input.GetKey(KeyCode.LeftShift))
                 {
                     _lastEquipped = GetCurrentEquip();
-                    _controller.character.tooltip.showOverrideTooltip("Equipped items saved to temp loadout.", 1f);
+                    Plugin.ShowOverrideNotification("Equipped items saved to temp loadout.", 1f);
                     return;
                 }
 

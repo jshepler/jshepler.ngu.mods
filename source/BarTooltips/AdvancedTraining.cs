@@ -42,6 +42,10 @@ namespace jshepler.ngu.mods.BarTooltips
             var capMessage = Tooltips.BuildCurrentCapText(currentCap, overCappedDuration, ppt);
             message += $"\n\n{capMessage}";
 
+            var bank = character.adventureController.itopod.totalBankedAdvTraining();
+            if (bank > 0f)
+                message += $"\n\n<b>Banked ({bank * 100f:0}%):</b> {character.display(currentLevel * bank)}";
+
             __instance.tooltip.showTooltip($"{LastTooltip.Message}{message}");
         }
     }

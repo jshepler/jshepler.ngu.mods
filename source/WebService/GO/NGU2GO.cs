@@ -14,16 +14,16 @@ namespace jshepler.ngu.mods.WebService.GO
                 case "hacks":
                     json = Hacks.BuildHackStats();
                     context.Response.SendResponse(HttpStatusCode.OK, json, ContentTypes.JSON);
-                    return () => Plugin.ShowNotification("NGU2GO: hacks");
+                    return () => Plugin.ShowOverrideNotification("NGU2GO: hacks");
 
                 case "equipped":
                     json = Loadouts.BuildCurrentEquipJson();
                     context.Response.SendResponse(HttpStatusCode.OK, json, ContentTypes.JSON);
-                    return () => Plugin.ShowNotification("NGU2GO: equipped");
+                    return () => Plugin.ShowOverrideNotification("NGU2GO: equipped");
 
                 default:
                     context.Response.SendResponse(HttpStatusCode.BadRequest, $"unknown resource: {resource}");
-                    return () => Plugin.ShowNotification($"NGU2GO: unknown resource: {resource}");
+                    return () => Plugin.ShowOverrideNotification($"NGU2GO: unknown resource: {resource}");
             }
         }
     }

@@ -12,10 +12,11 @@ namespace jshepler.ngu.mods
     internal class ImrovedItemTooltips
     {
         private static bool _appendDaycareText = false;
+        private static bool _appendDualWieldText = false;
 
         // daycare
         [HarmonyPrefix, HarmonyPatch(typeof(DaycareItemController), "OnPointerEnter")]
-        private static bool DaycareItemController_OnPointerEnter_prefix(DaycareItemController __instance, string ___message)
+        private static bool DaycareItemController_OnPointerEnter_prefix(DaycareItemController __instance)
         {
             var item = Plugin.Character.inventory.daycare[__instance.id];
             if (item != null && item.id != 0)
@@ -36,7 +37,7 @@ namespace jshepler.ngu.mods
 
         // inventory
         [HarmonyPrefix, HarmonyPatch(typeof(ItemController), "OnPointerEnter")]
-        private static bool ItemController_OnPointerEnter_prefix(ItemController __instance, string ___message)
+        private static bool ItemController_OnPointerEnter_prefix(ItemController __instance)
         {
             var id = __instance.id;
             var character = __instance.character;
@@ -60,7 +61,27 @@ namespace jshepler.ngu.mods
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(ItemController), "OnPointerExit")]
-        private static void ItemController_OnPointerExit_prefix()
+        private static void ItemController_OnPointerExit_postfix()
+        {
+            StopShowTooltip();
+        }
+
+        // loadouts
+        [HarmonyPrefix, HarmonyPatch(typeof(LoadoutDisplayController), "OnPointerEnter")]
+        private static bool LoadoutDisplayController_OnPointerEnter_prefix(LoadoutDisplayController __instance, string ___message)
+        {
+            var item = __instance.GetItem();
+            if (item == null)
+                return true;
+
+            var messageField = Traverse.Create(__instance).Field<string>("message");
+            StartShowTooltip(item, __instance.updateTooltipMessage, () => messageField.Value);
+
+            return false;
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(LoadoutDisplayController), "OnPointerExit")]
+        private static void LoadoutDisplayController_OnPointerExit_postfix()
         {
             StopShowTooltip();
         }
@@ -78,6 +99,8 @@ namespace jshepler.ngu.mods
             if ((slotId <= -1 && slotId >= -6) || (slotId >= 10000 && slotId < 100000) || (slotId >= 1000000 && slotId < 20000000))
                 __instance.hovered = true;
 
+            _appendDualWieldText = slotId == -6;
+
             var item = GetItemFromSlotId(slotId);
             var messageField = Traverse.Create(__instance).Field<string>("message");
             StartShowTooltip(item, __instance.updateTooltipMessage, () => messageField.Value);
@@ -89,6 +112,7 @@ namespace jshepler.ngu.mods
         private static void LoadoutController_OnPointerExit_postfix()
         {
             StopShowTooltip();
+            _appendDualWieldText = false;
         }
 
         private static Coroutine _cor;
@@ -111,21 +135,19 @@ namespace jshepler.ngu.mods
         {
             while (true)
             {
-                string text;
+                updateTooltipMessage();
+                var text = getTooltipMessage();
+
+                if (_appendDaycareText)
+                    text += BuildDaycareString(item);
+
+                if (_appendDualWieldText)
+                    text += $"\n\n<b>Dual-Wield Effectiveness:</b> {Plugin.Character.inventoryController.weapon2Factor() * 100f:0}%";
 
                 if (Input.GetKey(KeyCode.LeftAlt))
-                    text = BuildItemSourcesString(item);
-                else
-                {
-                    updateTooltipMessage();
-                    text = getTooltipMessage();
-
-                    if (_appendDaycareText)
-                        text += BuildDaycareString(item);
-                }
+                    text += BuildItemSourcesString(item);
 
                 Plugin.Character.tooltip.showTooltip(text);
-
                 yield return _waiter;
             }
         }
@@ -195,7 +217,7 @@ namespace jshepler.ngu.mods
                     sources.Add($"<b>{zName}:</b> Quest Item");
             }
 
-            return $"<b>Drops in:</b>\n\n{sources.Join(s => s, "\n")}";
+            return $"\n\n<b>source(s):</b>\n{sources.Join(s => s, "\n")}";
         }
 
         private static Equipment GetItemFromSlotId(int slotId)

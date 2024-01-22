@@ -20,9 +20,7 @@ namespace jshepler.ngu.mods
                 .AddComponent<ClickHandlerComponent>()
                 .OnRightClick(e =>
                 {
-                    if(__instance.character.arbitrary.lazyITOPODOn)
-                        _optimalFloorButton.onClick.Invoke();
-
+                    _optimalFloorButton.onClick.Invoke();
                     _enterPodButton.onClick.Invoke();
                 });
         }

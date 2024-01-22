@@ -10,7 +10,7 @@ namespace jshepler.ngu.mods.WebService.Triggers
         internal static Action HandleRequest(HttpListenerContext context, string trigger)
         {
             if (!TriggerConfig.RemoteTriggersEnabled)
-                return () => Plugin.ShowNotification("remote triggers disabled");
+                return () => Plugin.ShowOverrideNotification("remote triggers disabled");
 
             switch (trigger)
             {
@@ -30,18 +30,18 @@ namespace jshepler.ngu.mods.WebService.Triggers
                     return kitty();
 
                 default:
-                    return () => Plugin.ShowNotification($"unknown trigger: {trigger}");
+                    return () => Plugin.ShowOverrideNotification($"unknown trigger: {trigger}");
             }
         }
 
         private static Action autoBoost()
         {
             if(!TriggerConfig.AutoBoostEnabled)
-                return () => Plugin.ShowNotification("trigger: autoboost disabled");
+                return () => Plugin.ShowOverrideNotification("trigger: autoboost disabled");
 
             return () =>
             {
-                Plugin.ShowNotification("trigger: autoboost");
+                Plugin.ShowOverrideNotification("trigger: autoboost");
                 Plugin.Character.inventoryController.autoBoost();
             };
         }
@@ -49,11 +49,11 @@ namespace jshepler.ngu.mods.WebService.Triggers
         private static Action autoMerge()
         {
             if(!TriggerConfig.AutoMergeEnabled)
-                return () => Plugin.ShowNotification("trigger: automerge disabed");
+                return () => Plugin.ShowOverrideNotification("trigger: automerge disabed");
 
             return () =>
             {
-                Plugin.ShowNotification("trigger: automerge");
+                Plugin.ShowOverrideNotification("trigger: automerge");
                 Plugin.Character.inventoryController.autoMerge();
             };
         }
@@ -61,20 +61,20 @@ namespace jshepler.ngu.mods.WebService.Triggers
         private static Action tossGold()
         {
             if (!TriggerConfig.TossGoldEnabled)
-                return () => Plugin.ShowNotification("trigger: toss gold disabed");
+                return () => Plugin.ShowOverrideNotification("trigger: toss gold disabed");
 
             if (InManualFight)
-                return () => Plugin.ShowNotification("trigger: toss gold ignored - manual adventure fight in progress");
+                return () => Plugin.ShowOverrideNotification("trigger: toss gold ignored - manual adventure fight in progress");
 
             if (TossGold.IsRunning)
-                return () => Plugin.ShowNotification("trigger: toss gold ignored - already running");
+                return () => Plugin.ShowOverrideNotification("trigger: toss gold ignored - already running");
 
             if (!Plugin.Character.pitController.canToss())
-                return () => Plugin.ShowNotification("trigger: toss gold ignored - pit not ready");
+                return () => Plugin.ShowOverrideNotification("trigger: toss gold ignored - pit not ready");
 
             return () =>
             {
-                Plugin.ShowNotification("trigger: toss gold");
+                Plugin.ShowOverrideNotification("trigger: toss gold");
                 Plugin.Character.StartCoroutine(TossGold.Run());
             };
         }
@@ -82,23 +82,23 @@ namespace jshepler.ngu.mods.WebService.Triggers
         private static Action fightBoss()
         {
             if (!TriggerConfig.FightBossEnabled)
-                return () => Plugin.ShowNotification("trigger: fight boss disabled");
+                return () => Plugin.ShowOverrideNotification("trigger: fight boss disabled");
 
             if (InManualFight)
-                return () => Plugin.ShowNotification("trigger: fight boss ignored - manual adventure fight in progress");
+                return () => Plugin.ShowOverrideNotification("trigger: fight boss ignored - manual adventure fight in progress");
 
             if (FightBoss.IsRunning)
-                return () => Plugin.ShowNotification("trigger: fight boss ignored - already running");
+                return () => Plugin.ShowOverrideNotification("trigger: fight boss ignored - already running");
 
             if (Plugin.Character.bossController.isFighting)
-                return () => Plugin.ShowNotification("trigger: fight boss ignored - fight in progress");
+                return () => Plugin.ShowOverrideNotification("trigger: fight boss ignored - fight in progress");
 
             if (!mods.FightBoss.CanFight)
-                return () => Plugin.ShowNotification("trigger: fight boss ignored - boss not beatable");
+                return () => Plugin.ShowOverrideNotification("trigger: fight boss ignored - boss not beatable");
 
             return () =>
             {
-                Plugin.ShowNotification("trigger: fightboss");
+                Plugin.ShowOverrideNotification("trigger: fightboss");
                 Plugin.Character.StartCoroutine(FightBoss.Run());
             };
         }
@@ -106,14 +106,14 @@ namespace jshepler.ngu.mods.WebService.Triggers
         private static Action kitty()
         {
             if (!TriggerConfig.KittyEnabled)
-                return () => Plugin.ShowNotification("trigger: kitty ignored - disabled");
+                return () => Plugin.ShowOverrideNotification("trigger: kitty ignored - disabled");
 
             if (Kitty.IsRunning)
-                return () => Plugin.ShowNotification("trigger: kitty ignored - already running");
+                return () => Plugin.ShowOverrideNotification("trigger: kitty ignored - already running");
 
             return () =>
             {
-                Plugin.ShowNotification("trigger: kitty");
+                Plugin.ShowOverrideNotification("trigger: kitty");
                 Plugin.Character.StartCoroutine(Kitty.Run());
             };
         }

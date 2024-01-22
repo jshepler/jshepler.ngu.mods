@@ -122,6 +122,12 @@ namespace jshepler.ngu.mods.AutoAllocator
         private static void HackUIController_remove_postfix(HackUIController __instance)
         {
             Instance[__instance.id] = false;
+
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                __instance.character.hacksController.removeR3(__instance.id, long.MaxValue);
+                __instance.updateRes3Allocated();
+            }
         }
     }
 }

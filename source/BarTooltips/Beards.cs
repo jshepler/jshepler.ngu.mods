@@ -19,10 +19,10 @@ namespace jshepler.ngu.mods.BarTooltips
             var tpb = ppt == 0 ? 0 : Mathf.CeilToInt(1 / ppt);
 
             var secondsRemaining = 0f;
+            var currentLevel = character.beards.beards[id].beardLevel;
             if (ppt > 1)
             {
                 var capLevel = Calculators.BeardCalculators[id].LevelFromResource(0);
-                var currentLevel = character.beards.beards[id].beardLevel;
                 secondsRemaining = (capLevel - currentLevel) / 50f;
             }
 
@@ -32,6 +32,11 @@ namespace jshepler.ngu.mods.BarTooltips
                 ___message += $" ({NumberOutput.timeOutput(secondsRemaining)})";
 
             ___message += $"\n   (ppt: {ppt:0.0000000} = {tpb}t/bar)";
+
+            var bank = character.adventureController.itopod.totalBankedBeardTemp();
+            if (bank > 0f)
+                ___message += $"\n\n<b>Banked ({bank * 100f:0}%):</b> {character.display(currentLevel * bank)}";
+
             __instance.tooltip.showTooltip(___message);
         }
     }

@@ -87,5 +87,13 @@ namespace jshepler.ngu.mods.ModSave
             get => Get<double>("TotalTimePlayedSadistic");
             set => Set("TotalTimePlayedSadistic", value);
         }
+
+        internal static int AutoMayGenMode
+        {
+            get => Get("AutoMayGenMode", 0);
+            set => Set("AutoMayGenMode", value);
+        }
+
+        // REMINDER: NO TYPES DEFINED IN MODS ELSE NOT LOADABLE IN VANILLA
     }
 }

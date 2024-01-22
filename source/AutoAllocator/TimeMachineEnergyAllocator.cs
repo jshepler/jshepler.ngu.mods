@@ -53,6 +53,13 @@ namespace jshepler.ngu.mods.AutoAllocator
             if (Input.GetKey(KeyCode.LeftShift) && Options.Allocators.AutoAllocatorEnabled.Value == true)
             {
                 Instance[0] = !Instance[0];
+
+                if (Input.GetKey(KeyCode.LeftAlt))
+                {
+                    var magic = Allocators.Magic[Allocators.Feature.TM_Magic];
+                    magic[0] = !magic[0];
+                }
+
                 return false;
             }
 
@@ -60,6 +67,13 @@ namespace jshepler.ngu.mods.AutoAllocator
             {
                 Instance[0] = false;
                 OverCap();
+
+                if (Input.GetKey(KeyCode.LeftAlt))
+                {
+                    Allocators.Magic[Allocators.Feature.TM_Magic][0] = false;
+                    TimeMachineMagicAllocator.OverCap();
+                }
+
                 return false;
             }
 
@@ -70,6 +84,9 @@ namespace jshepler.ngu.mods.AutoAllocator
         private static void TimeMachineController_removeEnergy_postfix(TimeMachineController __instance)
         {
             Instance[0] = false;
+
+            if (Input.GetKey(KeyCode.LeftShift))
+                __instance.removeAllEnergy();
         }
 
         private static long CalcCapForLevel(long level)
@@ -88,7 +105,7 @@ namespace jshepler.ngu.mods.AutoAllocator
             return ((long)cap) + 1;
         }
 
-        private static void OverCap()
+        internal static void OverCap()
         {
             if (_character.machine.speedTarget == -1)
                 return;

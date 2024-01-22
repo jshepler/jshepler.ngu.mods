@@ -40,6 +40,10 @@ namespace jshepler.ngu.mods.BarTooltips
             var capText = Tooltips.BuildCurrentCapText(currentCap, overCappedDuration, ppt);
             ___message += $"\n\n{capText}";
 
+            var bank = character.adventureController.itopod.totalBankedTimeMachine();
+            if(bank > 0f)
+                ___message += $"\n\n<b>Banked ({bank * 100f:0}%):</b> {character.display(currentLevel * bank)}";
+
             __instance.tooltip.showTooltip(___message);
         }
 
@@ -77,6 +81,10 @@ namespace jshepler.ngu.mods.BarTooltips
             var currentCap = Calculators.TM_MagicCalculator.ResourceFromLevel(currentLevel + 1);
             var capText = Tooltips.BuildCurrentCapText(currentCap, overCappedDuration, ppt);
             ___message += $"\n\n{capText}";
+
+            var bank = character.adventureController.itopod.totalBankedTimeMachine();
+            if (bank > 0f)
+                ___message += $"\n\n<b>Banked ({bank * 100f:0}%):</b> {character.display(currentLevel * bank)}";
 
             __instance.tooltip.showTooltip(___message);
         }

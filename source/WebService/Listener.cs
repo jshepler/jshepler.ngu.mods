@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using HarmonyLib;
@@ -21,13 +22,19 @@ namespace jshepler.ngu.mods.WebService
         // anything that needs to do something in the UI (e.g. showing notifications) is added to queue and executed in Update
         private static Queue<Action> _actions = new();
 
-        [HarmonyPostfix, HarmonyPatch(typeof(Character), "Start")]
-        private static void Character_Start_prefix()
+        [HarmonyPrepare, HarmonyPatch]
+        private static void prep(MethodBase original)
         {
-            if (HttpListener.IsSupported)
-                Task.Run(() => RunListener());
-            else
-                Plugin.LogInfo("HttpListener NOT SUPPORTED!!!");
+            if (original != null)
+                return;
+
+            Plugin.OnGameStart += (o, e) =>
+            {
+                if (HttpListener.IsSupported)
+                    Task.Run(() => RunListener());
+                else
+                    Plugin.LogInfo("HttpListener NOT SUPPORTED!!!");
+            };
 
             Plugin.OnUpdate += (o, e) =>
             {

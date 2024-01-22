@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using jshepler.ngu.mods.ModSave;
 using UnityEngine;
 
 namespace jshepler.ngu.mods
@@ -9,8 +10,14 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(Character), "addOfflineProgress", typeof(int))]
         private static void Character_addOfflineProgress_postfix(int timeElapsed)
         {
-            if(timeElapsed > 0)
-                AddTime(timeElapsed);
+            if (Plugin.Character.challenges.levelChallenge10k.inChallenge
+                || Plugin.Character.challenges.trollChallenge.inChallenge
+                || Plugin.Character.challenges.hour24Challenge.inChallenge
+                || timeElapsed <= 0)
+                return;
+
+            AddTime(timeElapsed);
+            CheckTime();
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(TotalTimePlayed), "updateTimer")]
@@ -30,13 +37,9 @@ namespace jshepler.ngu.mods
         private static void TotalTimePlayed_updateText_postfix(TotalTimePlayed __instance)
         {
             __instance.timerText.text +=
-                //    Total Time Played:
-                  $"\n         (normal): {NumberOutput.timeOutput(ModSave.Data.TotalTimePlayedNormal)}"
-                + $"\n           (evil): {NumberOutput.timeOutput(ModSave.Data.TotalTimePlayedEvil)}"
-                + $"\n       (sadistic): {NumberOutput.timeOutput(ModSave.Data.TotalTimePlayedSadistic)}";
-            //  $"\n                 (normal): {NumberOutput.timeOutput(ModSave.Data.TotalTimePlayedNormal)}"
-            //+ $"\n                       (evil): {NumberOutput.timeOutput(ModSave.Data.TotalTimePlayedEvil)}"
-            //+ $"\n                (sadistic): {NumberOutput.timeOutput(ModSave.Data.TotalTimePlayedSadistic)}";
+                  $"\n         (normal): {NumberOutput.timeOutput(Data.TotalTimePlayedNormal)}"
+                + $"\n           (evil): {NumberOutput.timeOutput(Data.TotalTimePlayedEvil)}"
+                + $"\n       (sadistic): {NumberOutput.timeOutput(Data.TotalTimePlayedSadistic)}";
         }
 
         private static void AddTime(double totalSeconds)
@@ -44,25 +47,52 @@ namespace jshepler.ngu.mods
             // if game wasn't started with this mod, start it with current playtime;
             // if current difficulty isn't normal, there's no way to know how much was normal,
             // so make it all normal
-            if (ModSave.Data.TotalTimePlayedNormal == 0.0)
+            if (Data.TotalTimePlayedNormal == 0.0)
             {
-                ModSave.Data.TotalTimePlayedNormal = Plugin.Character.totalPlaytime.totalseconds;
+                Data.TotalTimePlayedNormal = Plugin.Character.totalPlaytime.totalseconds;
                 return;
             }
 
             switch (Plugin.Character.settings.rebirthDifficulty)
             {
                 case difficulty.normal:
-                    ModSave.Data.TotalTimePlayedNormal += totalSeconds;
+                    Data.TotalTimePlayedNormal += totalSeconds;
                     break;
 
                 case difficulty.evil:
-                    ModSave.Data.TotalTimePlayedEvil += totalSeconds;
+                    Data.TotalTimePlayedEvil += totalSeconds;
                     break;
 
                 case difficulty.sadistic:
-                    ModSave.Data.TotalTimePlayedSadistic += totalSeconds;
+                    Data.TotalTimePlayedSadistic += totalSeconds;
                     break;
+            }
+        }
+
+        private static void CheckTime()
+        {
+            var diff = Plugin.Character.totalPlaytime.totalseconds
+                - Data.TotalTimePlayedNormal
+                - Data.TotalTimePlayedEvil
+                - Data.TotalTimePlayedSadistic;
+
+            if (diff != 0.0)
+            {
+                Plugin.LogInfo($"tracked time diff: {NumberOutput.timeOutput(System.Math.Abs(diff))}");
+                switch (Plugin.Character.settings.rebirthDifficulty)
+                {
+                    case difficulty.normal:
+                        Data.TotalTimePlayedNormal += diff;
+                        break;
+
+                    case difficulty.evil:
+                        Data.TotalTimePlayedEvil += diff;
+                        break;
+
+                    case difficulty.sadistic:
+                        Data.TotalTimePlayedSadistic += diff;
+                        break;
+                }
             }
         }
     }

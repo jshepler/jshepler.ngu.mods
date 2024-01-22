@@ -57,6 +57,10 @@ namespace jshepler.ngu.mods.AutoAllocator
             if (Input.GetKey(KeyCode.LeftShift) && Options.Allocators.AutoAllocatorEnabled.Value == true)
             {
                 Instance[id] = !Instance[id];
+
+                if (Input.GetKey(KeyCode.LeftAlt))
+                    Allocators.Energy[Allocators.Feature.Augment][id] = Instance[id];
+
                 return false;
             }
 
@@ -64,6 +68,12 @@ namespace jshepler.ngu.mods.AutoAllocator
             {
                 Instance[id] = false;
                 OverCap(id);
+
+                if (Input.GetKey(KeyCode.LeftAlt))
+                {
+                    Allocators.Energy[Allocators.Feature.Augment][id] = false;
+                    AugmentAllocator.OverCap(id);
+                }
 
                 return false;
             }
@@ -75,6 +85,9 @@ namespace jshepler.ngu.mods.AutoAllocator
         private static void AugmentController_removeEnergyUpgrade_postfix(AugmentController __instance)
         {
             Instance[__instance.id] = false;
+
+            if(Input.GetKey(KeyCode.LeftShift))
+                __instance.character.idleEnergy += __instance.character.augments.augs[__instance.id].removeEnergyUpgrade(long.MaxValue);
         }
 
         private static long CalcCapForLevel(int id, long level)
@@ -109,7 +122,7 @@ namespace jshepler.ngu.mods.AutoAllocator
             return ((long)cap) + 1;
         }
 
-        private static void OverCap(int id)
+        internal static void OverCap(int id)
         {
             var aug = _character.augments.augs[id];
             if (aug.upgradeTarget == -1)

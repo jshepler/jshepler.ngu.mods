@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using System.Reflection;
+using HarmonyLib;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -45,19 +46,28 @@ namespace jshepler.ngu.mods.WebService.Triggers
             set => Options.RemoteTriggers.Kitty.Enabled.Value = value;
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(Character), "Start")]
-        private static void Character_Start_postfix()
+        [HarmonyPrepare, HarmonyPatch]
+        private static void prep(MethodBase original)
         {
-            _settingsButton = GameObject.Find("Canvas/Player Panel Canvas/Player Panel/Settings").GetComponent<Button>();
-            _settingsButton.image.color = RemoteTriggersEnabled ? Plugin.ButtonColor_Green : Color.white;
+            if (original != null)
+                return;
 
-            _settingsButton.gameObject.AddComponent<ClickHandlerComponent>()
-                .OnRightClick(e => OpenConfig());
+            Plugin.OnGameStart += (o, e) =>
+            {
+                _settingsButton = GameObject.Find("Canvas/Player Panel Canvas/Player Panel/Settings").GetComponent<Button>();
+                _settingsButton.image.color = RemoteTriggersEnabled ? Plugin.ButtonColor_Green : Color.white;
 
-            InitPopup();
+                _settingsButton.gameObject.AddComponent<ClickHandlerComponent>()
+                    .OnRightClick(e => OpenConfig());
+
+                InitPopup();
+            };
 
             Plugin.OnUpdate += (o, e) =>
             {
+                if (!Plugin.GameHasStarted)
+                    return;
+
                 if (Input.GetKeyDown(KeyCode.F10))
                 {
                     if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))

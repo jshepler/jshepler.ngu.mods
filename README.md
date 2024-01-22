@@ -113,6 +113,7 @@ For the URLs, paste the following javascript:
     - over-capped duration (time until no longer over-capped): augs, AT, TM, wandoos, NGUs, beards\*
     - current speed - progress per tick & ticks per bar: augs, AT, TM, wandoos, NGUs, beards
     - time to target: augs, AT, TM, NGUs
+    - banked amounts to: AT, TM, beards
 
     \* I know you don't allocate resources to beards, but the game still calculates progress per tick, which can be used to show a % "allocated" in order to show how much over "cap" the bar is, and to calc/display how long until no longer capped (i.e. how long it will be BB'd) - this helps to project when you won't need beard diggers running to stay BB'd for 24 hour rebirths
         
@@ -132,7 +133,7 @@ For the URLs, paste the following javascript:
 
     current bars: Basic Training, Augments, Advanced Training, Time Machine, Blood Magic Rituals, Wandoos, NGUs, Hacks
 
-32. alt-shift-click enables auto-allocate on multiple bars: all ngu enery, all ngu magic, augment+upgrade pair, basic training offense/defense pair (if sync training enabled)
+32. alt-shift-click enables auto-allocate on multiple bars: all ngu energy, all ngu magic, augment+upgrade pair, basic training offense/defense pair (if sync training enabled), TM pair, wandoows pair
 
 33. directly modify loadouts without having to change currently equipped gear:
 
@@ -336,6 +337,8 @@ For the URLs, paste the following javascript:
 
     (ignores boss kills - nuking 50+ bosses generates way too many toasts)
 
+    options to disable this mod or to change orientation (top-down or bottom-up)
+
 84. evenly split resources between selected wishes
 
     alt-click to select multiple wishes (up to max wish slots)
@@ -344,7 +347,8 @@ For the URLs, paste the following javascript:
 
 85. improved ITOPOD description (zone tooltip)
     - cleaned up the text
-    - added time to next PP
+    - added time to next PP/AP/EXP/guff
+    - added PP/hour
     - added max and optimal floors
 
     time to next PP uses 2 calcs: one for when floor \<= optimal floor and another > optimal floor
@@ -394,23 +398,23 @@ For the URLs, paste the following javascript:
 
 100. hold alt when viewing an item's tooltip to see a list of where that item drops
 
-101. appends inventory counter to the "INVENTORY" label above inventory grid
+101. highlight currently equipped loadout button on inventory screen
 
-102. highlight currently equipped loadout button on inventory screen
+102. options to enable/disable each of the 3 allocators (defaults to disabled)
 
-103. options to enable/disable each of the 3 allocators (defaults to disabled)
-
-104. when right-clicking an accessory, it will get equipped in the first open slot
+103. when right-clicking an accessory, it will get equipped in the first open slot
 
      order follows same order as auto merge/boost, described in [the wiki](https://ngu-idle.fandom.com/wiki/Inventory#AutoMerge_&_AutoBoost)
 
-105. save pruning: when an autosave or quicksave happens, saves older than DaysToKeep (in cfg file) are deleted
+104. save pruning: when an autosave or quicksave happens, saves older than DaysToKeep (in cfg file) are deleted
 
      defaults to being disabled, edit cfg file to change DaysToKeep from 0 to something else
 
-106. right-click the `Adventure` button to change to highest zone - same as right-clicking the right-arrow button on the Adventure page
+105. right-click the `Adventure` button to change to highest zone - same as right-clicking the right-arrow button on the Adventure page
 
-107. right-click the `Loadouts` button to toggle "mark used" - similar to GO's "mark unused", but highlights items that are in any loadout
+106. right-click the `Loadouts` button to toggle "mark used" - similar to GO's "mark unused", but highlights items that are in any loadout
+
+107. adds support for my [ratio tool](https://jshepler.github.io/) to import base EMR3 directly from NGU
 
 108. GO ([gear optimizer](https://gmiclotte.github.io/gear-optimizer)) integration:
 - transfer loadouts from GO to NGU
@@ -420,4 +424,19 @@ For the URLs, paste the following javascript:
 
     **requires adding bookmarklets to your browser - see [GO integration bookmarklets] above**
 
-109. adds support for my [ratio tool](https://jshepler.github.io/) to import base EMR3 directly from NGU
+109. adds dual-wield effectiveness to the second weaopon slot's item tooltip
+
+110. auto-allocation of mayo generators - hold alt key when on cards screen to change the "CAST", "PROTECT", "YEET" buttons to:
+  - OFF: disable auto-allocation of mayo generators
+  - LOW: runs 1 or more generators only on lowest mayo amounts
+  - ALL: runs all generators in order of lowest to highest mayo amounts
+
+111. options to replace the images for: default player portrait, default daycare kitty, troll kitty
+
+112. right-click on zone forward (right-arrow) button to advance to the zone marked as the "autoadvancer" zone from the "Adventure Advancer" AP purchase
+
+113. adds titan bonus exp kills remaining (from perk 34) to zone drop table tooltip
+
+114. shift-clicking the "-" button to remove a resource from a bar will remove all of the resource, ignoring the "Input" field
+
+115. when using the "buy all custom EMR3" mod, right-click instead of left-click to spend all exp (in multiples of the custom purchase) similar to right-clicking perks and quirks

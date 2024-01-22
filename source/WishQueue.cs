@@ -24,7 +24,7 @@ namespace jshepler.ngu.mods
             Plugin.OnPreSave += (o, e) => ModSave.Data.WishQueue = Queue;
             Plugin.OnUpdate += (o, e) =>
             {
-                if (e.Character.InMenu(Menu.Wishes) && Input.GetKeyDown(KeyCode.Q))
+                if (Plugin.Character.InMenu(Menu.Wishes) && Input.GetKeyDown(KeyCode.Q))
                 {
                     _popup.Toggle();
                 }
@@ -40,12 +40,12 @@ namespace jshepler.ngu.mods
             if (Queue.Contains(id))
             {
                 Queue.Remove(id);
-                __instance.tooltip.showOverrideTooltip($"removed wishId {id} from queue", 1);
+                Plugin.ShowOverrideNotification($"removed wishId {id} from queue", 1);
             }
             else
             {
                 Queue.Add(id);
-                __instance.tooltip.showOverrideTooltip($"added wishId {id} to queue", 1);
+                Plugin.ShowOverrideNotification($"added wishId {id} to queue", 1);
             }
 
             return false;

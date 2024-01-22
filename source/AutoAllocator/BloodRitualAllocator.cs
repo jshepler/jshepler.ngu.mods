@@ -85,6 +85,9 @@ namespace jshepler.ngu.mods.AutoAllocator
         private static void BloodMagicController_removeMagic_postfix(BloodMagicController __instance)
         {
             Instance[__instance.id] = false;
+
+            if (Input.GetKey(KeyCode.LeftShift))
+                __instance.removeAllMagic();
         }
     }
 }

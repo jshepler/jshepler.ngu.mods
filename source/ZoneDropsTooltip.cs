@@ -179,7 +179,8 @@ namespace jshepler.ngu.mods
 
                     case (int)Items.Exp:
                         var exp = isTitan ? Evaluators.TitanExp(_zoneId) : Plugin.Character.checkExpAdded(idc.BaseAmount);
-                        text += $"{_number(exp)} EXP ({_number(idc.BaseAmount)} base)";
+                        var bonusKillsRemaining = isTitan ? ((Plugin.Character.adventure.itopod.perkLevel[34] * 3) - Evaluators.TitanKills(_zoneId)) : 0;
+                        text += $"{_number(exp)} EXP ({_number(idc.BaseAmount)} base){(isTitan ? $"\n\t({(bonusKillsRemaining < 0 ? 0 : bonusKillsRemaining)} bonus exp kills left)" : string.Empty)}";
                         break;
 
                     default:

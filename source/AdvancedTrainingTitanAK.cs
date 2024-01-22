@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
 using HarmonyLib;
@@ -33,19 +34,18 @@ namespace jshepler.ngu.mods
         private static float totalDefWithoutAdvDef;
         private static float totalRegenWithoutAdvDef;
 
+        [HarmonyPostfix, HarmonyPatch(typeof(ButtonShower), "Start")]
+        private static void ButtonShower_showTitanTimer_Start(ButtonShower __instance)
+        {
+            character = __instance.character;
+            advancedTraining = character.advancedTrainingController;
+        }
+
         [HarmonyPostfix, HarmonyPatch(typeof(ButtonShower), "showTitanTimer")]
         private static void ButtonShower_showTitanTimer_postfix(ButtonShower __instance, ref string ___message)
         {
-            var advButton = __instance.adventure;
-            if (!advButton.interactable) return;
-
-            if (string.IsNullOrWhiteSpace(___message)) return;
-
-            if (character == null)
-            {
-                character = __instance.character;
-                advancedTraining = character.advancedTrainingController;
-            }
+            if (!Plugin.GameHasStarted || __instance.adventure.interactable == false || string.IsNullOrWhiteSpace(___message))
+                return;
 
             totalPowerWithoutAdvPower = character.totalAdvAttack() / (advancedTraining.adventurePowerBonus(0) + 1f);
             totalDefWithoutAdvDef = character.totalAdvDefense() / (advancedTraining.adventureToughnessBonus(0) + 1f);
@@ -252,7 +252,6 @@ namespace jshepler.ngu.mods
             }
 
             if (sb.Length > 0)
-                //if (texts.Any())
             {
                 ___message += $"\n\n<b>Adv. Training needed to autokill Titans:</b>{sb}";
                 __instance.tooltip.showTooltip(___message);

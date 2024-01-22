@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using HarmonyLib;
+﻿using HarmonyLib;
 using UnityEngine;
 
 namespace jshepler.ngu.mods
@@ -18,24 +13,26 @@ namespace jshepler.ngu.mods
         {
             int numberKey;
 
-            if (Input.GetKeyDown(KeyCode.Alpha1))
+            if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1))
                 numberKey = 1;
-            else if (Input.GetKeyDown(KeyCode.Alpha2))
+            else if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2))
                 numberKey = 2;
-            else if (Input.GetKeyDown(KeyCode.Alpha3))
+            else if (Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3))
                 numberKey = 3;
-            else if (Input.GetKeyDown(KeyCode.Alpha4))
+            else if (Input.GetKeyDown(KeyCode.Alpha4) || Input.GetKeyDown(KeyCode.Keypad4))
                 numberKey = 4;
-            else if (Input.GetKeyDown(KeyCode.Alpha5))
+            else if (Input.GetKeyDown(KeyCode.Alpha5) || Input.GetKeyDown(KeyCode.Keypad5))
                 numberKey = 5;
-            else if (Input.GetKeyDown(KeyCode.Alpha6))
+            else if (Input.GetKeyDown(KeyCode.Alpha6) || Input.GetKeyDown(KeyCode.Keypad6))
                 numberKey = 6;
-            else if (Input.GetKeyDown(KeyCode.Alpha7))
+            else if (Input.GetKeyDown(KeyCode.Alpha7) || Input.GetKeyDown(KeyCode.Keypad7))
                 numberKey = 7;
-            else if (Input.GetKeyDown(KeyCode.Alpha8))
+            else if (Input.GetKeyDown(KeyCode.Alpha8) || Input.GetKeyDown(KeyCode.Keypad8))
                 numberKey = 8;
-            else if (Input.GetKeyDown(KeyCode.Alpha9))
+            else if (Input.GetKeyDown(KeyCode.Alpha9) || Input.GetKeyDown(KeyCode.Keypad9))
                 numberKey = 9;
+            else if (Input.GetKeyDown(KeyCode.Alpha0) || Input.GetKeyDown(KeyCode.Keypad0))
+                numberKey = 10;
             else
                 return true;
 
@@ -87,6 +84,23 @@ namespace jshepler.ngu.mods
                     {
                         __instance.wishesController.changePage(numberKey - 1);
                         return false;
+                    }
+
+                    return true;
+
+                case Menu.Perks:
+                    if (numberKey < 4)
+                    {
+                        __instance.adventureController.itopod.changePage(numberKey - 1);
+                        return false;
+                    }
+
+                    return true;
+
+                case Menu.Quirks:
+                    if (numberKey < 3)
+                    {
+                        __instance.beastQuestPerkController.changePage(numberKey - 1);
                     }
 
                     return true;

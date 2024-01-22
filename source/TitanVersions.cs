@@ -19,7 +19,7 @@ namespace jshepler.ngu.mods
             Plugin.OnSaveLoaded += (o, e) =>
             {
                 if(_popup == null)
-                    _popup = new TitanVersionsPopup(e.Character);
+                    _popup = new TitanVersionsPopup(Plugin.Character);
             };
         }
 

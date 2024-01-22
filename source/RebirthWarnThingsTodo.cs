@@ -9,16 +9,16 @@ namespace jshepler.ngu.mods
     [HarmonyPatch]
     internal class RebirthWarnThingsTodo
     {
-        private static Character character;
         private static Button _button;
 
-        [HarmonyPostfix, HarmonyPatch(typeof(Character), "Start")]
+        [HarmonyPostfix, HarmonyPatch(typeof(Rebirth), "Awake")]
         private static void Character_Start_postfix(Character __instance)
         {
-            character = __instance;
-            _button = GameObject.Find("Canvas/Rebirth Canvas/Rebirth Menu/Rebirth Button").GetComponent<Button>();
-            
-            __instance.StartCoroutine(SetRebirthColor());
+            Plugin.OnGameStart += (o, e) =>
+            {
+                _button = GameObject.Find("Canvas/Rebirth Canvas/Rebirth Menu/Rebirth Button").GetComponent<Button>();
+                __instance.StartCoroutine(SetRebirthColor());
+            };
         }
 
         private static IEnumerator SetRebirthColor()
@@ -34,6 +34,8 @@ namespace jshepler.ngu.mods
 
         private static bool HaveThingsTodo()
         {
+            var character = Plugin.Character;
+
             if (character.settings.pitUnlocked
                 && !character.pit.tossedGold
                 && character.realGold > 1000.0

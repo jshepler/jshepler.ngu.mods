@@ -36,6 +36,10 @@ namespace jshepler.ngu.mods
 
                 foreach (var id in loadoutDiggers)
                 {
+                    // ignore those at max
+                    if (diggers[id].curLevel >= diggers[id].maxLevel)
+                        continue;
+
                     var drain = __instance.drain(id, 1) - __instance.drain(id);
                     if (totalDrain + drain > grossGps)
                         continue;
@@ -60,7 +64,7 @@ namespace jshepler.ngu.mods
 
             activeDiggers.AddRange(loadoutDiggers);
 
-            __instance.tooltip.showTooltip("Saved diggers have been capped!", 2f);
+            Plugin.ShowNotification("Saved diggers have been capped!", 2f);
             __instance.refreshMenu();
 
             return false;

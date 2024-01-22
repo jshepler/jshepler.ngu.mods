@@ -26,7 +26,7 @@ namespace jshepler.ngu.mods
 
             Plugin.OnUpdate += (o, e) =>
             {
-                if (!e.Character.InMenu(Menu.Wishes))
+                if (!Plugin.Character.InMenu(Menu.Wishes))
                     return;
 
                 if (Input.GetKeyDown(KeyCode.LeftArrow))

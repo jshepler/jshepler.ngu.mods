@@ -14,13 +14,13 @@ namespace jshepler.ngu.mods
 
             Plugin.OnUpdate += (o, e) =>
             {
-                if (!e.Character.InMenu(Menu.Wishes))
+                if (!Plugin.Character.InMenu(Menu.Wishes))
                     return;
 
                 if (Input.GetKeyDown(KeyCode.C) && Input.GetKey(KeyCode.LeftControl))
                 {
-                    copiedWish = e.Character.wishes.wishes[__instance.curSelectedWish];
-                    __instance.tooltip.showOverrideTooltip("wish resource allocations copied", 1);
+                    copiedWish = Plugin.Character.wishes.wishes[__instance.curSelectedWish];
+                    Plugin.ShowOverrideNotification("wish resource allocations copied", 1);
                 }
 
                 if (Input.GetKeyDown(KeyCode.V) && Input.GetKey(KeyCode.LeftControl))
@@ -28,7 +28,7 @@ namespace jshepler.ngu.mods
                     if (copiedWish == null)
                         return;
 
-                    var character = e.Character;
+                    var character = Plugin.Character;
                     var id = __instance.curSelectedWish;
                     var wish = character.wishes.wishes[id];
 

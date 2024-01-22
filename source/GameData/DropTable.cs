@@ -440,7 +440,7 @@ namespace jshepler.ngu.mods.GameData
                 }
 
                 , MacGuffinDrop = new MacGuffinDrop(Items.Guff_DropChance)
-                , QuestItemDrop = new QuestItemDrop(Items.Quest_Spittoon, ItemSets.Bread)
+                , QuestItemDrop = new QuestItemDrop(Items.Quest_Spittoon, ItemSets.Beardverse)
             });
 
             // 16 - T5
