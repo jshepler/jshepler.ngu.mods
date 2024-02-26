@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -43,16 +44,17 @@ namespace jshepler.ngu.mods
                     _energyPurchases.refresh();
             };
 
-            var buyCustomAll = Traverse.Create(__instance).Method("buyCustomAll");
+            var buyCustomAllMethod = typeof(EnergyPurchases).GetMethod("buyCustomAll", BindingFlags.Instance | BindingFlags.NonPublic);
+            var buyCustomAll = () => buyCustomAllMethod.Invoke(__instance, []);
+
             GameObject.Find("Canvas/Exp Energy Canvas /Exp Menu 1/Scroll Rect/Content/Custom All Button")
                 .AddComponent<ClickHandlerComponent>()
                 .OnRightClick(e =>
                 {
-                    if (!_shiftDown)
-                        return;
+                    var cost = _shiftDown ? _customAllAllCost : __instance.customAllCost();
 
-                    while (Plugin.Character.realExp >= _customAllAllCost)
-                        buyCustomAll.GetValue();
+                    while (Plugin.Character.realExp >= cost)
+                        buyCustomAll();
                 });
         }
 

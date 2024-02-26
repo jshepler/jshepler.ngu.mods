@@ -9,6 +9,7 @@ namespace jshepler.ngu.mods
     internal class AutoManualMajorQuesting
     {
         private static Character _character;
+        private static BeastQuestController _controller;
         
         private static bool _enabled
         {
@@ -32,6 +33,7 @@ namespace jshepler.ngu.mods
         private static void ButtonShower_start_postfix(ButtonShower __instance)
         {
             _character = __instance.character;
+            _controller = _character.beastQuestController;
 
             __instance.beast.gameObject.AddComponent<ClickHandlerComponent>()
                 .OnRightClick(e =>
@@ -99,7 +101,7 @@ namespace jshepler.ngu.mods
             _character.inventoryController.dumpAllIntoQuest(quest.questID);
 
             if (quest.curDrops >= quest.targetDrops)
-                _character.beastQuestController.startOrCompleteQuest();
+                _controller.startOrCompleteQuest();
         }
 
         private static void StartManualMajorQuest()
@@ -114,28 +116,32 @@ namespace jshepler.ngu.mods
             if (quest.curBankedQuests < 1)
             {
                 if (_character.settings.useMajorQuests)
-                    _character.beastQuestController.toggleMajorQuestUse();
+                    _controller.toggleMajorQuestUse();
 
-                _character.beastQuestController.startQuest();
+                _controller.startQuest();
 
                 if (!quest.idleMode)
-                    _character.beastQuestController.toggleIdleMode();
+                    _controller.toggleIdleMode();
 
                 _enabled = false;
                 return;
             }
 
             if (quest.inQuest)
-                _character.beastQuestController.skipQuest();
+                _controller.skipQuest();
 
             if (quest.idleMode)
-                _character.beastQuestController.toggleIdleMode();
+                _controller.toggleIdleMode();
 
             if (!_character.settings.useMajorQuests)
-                _character.beastQuestController.toggleMajorQuestUse();
+                _controller.toggleMajorQuestUse();
 
-            _character.beastQuestController.startQuest();
-            _character.beastQuestController.refreshMenu();
+            _controller.startQuest();
+
+            if (!_character.beastQuest.usedButter && _character.arbitrary.beastButterCount > 0 && Options.AutoQuesting.UseButter.Value == true)
+                _controller.tryUseButter();
+            
+            _controller.refreshMenu();
         }
 
         private static bool InManualQuest()

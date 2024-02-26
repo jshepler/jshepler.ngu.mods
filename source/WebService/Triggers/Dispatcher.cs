@@ -34,7 +34,37 @@ namespace jshepler.ngu.mods.WebService.Triggers
             }
         }
 
-        private static Action autoBoost()
+        internal static Action HandleTwitchReward(Twitch.Reward reward)
+        {
+            if (!TriggerConfig.RemoteTriggersEnabled)
+                return () => Plugin.ShowOverrideNotification("remote triggers disabled");
+
+            if (reward.title == Options.Twitch.RewardTriggers.Merge.Value)
+                return autoMerge();
+
+            if (reward.title == Options.Twitch.RewardTriggers.Boost.Value)
+                return autoBoost();
+
+            if (reward.title == Options.Twitch.RewardTriggers.MergeBoost.Value)
+                return () =>
+                {
+                    autoMerge()();
+                    autoBoost()();
+                };
+
+            if (reward.title == Options.Twitch.RewardTriggers.FightBoss.Value)
+                return fightBoss();
+
+            if (reward.title == Options.Twitch.RewardTriggers.TossGold.Value)
+                return tossGold();
+
+            if (reward.title == Options.Twitch.RewardTriggers.Kitty.Value)
+                return kitty();
+
+            return () => Plugin.ShowOverrideNotification($"TWITCH: no match found for \"{reward.title}\"");
+        }
+
+        internal static Action autoBoost()
         {
             if(!TriggerConfig.AutoBoostEnabled)
                 return () => Plugin.ShowOverrideNotification("trigger: autoboost disabled");
@@ -46,7 +76,7 @@ namespace jshepler.ngu.mods.WebService.Triggers
             };
         }
 
-        private static Action autoMerge()
+        internal static Action autoMerge()
         {
             if(!TriggerConfig.AutoMergeEnabled)
                 return () => Plugin.ShowOverrideNotification("trigger: automerge disabed");
@@ -58,7 +88,7 @@ namespace jshepler.ngu.mods.WebService.Triggers
             };
         }
 
-        private static Action tossGold()
+        internal static Action tossGold()
         {
             if (!TriggerConfig.TossGoldEnabled)
                 return () => Plugin.ShowOverrideNotification("trigger: toss gold disabed");
@@ -79,7 +109,7 @@ namespace jshepler.ngu.mods.WebService.Triggers
             };
         }
 
-        private static Action fightBoss()
+        internal static Action fightBoss()
         {
             if (!TriggerConfig.FightBossEnabled)
                 return () => Plugin.ShowOverrideNotification("trigger: fight boss disabled");
@@ -103,7 +133,7 @@ namespace jshepler.ngu.mods.WebService.Triggers
             };
         }
 
-        private static Action kitty()
+        internal static Action kitty()
         {
             if (!TriggerConfig.KittyEnabled)
                 return () => Plugin.ShowOverrideNotification("trigger: kitty ignored - disabled");

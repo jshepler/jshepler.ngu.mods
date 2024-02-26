@@ -92,11 +92,10 @@ namespace jshepler.ngu.mods
         [HarmonyPrefix, HarmonyPatch(typeof(LoadoutController), "OnPointerClick")]
         private static bool LoadoutController_OnPointerClick_prefix(PointerEventData eventData, LoadoutController __instance)
         {
-            if (_slotBeingAssigned == null || eventData.button != PointerEventData.InputButton.Left) return true;
+            if (_slotBeingAssigned == null || eventData.button != PointerEventData.InputButton.Left)
+                return true;
 
-            if (__instance.id == _slotBeingAssigned.id
-                // or one accessory slot to a different accessory slot
-                || (_acc.Contains(__instance.id) && _acc.Contains(_slotBeingAssigned.id)))
+            if(__instance.equip().type == _slotBeingAssigned.GetEqupmentType())
             {
                 RemoveDupes(_slotBeingAssigned.loadoutID, __instance.id);
                 _slotBeingAssigned.SetInventorySlotId(__instance.id);

@@ -50,7 +50,8 @@ namespace jshepler.ngu.mods
             _zoneId = __instance.zone;
             if (Options.DropTableTooltip.Enabled.Value == false
                 || !Input.GetKey(KeyCode.LeftAlt)
-                || _zoneId >= DropTable.Zones.Count)
+                || _zoneId >= DropTable.Zones.Count
+                || _zoneId < 0)
                 return true;
 
             var zone = DropTable.Zones[_zoneId];

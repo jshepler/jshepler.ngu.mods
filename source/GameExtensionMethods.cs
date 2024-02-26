@@ -299,8 +299,11 @@ namespace jshepler.ngu.mods
 
         internal static long CeilToLong(this float num)
         {
+            if (num >= long.MaxValue)
+                return long.MaxValue;
+
             var l = (long)num;
-            if (num > l)
+            if (num > l && l < long.MaxValue)
                 l++;
 
             return l;

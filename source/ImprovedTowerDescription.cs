@@ -118,22 +118,20 @@ namespace jshepler.ngu.mods
 
             _tooltipText = $"\n\n<b>PP Progress:</b> {currentProgress:#,##0} / {MAXPROGRESS:#,##0} ({currentProgress / MAXPROGRESS * 100f:##0.00}%)"
                 + $"\n\n<b>Seconds per kill:</b> {(secondsPerKill == 0.0 ? "????" : NumberOutput.timeOutput(secondsPerKill))} ({(isEstimated ? "estimated" : currentFloor < optimalFloor ? "sub-optimal" : "optimal")})"
-                + $"\n<b>Kills to next PP:</b> {killsRemaining} in {(secondsRemaining == 0.0 ? "????" : NumberOutput.timeOutput(secondsRemaining))}"
-                + $"\n\n<b>Kills per PP:</b> {killsPerPP} taking {(secondsPerPP == 0 ? "????" : NumberOutput.timeOutput(secondsPerPP))}"
-                + $"\n<b>PP per hour:</b> {ppPerHour:#,##0.##}";
+                + (killsPerPP == 1 ? $"\n<b>PP per kill:</b> {ppPerKill:#,##0.00}" : $"\n<b>Kills per PP:</b> {killsPerPP} taking {(secondsPerPP == 0 ? "????" : NumberOutput.timeOutput(secondsPerPP))}")
+                + $"\n<b>PP per hour:</b> {ppPerHour:#,##0.##}"
+                + $"\n\n<b>Kills to next PP:</b> {killsRemaining} in {(secondsRemaining == 0.0 ? "????" : NumberOutput.timeOutput(secondsRemaining))}";
 
 
             var tier = character.adventureController.lootDrop.itopodTier(currentFloor);
             var killsToNextAP = controller.lootDrop.killsUntilAP(currentFloor);
-            _tooltipText += $"\n\n<b>Kills to next AP{(tier > 3 ? "/EXP" : string.Empty)}:</b> {killsToNextAP} in {(secondsPerKill == 0.0 ? "???" : NumberOutput.timeOutput(killsToNextAP * secondsPerKill))}";
-
+            _tooltipText += $"\n<b>Kills to next AP{(tier > 3 ? "/EXP" : string.Empty)}:</b> {killsToNextAP} in {(secondsPerKill == 0.0 ? "???" : NumberOutput.timeOutput(killsToNextAP * secondsPerKill))}";
 
             if (character.achievements.achievementComplete[145] && character.adventure.itopod.perkLevel[68] >= 1)
             {
                 var killsToNextGuff = controller.lootDrop.killsUntilMacguffin();
                 _tooltipText += $"\n<b>Kills to next MacGuffin:</b> {killsToNextGuff} in {(secondsPerKill == 0.0 ? "???" : NumberOutput.timeOutput(killsToNextGuff * secondsPerKill))}";
             }
-
 
             _tooltipText += $"\n\n<b>Max Floor: </b> {maxFloor}"
                 + $"\n<b>Optimal Floor:</b> {optimalFloor}";

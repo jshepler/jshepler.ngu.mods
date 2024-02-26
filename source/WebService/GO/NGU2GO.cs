@@ -11,6 +11,16 @@ namespace jshepler.ngu.mods.WebService.GO
 
             switch (resource)
             {
+                case "augstats":
+                    json = Augments.BuildHackStats();
+                    context.Response.SendResponse(HttpStatusCode.OK, json, ContentTypes.JSON);
+                    return () => Plugin.ShowOverrideNotification("NGU2GO: aug stats");
+
+                case "ngustats":
+                    json = NGUs.BuildNGUStats();
+                    context.Response.SendResponse(HttpStatusCode.OK, json, ContentTypes.JSON);
+                    return () => Plugin.ShowOverrideNotification("NGU2GO: ngu stats");
+
                 case "hacks":
                     json = Hacks.BuildHackStats();
                     context.Response.SendResponse(HttpStatusCode.OK, json, ContentTypes.JSON);

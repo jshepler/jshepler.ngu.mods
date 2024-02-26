@@ -5,13 +5,13 @@ namespace jshepler.ngu.mods.GameData
     internal class DropGroup
     {
         internal DropGroup(params DropItems[] items) : this(0f, items) { }
-        internal DropGroup(float baseGold, params DropItems[] items)
+        internal DropGroup(double baseGold, params DropItems[] items)
         {
             BaseGold = baseGold;
             Items = items;
         }
 
-        internal float BaseGold;
+        internal double BaseGold;
         internal DropItems[] Items;
     }
 
@@ -20,7 +20,7 @@ namespace jshepler.ngu.mods.GameData
         internal int EnemyId;
 
         internal EnemyDropGroup(Enemies enemy, params DropItems[] items) : this(enemy, 0f, items) { }
-        internal EnemyDropGroup(Enemies enemy, float baseGold, params DropItems[] items) : base(baseGold, items)
+        internal EnemyDropGroup(Enemies enemy, double baseGold, params DropItems[] items) : base(baseGold, items)
         {
             EnemyId = (int)enemy;
         }

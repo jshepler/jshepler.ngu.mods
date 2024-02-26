@@ -85,10 +85,10 @@ namespace jshepler.ngu.mods.AutoAllocator
                 return true;
 
             var id = __instance.id;
+            var wandoosOn = _character.settings.wandoos98On;
 
             if (Input.GetKey(KeyCode.LeftShift) && Options.Allocators.AutoAllocatorEnabled.Value == true)
             {
-                var wandoosOn = _character.settings.wandoos98On;
 
                 if (Input.GetKey(KeyCode.LeftAlt))
                     Enumerable.Range(0, wandoosOn ? 5 : 3).Do(i => Instance[i] = !Instance[i]);
@@ -101,8 +101,16 @@ namespace jshepler.ngu.mods.AutoAllocator
 
             if (Input.GetKey(KeyCode.LeftControl) && Options.Allocators.OverCapAllocatorEnabled.Value == true)
             {
-                Instance[id] = false;
-                OverCap(id);
+                if (Input.GetKey(KeyCode.LeftAlt))
+                {
+                    Instance.DisableAll();
+                    Enumerable.Range(0, wandoosOn ? 5 : 3).Do(i => OverCap(i));
+                }
+                else
+                {
+                    Instance[id] = false;
+                    OverCap(id);
+                }
 
                 return false;
             }

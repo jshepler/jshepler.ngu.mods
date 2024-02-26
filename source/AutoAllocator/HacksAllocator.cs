@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.UI;
@@ -111,7 +113,11 @@ namespace jshepler.ngu.mods.AutoAllocator
 
             if (Input.GetKey(KeyCode.LeftShift) && Options.Allocators.AutoAllocatorEnabled.Value == true)
             {
-                Instance[id] = !Instance[id];
+                if (Input.GetKey(KeyCode.LeftAlt))
+                    Enumerable.Range(0, NUMBER_OF_HACKS - 1).Do(i => Instance[i] = !Instance[i]); // -1 to not count THE END hack
+                else
+                    Instance[id] = !Instance[id];
+
                 return false;
             }
 

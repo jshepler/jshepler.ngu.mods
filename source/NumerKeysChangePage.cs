@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace jshepler.ngu.mods
 {
@@ -11,6 +12,10 @@ namespace jshepler.ngu.mods
         [HarmonyPrefix, HarmonyPatch(typeof(Character), "Update")]
         private static bool Character_Update_prefix(Character __instance)
         {
+            // if typing in a text box...
+            if (EventSystem.current.currentSelectedGameObject != null)
+                return true;
+
             int numberKey;
 
             if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1))

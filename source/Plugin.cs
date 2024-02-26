@@ -46,6 +46,11 @@ namespace jshepler.ngu.mods
 
         private void Awake()
         {
+            // prevents the bepinex manager object (i.e. this plugin instance) from being destroyed after Awake()
+            // https://github.com/aedenthorn/PlanetCrafterMods/issues/7
+            // not needed for all games, but I'm not currently aware of anything that it would hurt
+            this.gameObject.hideFlags = HideFlags.HideAndDontSave;
+            
             Log = base.Logger;
             Options.Init(base.Config);
 
@@ -214,7 +219,7 @@ namespace jshepler.ngu.mods
                 {
                     var tag = data["tag_name"].Value;
                     if (!string.IsNullOrWhiteSpace(tag) && tag != PluginInfo.PLUGIN_VERSION)
-                        ShowOverrideNotification($"NEW VERSION of jshepler.ngu.mods\nv{tag} available for download", 10f);
+                        ShowOverrideNotification($"<b><color=blue>jshepler.ngu.mods</color></b>\n\nCurrent Version: <b>{PluginInfo.PLUGIN_VERSION}</b>\nLatest Version: <b>{tag}</b>", 10f);
                 }
 
                 yield return _waitForOneHour;

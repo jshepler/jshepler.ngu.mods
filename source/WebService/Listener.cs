@@ -13,6 +13,7 @@ namespace jshepler.ngu.mods.WebService
     {
         internal const string PlainText = "text/plain";
         internal const string JSON = "application/json";
+        internal const string HTML = "text/html";
     }
 
     [HarmonyPatch]
@@ -98,6 +99,10 @@ namespace jshepler.ngu.mods.WebService
                 case "kitty":
                     _actions.Enqueue(Triggers.Dispatcher.HandleRequest(context, segments[0]));
                     context.Response.SendResponse(HttpStatusCode.OK);
+                    break;
+
+                case "twitch":
+                    _actions.Enqueue(Twitch.API.HandleAuthRedirectRequest(context));
                     break;
 
                 default:

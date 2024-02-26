@@ -11,6 +11,7 @@ namespace jshepler.ngu.mods
             Options.Allocators.RatioSplitAllocatorEnabled = Config.Bind("Allocators", "RatioSplitAllocator.Enabled", false, "splits resource between bars, using their ratios, to keep even leveling speed");
 
             Options.AutoHarvest.Enabled = Config.Bind("AutoHarvest", "Enabled", false, "enable auto harvest/eat fruits when fully grown (max tier)");
+            Options.AutoQuesting.UseButter = Config.Bind("AutoQuesting", "UseButter", false, "if enabled, when automatically staring a manual major quest, use butter if available");
             Options.AutoSnipe.TargetZone = Config.Bind("AutoSnipe", "TargetZone", 0, "used to target specific enemy in specific zone, other zones always snipe bosses; enter zone number (from wiki: https://ngu-idle.fandom.com/wiki/Adventure_Mode#Zones)");
             Options.AutoSnipe.TargetEnemy = Config.Bind("AutoSnipe", "TargetEnemy", 0, "used to target specific enemy in specific zone; enter enemy number (from bestiary), 0 = bosses");
 
@@ -37,6 +38,21 @@ namespace jshepler.ngu.mods
             Options.RemoteTriggers.TossGold.Enabled = Config.Bind("RemoteTriggers.TossGold", "Enabled", true, "enables toss gold trigger");
             Options.RemoteTriggers.FightBoss.Enabled = Config.Bind("RemoteTriggers.FightBoss", "Enabled", true, "enables fight boss trigger");
             Options.RemoteTriggers.Kitty.Enabled = Config.Bind("RemoteTriggers.Kitty", "Enabled", true, "enables kitty trigger");
+
+            Options.Twitch.Enabled = Config.Bind("Twitch", "Enabled", false, "Enables twitch integration");
+            Options.Twitch.AutoConnect = Config.Bind("Twitch", "AutoConnect", false, "Connects to twitch when game starts");
+            Options.Twitch.ClientId = Config.Bind("Twitch", "ClientId", "", "The client id for the registered twitch application (see README)");
+            Options.Twitch.ClientSecret = Config.Bind("Twitch", "ClientSecret", "", "The client secret from the registered twitch applicatino (see README)");
+            Options.Twitch.AppAccessToken = Config.Bind("Twitch", "AppAccessToken", "", "The stored access token for the app - set automatically");
+            Options.Twitch.UserAccessToken = Config.Bind("Twitch", "UserAccessToken", "", "The stored access token for the current user - set automatically");
+            Options.Twitch.UserRefreshToken = Config.Bind("Twitch", "UserRefreshToken", "", "The stored refresh token for the current user - set automatically");
+
+            Options.Twitch.RewardTriggers.Merge = Config.Bind("Twitch.RewardTriggers", "Merge", "", "Custom reward name to trigger merge");
+            Options.Twitch.RewardTriggers.Boost = Config.Bind("Twitch.RewardTriggers", "Boost", "", "Custom reward name to trigger boost");
+            Options.Twitch.RewardTriggers.MergeBoost = Config.Bind("Twitch.RewardTriggers", "MergeBoost", "", "Custom reward name to trigger merge+boost");
+            Options.Twitch.RewardTriggers.FightBoss = Config.Bind("Twitch.RewardTriggers", "FightBoss", "", "Custom reward name to trigger boss fight");
+            Options.Twitch.RewardTriggers.TossGold = Config.Bind("Twitch.RewardTriggers", "TossGold", "", "Custom reward name to toss gold into money pit");
+            Options.Twitch.RewardTriggers.Kitty = Config.Bind("Twitch.RewardTriggers", "Kitty", "", "Custom reward name to trigger troll kitty event");
         }
 
         internal static class RemoteTriggers
@@ -127,6 +143,32 @@ namespace jshepler.ngu.mods
         internal static class CheckForNewVersion
         {
             public static ConfigEntry<bool> Enabled;
+        }
+
+        internal static class Twitch
+        {
+            internal static ConfigEntry<bool> Enabled;
+            internal static ConfigEntry<bool> AutoConnect;
+            internal static ConfigEntry<string> ClientId;
+            internal static ConfigEntry<string> ClientSecret;
+            internal static ConfigEntry<string> AppAccessToken;
+            internal static ConfigEntry<string> UserAccessToken;
+            internal static ConfigEntry<string> UserRefreshToken;
+
+            internal static class RewardTriggers
+            {
+                internal static ConfigEntry<string> Merge;
+                internal static ConfigEntry<string> Boost;
+                internal static ConfigEntry<string> MergeBoost;
+                internal static ConfigEntry<string> FightBoss;
+                internal static ConfigEntry<string> TossGold;
+                internal static ConfigEntry<string> Kitty;
+            }
+        }
+
+        internal static class AutoQuesting
+        {
+            internal static ConfigEntry<bool> UseButter;
         }
     }
 }

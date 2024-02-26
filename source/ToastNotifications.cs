@@ -39,11 +39,11 @@ namespace jshepler.ngu.mods
                 _toastsContainer.transform.SetAsFirstSibling();
             };
 
-            Plugin.OnUpdate += (o, e) =>
-            {
-                if (Input.GetKeyDown(KeyCode.F1))
-                    Plugin.ShowOverrideNotification("test toast", 10f);
-            };
+            //Plugin.OnUpdate += (o, e) =>
+            //{
+            //    if (Input.GetKeyDown(KeyCode.F1))
+            //        Plugin.ShowOverrideNotification("test toast", 10f);
+            //};
 
             Plugin.OnFixedUpdate += (o, e) =>
             {
@@ -139,7 +139,7 @@ namespace jshepler.ngu.mods
             yield return null;
             yield return null;
 
-            while (_overflow.Count > 0)
+            while (_overflow.Count > 0 && _baseTooltip != null)
             {
                 var tm = _overflow.Dequeue();
                 ShowNotification(tm);
@@ -193,7 +193,7 @@ namespace jshepler.ngu.mods
             if (_killedBoss && Plugin.Character.bossController.nukeBoss)
                 yield break;
 
-            if (_splashScreenIsOpen)
+            if (_splashScreenIsOpen || _baseTooltip == null)
             {
                 _overflow.Enqueue(tm);
                 yield break;

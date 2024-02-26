@@ -33,16 +33,54 @@ For the URLs, paste the following javascript:
 ## sending loadouts from GO to NGU
 `javascript:fetch("http://localhost:8088/ngu/go2ngu/loadouts",{method:"POST",body:JSON.stringify(appState.savedequip)});`
 
+This will find matching loadouts in NGU (where loadout name = GO save slot name) and changes the items to match GO. If you have more than one of that item, it will use the one with the highest level.
+
 ## sending current equipped items from NGU to GO
 `javascript:fetch("http://localhost:8088/ngu/ngu2go/equipped").then(e=>e.json()).then(e=>{let n=appState.savedequip;Object.assign(n.find(e=>"current"==e.name),e),appHandlers.handleSettings("savedequip",n)});`
 
-(note that if you want to use a different name than "current" in GO, edit the above to specificy a different slot name)
+If you have a save slot named `current` in GO, that will be updated to match your currently equipped gear. If you want to use a different name than `current` in GO, edit the above to specificy a different slot name.
+
+## sending aug stats from NGU to GO
+`javascript:fetch("http://localhost:8088/ngu/NGU2GO/augstats").then(t=>t.json()).then(t=>{let s=appState.augstats;Object.assign(s,t),appHandlers.handleSettings("augstats",s)});`
+
+This sends current data from NGU to GO for the `Augments` tab.
+
+## sending ngu stats from NGU to GO
+`javascript:fetch("http://localhost:8088/ngu/NGU2GO/ngustats").then(t=>t.json()).then(t=>{let s=appState.ngustats;Object.assign(s,t),appHandlers.handleSettings("ngustats",s)});`
+
+This sends current data from NGU to GO for the `NGUs` tab.
 
 ## sending hack stats from NGU to GO
 `javascript:fetch("http://localhost:8088/ngu/ngu2go/hacks").then(e=>e.json()).then(e=>{let a=appState.hackstats;a.rpow=e.rpow,a.rcap=e.rcap,a.hackspeed=e.hackspeed;for(let c=0;c<15;c++)a.hacks[c].goal=a.hacks[c].level=e.hacks[c].level,a.hacks[c].reducer=e.hacks[c].reducer;appHandlers.handleSettings("hackstats",a)});`
 
+This sends current hack stats from NGU to GO for the `Hacks` tab.
+
 ## sending hack targets from GO to NGU
 `javascript:fetch("http://localhost:8088/ngu/go2ngu/hacks",{method:"POST",body:JSON.stringify(appState.hackstats.hacks.map(a=>a.goal))});`
+
+This sends the hack goals from GO to NGU which sets hack targets.
+
+# Twitch Integration
+
+## setup
+
+To setup twitch integration, you will need to [register your app](https://dev.twitch.tv/docs/authentication/register-app/):
+- the redirect url MUST be `http://localhost:8088/ngu/twitch/oauth`
+- the client type MUST be `Confidential`
+- the client id and client secret go into the `jshepler.ngu.mods.cfg` file in the `[Twitch]` section
+
+After setting up custom rewards, you can map them to remote triggers in the cfg file, in the `[Twitch.RewardTriggers]` section. ***The reward names in the cfg file must exactly match, i.e. are case-sensitive.***
+
+In game, right-click the gear (settings) button in the lower-left of the screen to bring up the remote triggers config panel - which now includes twitch options at the bottom. Enabling `Twitch Integration` will add a row to show the connection status and buttons to connect/disconnect and reset.
+
+If configured correctly, click the `Connect` button to connect to twitch and start the authorization process. Your default browser should open a new tab asking your to login to twitch and grant permission to for NGU to connect to your channel.
+
+## troubleshooting
+If twitch integration is enabled, the color of the gear icon will change to red if not connected.
+
+If NGU gets disconnected from Twitch, you should just be able to click the `Connect` button to re-connect. If that doesn't work, click the `Reset` button which ditches the current authorization and starts over.
+
+If it continues to stay disconnected, please send me the `...\Steam\steamapps\common\NGU IDLE\BepInEx\LogOutput.log` file. The best way to do this is to DM it to me on discord. I'm on the NGU discord and can be found in the `scripting` or `bug-reports-and-complaints` channels.
 
 # Mods
 (in no partiular order)
@@ -88,6 +126,7 @@ For the URLs, paste the following javascript:
 18. when in the spend exp menu, on the energy tab:
     - shift-clicking the "Buy ALL Custom" button will buy all custom E/M
     - control-shift-clicking the "Buy ALL Custom" button will buy all custom E/M/R3
+    - shift-right-click or control-shift-right-click will repeat buying until not enough EXP
 
     (just holding those keys down will change the button text to indicate this will happen as well as the total EXP cost)
 
@@ -143,7 +182,7 @@ For the URLs, paste the following javascript:
 
     press escape to cancel "selection mode"
 
-34. shift-right-click questing button to toggle automate manual major quest: auto-collect items, auto-complete quest, auto-start new major quest
+34. shift-right-click questing button to toggle automate manual major quest: auto-collect items, auto-complete quest, auto-start new major quest, auto-use butter (option in cfg file)
 
     doesn't automatically switch adventure zone - assumes already in quest zone and the above mod that uses current zone when starting quest
 
@@ -419,10 +458,12 @@ For the URLs, paste the following javascript:
 108. GO ([gear optimizer](https://gmiclotte.github.io/gear-optimizer)) integration:
 - transfer loadouts from GO to NGU
 - transfer current equipped gear from NGU to GO a save slot that's named "current"
+- transfer aug stats from NGU to GO's augments tab (ecap, aug speed, net gps, normal LAC, and normal LSC)
+- transfer ngu stats from NGU to GO's NGUs tab (em cap, em ngu speed, quirks, blue heart, and current levels for all NGUs)
 - transfer hack stats from NGU to GO's hacks tab (rpower, rcap, hack speed, current level and reducer counts for all hacks)
 - transfer hack goals from GO's hacks tab to NGU hacks' targets
 
-    **requires adding bookmarklets to your browser - see [GO integration bookmarklets] above**
+    **requires adding bookmarklets to your browser - see [GO integration bookmarklets](https://github.com/jshepler/jshepler.ngu.mods?tab=readme-ov-file#go-integration-bookmarklets) above**
 
 109. adds dual-wield effectiveness to the second weaopon slot's item tooltip
 
@@ -440,3 +481,11 @@ For the URLs, paste the following javascript:
 114. shift-clicking the "-" button to remove a resource from a bar will remove all of the resource, ignoring the "Input" field
 
 115. when using the "buy all custom EMR3" mod, right-click instead of left-click to spend all exp (in multiples of the custom purchase) similar to right-clicking perks and quirks
+
+116. twitch integration to map custom rewards to remote triggers, read [Twitch Integration](https://github.com/jshepler/jshepler.ngu.mods?tab=readme-ov-file#twitch-integration) above for setup
+
+117. cooking helper:
+- prefixes ingredient names with pair number to see which ingredients are paired
+- suffixes ingredient names with targets (`ingred target`:`pair target`)
+- shift-click the `-` button to reset all ingredients to 0
+- shift-click the `+` button to set optimal levels to all ingredients to give 100% meal efficiency

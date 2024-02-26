@@ -145,6 +145,7 @@ namespace jshepler.ngu.mods
 
             gens.Take(maxActive).Do(m => m.running = true);
             Plugin.Character.cardsController.updateManaPods();
+            Plugin.Character.cardsController.updateManaGenText();
         }
 
         private static void ChangeMode(Mode mode)

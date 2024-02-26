@@ -26,6 +26,32 @@ function ngu2go_equipped2() {
 }
 
 
+// NGU2GO/augstats
+// javascript:fetch("http://localhost:8088/ngu/NGU2GO/augstats").then(t=>t.json()).then(t=>{let s=appState.augstats;Object.assign(s,t),appHandlers.handleSettings("augstats",s)});
+function ngu2go_augstats() {
+    fetch("http://localhost:8088/ngu/NGU2GO/augstats")
+        .then(resp => resp.json())
+        .then(data => {
+            let augStats = appState.augstats;
+            Object.assign(augStats, data);
+            appHandlers.handleSettings("augstats", augStats);
+        });
+}
+
+
+// NGU2GO/ngustats
+// javascript:fetch("http://localhost:8088/ngu/NGU2GO/ngustats").then(t=>t.json()).then(t=>{let s=appState.ngustats;Object.assign(s,t),appHandlers.handleSettings("ngustats",s)});
+function ngu2go_ngustats() {
+    fetch("http://localhost:8088/ngu/NGU2GO/ngustats")
+        .then(resp => resp.json())
+        .then(data => {
+            let nguStats = appState.ngustats;
+            Object.assign(nguStats, data);
+            appHandlers.handleSettings("ngustats", nguStats);
+        });
+}
+
+
 // NGU2GO/hacks
 // javascript:fetch("http://localhost:8088/ngu/ngu2go/hacks").then(e=>e.json()).then(e=>{let a=appState.hackstats;a.rpow=e.rpow,a.rcap=e.rcap,a.hackspeed=e.hackspeed;for(let c=0;c<15;c++)a.hacks[c].goal=a.hacks[c].level=e.hacks[c].level,a.hacks[c].reducer=e.hacks[c].reducer;appHandlers.handleSettings("hackstats",a)});
 function ngu2go_hacks2() {

@@ -100,6 +100,7 @@ namespace jshepler.ngu.mods
                 __instance.hovered = true;
 
             _appendDualWieldText = slotId == -6;
+            _appendDaycareText = true;
 
             var item = GetItemFromSlotId(slotId);
             var messageField = Traverse.Create(__instance).Field<string>("message");

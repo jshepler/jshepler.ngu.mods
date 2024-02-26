@@ -46,6 +46,18 @@ namespace jshepler.ngu.mods.WebService.Triggers
             set => Options.RemoteTriggers.Kitty.Enabled.Value = value;
         }
 
+        internal static bool TwitchIntegrationEnabled
+        {
+            get => Options.Twitch.Enabled.Value;
+            set => Options.Twitch.Enabled.Value = value;
+        }
+
+        internal static bool TwitchAutoConnect
+        {
+            get => Options.Twitch.AutoConnect.Value;
+            set => Options.Twitch.AutoConnect.Value = value;
+        }
+
         [HarmonyPrepare, HarmonyPatch]
         private static void prep(MethodBase original)
         {
@@ -55,8 +67,6 @@ namespace jshepler.ngu.mods.WebService.Triggers
             Plugin.OnGameStart += (o, e) =>
             {
                 _settingsButton = GameObject.Find("Canvas/Player Panel Canvas/Player Panel/Settings").GetComponent<Button>();
-                _settingsButton.image.color = RemoteTriggersEnabled ? Plugin.ButtonColor_Green : Color.white;
-
                 _settingsButton.gameObject.AddComponent<ClickHandlerComponent>()
                     .OnRightClick(e => OpenConfig());
 
@@ -75,6 +85,14 @@ namespace jshepler.ngu.mods.WebService.Triggers
                     else
                         ToggleRemoteTriggersEnabled();
                 }
+            };
+
+            Plugin.onGUI += (o, e) =>
+            {
+                _settingsButton.image.color =
+                    !RemoteTriggersEnabled ? Color.white
+                    : !TwitchIntegrationEnabled || Twitch.Manager.IsConnected ? Plugin.ButtonColor_Green
+                    : Plugin.ButtonColor_Red;
             };
         }
 
@@ -96,7 +114,7 @@ namespace jshepler.ngu.mods.WebService.Triggers
 
         private static void InitPopup()
         {
-            _windowRect = new Rect(Screen.width / 2 - 200, Screen.height / 2 - 114, 400, 260);
+            _windowRect = new Rect(Screen.width / 2 - 200, Screen.height / 2 - 114, 400, 300);
             _blocker = buildBLocker();
             IsOpen = false;
 
@@ -161,32 +179,73 @@ namespace jshepler.ngu.mods.WebService.Triggers
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal("box");
+            GUILayout.Label("Accept Trigger Requests");
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("disabled", !RemoteTriggersEnabled ? _selected : _notSelected)) RemoteTriggersEnabled = false;
+            if (GUILayout.Button("enabled", RemoteTriggersEnabled ? _selected : _notSelected)) RemoteTriggersEnabled = true;
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal("box");
             GUILayout.Label("Auto Boost");
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button("enabled", AutoBoostEnabled ? _selected : _notSelected)) AutoBoostEnabled = true;
             if (GUILayout.Button("disabled", !AutoBoostEnabled ? _selected : _notSelected)) AutoBoostEnabled = false;
+            if (GUILayout.Button("enabled", AutoBoostEnabled ? _selected : _notSelected)) AutoBoostEnabled = true;
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal("box");
             GUILayout.Label("Auto Merge");
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button("enabled", AutoMergeEnabled ? _selected : _notSelected)) AutoMergeEnabled = true;
             if (GUILayout.Button("disabled", !AutoMergeEnabled ? _selected : _notSelected)) AutoMergeEnabled = false;
+            if (GUILayout.Button("enabled", AutoMergeEnabled ? _selected : _notSelected)) AutoMergeEnabled = true;
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal("box");
             GUILayout.Label("Toss Gold");
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button("enabled", TossGoldEnabled ? _selected : _notSelected)) TossGoldEnabled = true;
             if (GUILayout.Button("disabled", !TossGoldEnabled ? _selected : _notSelected)) TossGoldEnabled = false;
+            if (GUILayout.Button("enabled", TossGoldEnabled ? _selected : _notSelected)) TossGoldEnabled = true;
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal("box");
             GUILayout.Label("Fight Boss");
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button("enabled", FightBossEnabled ? _selected : _notSelected)) FightBossEnabled = true;
             if (GUILayout.Button("disabled", !FightBossEnabled ? _selected : _notSelected)) FightBossEnabled = false;
+            if (GUILayout.Button("enabled", FightBossEnabled ? _selected : _notSelected)) FightBossEnabled = true;
             GUILayout.EndHorizontal();
+
+            GUILayout.FlexibleSpace();
+
+            GUILayout.BeginHorizontal("box");
+            GUILayout.Label("Twitch Integration");
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("disabled", !TwitchIntegrationEnabled ? _selected : _notSelected)) TwitchIntegrationEnabled = false;
+            if (GUILayout.Button("enabled", TwitchIntegrationEnabled ? _selected : _notSelected)) TwitchIntegrationEnabled = true;
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal("box");
+            GUILayout.Label("Auto Connect");
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("disabled", !TwitchAutoConnect ? _selected : _notSelected)) TwitchAutoConnect = false;
+            if (GUILayout.Button("enabled", TwitchAutoConnect ? _selected : _notSelected)) TwitchAutoConnect = true;
+            GUILayout.EndHorizontal();
+
+            if (TwitchIntegrationEnabled)
+            {
+                GUILayout.BeginHorizontal();
+                GUILayout.Label($"{(Twitch.Manager.IsConnecting ? "connecting ..." : Twitch.Manager.IsConnected ? "CONNECTED" : "DISCONNECTED")}");
+
+                if (!Twitch.Manager.IsConnecting)
+                    if (GUILayout.Button($"{(Twitch.Manager.IsConnected ? "disconnect" : "connect")}"))
+                    {
+                        if (Twitch.Manager.IsConnected)
+                            Twitch.Manager.Disconnect();
+                        else
+                            Twitch.Manager.Connect();
+                    };
+
+                if (GUILayout.Button("reset")) Twitch.Manager.Reset();
+                GUILayout.EndHorizontal();
+            }
 
             GUILayout.EndVertical();
             GUILayout.EndArea();
