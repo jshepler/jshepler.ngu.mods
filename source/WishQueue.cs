@@ -3,7 +3,6 @@ using System.Reflection.Emit;
 using HarmonyLib;
 using jshepler.ngu.mods.Popups;
 using UnityEngine;
-using UnityEngine.TextCore;
 
 namespace jshepler.ngu.mods
 {
@@ -80,41 +79,68 @@ namespace jshepler.ngu.mods
             cm.Advance(-2)
                 .RemoveInstruction() // removes ldarg.0
                 .Advance(1)
-                .SetInstruction(Transpilers.EmitDelegate(CheckQueue));
+                .SetInstruction(Transpilers.EmitDelegate(StartNextWish));
 
             return cm.InstructionEnumeration();//.DumpToLog();
         }
 
-        private static void CheckQueue(int currentId)
+        private static void StartNextWish(int wishId)
         {
-            if (Queue.Count == 0)
+            var nextWishId = Options.WisheQueue.Enabled.Value ? GetNextWishId() : -1;
+
+            if (nextWishId == -1)
             {
-                _controller.removeAllResources(currentId);
+                _controller.removeAllResources(wishId);
                 return;
             }
 
-            var nextId = Queue[0];
-            Queue.RemoveAt(0);
-
-            var current = _controller.character.wishes.wishes[currentId];
-            var next = _controller.character.wishes.wishes[nextId];
-
-            // if next is completed, skip it, but instead of a while loop, trying a recursion thing, just because
-            if (next.level >= _controller.properties[nextId].maxLevel)
-            {
-                CheckQueue(currentId);
-                return;
-            }
+            var current = _controller.character.wishes.wishes[wishId];
+            var next = _controller.character.wishes.wishes[nextWishId];
 
             next.energy += current.energy;
             next.magic += current.magic;
             next.res3 += current.res3;
-            _controller.updatebyID(nextId);
+            _controller.updatebyID(nextWishId);
 
             current.energy = 0;
             current.magic = 0;
             current.res3 = 0;
-            // no need to do updateByID for current, the patched method will do it after return
+        }
+
+        private static int GetNextWishId()
+        {
+            var wishes = _controller.character.wishes.wishes;
+            var props = _controller.properties;
+            var nextWishId = -1;
+
+            while (Queue.Count > 0)
+            {
+                var index = Queue[0];
+                Queue.RemoveAt(0);
+
+                if (wishes[index].level < props[index].maxLevel)
+                {
+                    nextWishId = index;
+                    break;
+                }
+            }
+
+            if (nextWishId == -1)
+            {
+                _controller.constructList();
+                for (var x = 0; x < _controller.curValidUpgradesList.Count; x++)
+                {
+                    var index = _controller.curValidUpgradesList[x];
+                    var wish = wishes[index];
+                    if (wish.level < props[index].maxLevel && wish.energy == 0 && wish.magic == 0 && wish.res3 == 0)
+                    {
+                        nextWishId = index;
+                        break;
+                    }
+                }
+            }
+
+            return nextWishId;
         }
     }
 }

@@ -68,8 +68,10 @@ namespace jshepler.ngu.mods
         {
             var c = __instance.character;
 
-            if (c.settings.syncTraining) CapAllBasicTraining(c);
-            else CapAllOffsenseBasicTraining(c);
+            if (c.settings.syncTraining)
+                CapAllBasicTraining(c);
+            else
+                CapAllOffsenseBasicTraining(c);
 
             return false;
         }
@@ -79,8 +81,10 @@ namespace jshepler.ngu.mods
         {
             var c = __instance.character;
 
-            if (c.settings.syncTraining) CapAllBasicTraining(c);
-            else CapAllDefenseBasicTraining(c);
+            if (c.settings.syncTraining)
+                CapAllBasicTraining(c);
+            else
+                CapAllDefenseBasicTraining(c);
 
             return false;
         }

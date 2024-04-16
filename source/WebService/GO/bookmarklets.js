@@ -26,6 +26,19 @@ function ngu2go_equipped2() {
 }
 
 
+// data/naked_emr3
+// javascript:fetch("http://localhost:8088/ngu/ngu2go/nakedemr").then(t=>t.json()).then(t=>{let a=appState.capstats;Object.assign(a,t),appHandlers.handleSettings("capstats",a)});
+function ngu2go_nakedemr3() {
+    fetch("http://localhost:8088/ngu/ngu2go/nakedemr")
+        .then(resp => resp.json())
+        .then(data => {
+            let capStats = appState.capstats;
+            Object.assign(capStats, data);
+            appHandlers.handleSettings("capstats", capStats);
+        });
+}
+
+
 // NGU2GO/augstats
 // javascript:fetch("http://localhost:8088/ngu/NGU2GO/augstats").then(t=>t.json()).then(t=>{let s=appState.augstats;Object.assign(s,t),appHandlers.handleSettings("augstats",s)});
 function ngu2go_augstats() {

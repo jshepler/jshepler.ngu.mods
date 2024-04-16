@@ -53,6 +53,8 @@ namespace jshepler.ngu.mods
             Options.Twitch.RewardTriggers.FightBoss = Config.Bind("Twitch.RewardTriggers", "FightBoss", "", "Custom reward name to trigger boss fight");
             Options.Twitch.RewardTriggers.TossGold = Config.Bind("Twitch.RewardTriggers", "TossGold", "", "Custom reward name to toss gold into money pit");
             Options.Twitch.RewardTriggers.Kitty = Config.Bind("Twitch.RewardTriggers", "Kitty", "", "Custom reward name to trigger troll kitty event");
+
+            Options.WisheQueue.Enabled = Config.Bind("WisheQueue", "Enabled", true, "enables the wish queue");
         }
 
         internal static class RemoteTriggers
@@ -169,6 +171,11 @@ namespace jshepler.ngu.mods
         internal static class AutoQuesting
         {
             internal static ConfigEntry<bool> UseButter;
+        }
+
+        internal static class WisheQueue
+        {
+            internal static ConfigEntry<bool> Enabled;
         }
     }
 }

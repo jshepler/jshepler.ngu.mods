@@ -2,6 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
+using System.Text;
 using HarmonyLib;
 using jshepler.ngu.mods.GameData;
 using UnityEngine;
@@ -242,6 +245,96 @@ namespace jshepler.ngu.mods
                 -69 => inventory.trash,
                 _ => inventory.inventory[slotId]
             };
+        }
+
+        //[HarmonyTranspiler, HarmonyPatch(typeof(InventoryController), "itemTooltipText", [typeof(Equipment)])]
+        private static IEnumerable<CodeInstruction> InventoryController_itemTooltipText_transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var isEquipment = typeof(Equipment).GetMethod(nameof(Equipment.isEquipment));
+            var cm = new CodeMatcher(instructions);
+
+            var start = cm
+                .MatchForward(false, new CodeMatch(OpCodes.Callvirt, isEquipment))
+                .Advance(2)
+                .Pos;
+
+            var end = cm
+                .MatchForward(false, new CodeMatch(OpCodes.Ldloc_0))
+                .Pos;
+
+            cm.Advance(start - end)
+                .RemoveInstructions(end - start)
+                .Advance(1)
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldarg_1))
+                .SetInstruction(Transpilers.EmitDelegate(EquipInfo));
+
+            return cm.InstructionEnumeration();//.DumpToLog();
+        }
+
+        private static MethodInfo _effectNameMethod = typeof(InventoryController).GetMethod("effectName", BindingFlags.Instance | BindingFlags.NonPublic);
+        private static Func<specType, string> _effectName = st => (string)_effectNameMethod.Invoke(Plugin.Character.inventoryController, [st]);
+
+        private static MethodInfo _effectBonusMethod = typeof(InventoryController).GetMethod("effectBonus", BindingFlags.Instance | BindingFlags.NonPublic);
+        private static Func<float, specType, float> _effectBonus = (f, st) => (float)_effectBonusMethod.Invoke(Plugin.Character.inventoryController, [f, st]);
+
+        private static string EquipInfo(Equipment item)
+        {
+            var effectiveModifier = Mathf.Min((float)Plugin.Character.effectiveBossID() / item.bossRequired, 1f);
+            var levelModifier = 1f + item.level / 100f;
+
+            var appendStat = (StringBuilder sb, string name, float curValue, float capValue, specType st = specType.None) =>
+            {
+                var effValue = Mathf.Floor(curValue * effectiveModifier);
+                var maxValue = Mathf.Floor(capValue * levelModifier);
+                var effMaxValue = maxValue * effectiveModifier;
+                var color = curValue >= maxValue ? "green" : "black";
+                var specBonus = _effectBonus(curValue, st);
+                var effSpecBonus = _effectBonus(effValue, st);
+
+                sb.Append($"\n<color={color}><b>{name}:</b> {effValue:#,##0}/{effMaxValue:#,##0}");
+
+                if (st != specType.None)
+                    sb.Append($" ({effSpecBonus:#,##0.##}%)");
+
+                if (effectiveModifier < 1f)
+                {
+                    sb.Append($" [{curValue:#,##0}/{maxValue:#,##0}]");
+
+                    if (st != specType.None)
+                        sb.Append($" ({specBonus:#,##0.##}%)");
+                }
+
+                sb.Append("</color>");
+            };
+
+            var sb = new StringBuilder();
+
+            if (item.capAttack > 0 || item.capDefense > 0)
+            {
+                sb.Append($"\n\n<b>Stats</b>");
+
+                if (item.capAttack > 0)
+                    appendStat(sb, "Power", item.curAttack, item.capAttack);
+
+                if (item.capDefense > 0)
+                    appendStat(sb, "Defense", item.curDefense, item.capDefense);
+            }
+
+            if (item.spec1Type != specType.None || item.spec2Type != specType.None || item.spec3Type != specType.None)
+            {
+                sb.Append($"\n\n<b>Special Bonuses</b>");
+
+                if (item.spec1Type != specType.None)
+                    appendStat(sb, _effectName(item.spec1Type), item.spec1Cur, item.spec1Cap, item.spec1Type);
+
+                if (item.spec2Type != specType.None)
+                    appendStat(sb, _effectName(item.spec2Type), item.spec2Cur, item.spec2Cap, item.spec2Type);
+
+                if (item.spec3Type != specType.None)
+                    appendStat(sb, _effectName(item.spec3Type), item.spec1Cur, item.spec3Cap, item.spec3Type);
+            }
+
+            return sb.ToString();
         }
     }
 }

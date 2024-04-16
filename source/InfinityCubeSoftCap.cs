@@ -83,8 +83,8 @@ namespace jshepler.ngu.mods
             var character = Plugin.Character;
             var cubePower = character.inventory.cubePower;
             var cubeToughness = character.inventory.cubeToughness;
-            var total = cubePower + cubeToughness;
-            var nextTier = (int)Mathf.Log10(total);
+            var total = (long)(cubePower + cubeToughness);
+            var nextTier = total < 10 ? 1 : (int)Mathf.Log10(total);
 
             if (nextTier > 10)
                 return "\n\n<color=blue><b>AT MAX TIER</b></color>";

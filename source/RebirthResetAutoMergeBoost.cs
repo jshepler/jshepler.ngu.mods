@@ -6,12 +6,18 @@ namespace jshepler.ngu.mods
     internal class RebirthResetAutoMergeBoost
     {
         [HarmonyPostfix, HarmonyPatch(typeof(Rebirth), "engage", typeof(bool))]
-        private static void Rebirth_engage_postfix(bool hardReset, Rebirth __instance)
+        private static void Rebirth_engage_postfix()
         {
-            __instance.character.inventory.mergeTime.reset();
-            __instance.character.inventory.mergeTime.advanceTime(2);
-            __instance.character.inventory.boostTime.reset();
-            __instance.character.inventory.boostTime.advanceTime(1);
+            var i = Plugin.Character.inventory;
+            i.mergeTime.reset();
+            i.mergeTime.advanceTime(2);
+            i.boostTime.reset();
+            i.boostTime.advanceTime(1);
+
+            if (!Plugin.Character.arbitrary.instaTrain)
+                Plugin.Character.menuSwapper.swapMenu((int)Menu.BasicTraining);
+
+            //CookingHelper.AdjustCookingTimer();
         }
     }
 }

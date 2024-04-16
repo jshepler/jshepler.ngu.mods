@@ -78,7 +78,7 @@ namespace jshepler.ngu.mods
 
             if (diff != 0.0)
             {
-                Plugin.LogInfo($"tracked time diff: {NumberOutput.timeOutput(System.Math.Abs(diff))}");
+                //Plugin.LogInfo($"tracked time diff: {NumberOutput.timeOutput(System.Math.Abs(diff))}");
                 switch (Plugin.Character.settings.rebirthDifficulty)
                 {
                     case difficulty.normal:

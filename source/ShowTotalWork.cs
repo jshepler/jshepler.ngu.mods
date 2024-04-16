@@ -1,5 +1,4 @@
-﻿using System;
-using HarmonyLib;
+﻿using HarmonyLib;
 using UnityEngine.UI;
 
 namespace jshepler.ngu.mods
@@ -7,14 +6,28 @@ namespace jshepler.ngu.mods
     [HarmonyPatch]
     internal class ShowTotalWork
     {
-        [HarmonyPostfix, HarmonyPatch(typeof(EquipmentDisplay), "updateDisplay")]
-        private static void EquipmentDisplay_updateDisplay_postfix(Character ___character, Text ___equipStats)
+        //[HarmonyPostfix, HarmonyPatch(typeof(InventoryController), "Start")]
+        private static void InventoryController_Start_postfix(InventoryController __instance)
         {
-            if (!___character.InMenu(Menu.Inventory)) return;
+            // Canvas/Inventory Menu Canvas/Inventory Menu/Current Equipment/Scrollrect/
+            //var sr = GameObject.Find("Canvas/Inventory Menu Canvas/Inventory Menu/Current Equipment/Scrollrect").GetComponent<ScrollRect>();
 
-            var eCap = ___character.totalCapEnergy();
-            var ePow = ___character.totalEnergyPower();
-            ___equipStats.text += $"\n\n<b>(eCap * ePow):</b> {___character.display(eCap * ePow)}";
+            var fitter = __instance.gameObject.AddComponent<ContentSizeFitter>();
+            fitter.verticalFit = ContentSizeFitter.FitMode.Unconstrained;
+        }
+
+        //[HarmonyPostfix, HarmonyPatch(typeof(EquipmentDisplay), "updateDisplay")]
+        private static void EquipmentDisplay_updateDisplay_postfix(EquipmentDisplay __instance)
+        {
+            var character = __instance.character;
+            var equipStats = __instance.equipStats;
+
+            if (!character.InMenu(Menu.Inventory))
+                return;
+
+            var eCap = character.totalCapEnergy();
+            var ePow = character.totalEnergyPower();
+            equipStats.text += $"\n\n<b>(eCap * ePow):</b> {character.display(eCap * ePow)}";
 
             //var eBars = ___character.totalEnergyBar();
             //___equipStats.text +=
@@ -24,9 +37,10 @@ namespace jshepler.ngu.mods
             //    + $"\n<b>Energy Bars:</b> {___character.display(eBars)}"
             //    + $"\n<b>Base eBeards:</b> {___character.display(eBars * Math.Sqrt(ePow))}";
 
-            var mCap = ___character.totalCapMagic();
-            var mPow = ___character.totalMagicPower();
-            if (mCap > 1) ___equipStats.text += $"\n<b>(mCap * mPow):</b> {___character.display(mCap * mPow)}";
+            var mCap = character.totalCapMagic();
+            var mPow = character.totalMagicPower();
+            if (mCap > 1)
+                equipStats.text += $"\n<b>(mCap * mPow):</b> {character.display(mCap * mPow)}";
 
             //var mBars = ___character.totalMagicBar();
             //if (mCap > 1) ___equipStats.text +=
@@ -36,9 +50,10 @@ namespace jshepler.ngu.mods
             //    + $"\n<b>Magic Bars:</b> {___character.display(mBars)}"
             //    + $"\n<b>Base mBearss:</b> {___character.display(mBars * Math.Sqrt(mPow))}";
 
-            var r3Cap = ___character.totalCapRes3();
-            var r3Pow = ___character.totalRes3Power();
-            if (r3Cap > 1) ___equipStats.text += $"\n<b>(r3Cap * r3Pow):</b> {___character.display(r3Cap * r3Pow)}";
+            var r3Cap = character.totalCapRes3();
+            var r3Pow = character.totalRes3Power();
+            if (r3Cap > 1)
+                equipStats.text += $"\n<b>(r3Cap * r3Pow):</b> {character.display(r3Cap * r3Pow)}";
                 //$"\n\n<b>Res3 Cap:</b> {___character.display(r3Cap)}"
                 //+ $"\n<b>Res3 Pow:</b> {___character.display(r3Pow)}"
                 //+ $"\n<b>(r3Cap*r3Pow):</b> {___character.display(r3Cap * r3Pow)}";

@@ -39,6 +39,10 @@ namespace jshepler.ngu.mods
         [DllImport("user32.dll", EntryPoint = "GetWindowLongPtr", SetLastError = true)]
         private static extern long GetWindowLongPtr(IntPtr hWnd, int nIndex);
 
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool SetWindowText(IntPtr hWnd, string lpString);
+
         private static IntPtr _windowHandle = IntPtr.Zero;
         private static bool _fullscreen = false;
         private static bool _maximized = false;
@@ -119,6 +123,14 @@ namespace jshepler.ngu.mods
                 Plugin.LogInfo($"error calling GetWindowLongPtr: {error}");
                 return;
             }
+        }
+
+        internal static void SetWindowTitle(string title)
+        {
+            if (_windowHandle == IntPtr.Zero)
+                GetWindowHandle();
+
+            SetWindowText(_windowHandle, title);
         }
     }
 }

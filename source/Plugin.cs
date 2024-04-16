@@ -106,6 +106,20 @@ namespace jshepler.ngu.mods
             Character = __instance;
             GameHasStarted = true;
 
+            var args = Environment.GetCommandLineArgs();
+            if (args.Length > 2)
+            {
+                for (var x = 1; x < args.Length - 1; x++)
+                {
+                    if (args[x] == "-game")
+                    {
+                        AutoSaves.GameName = args[x + 1];
+                        Fullscreen.SetWindowTitle($"NGU Idle - {args[x + 1]}");
+                        break;
+                    }
+                }
+            }
+
             OnGameStart?.Invoke(null, EventArgs.Empty);
         }
 

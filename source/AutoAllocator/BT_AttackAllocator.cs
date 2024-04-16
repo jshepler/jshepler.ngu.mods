@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Linq;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,13 +6,14 @@ using UnityEngine.UI;
 namespace jshepler.ngu.mods.AutoAllocator
 {
     [HarmonyPatch]
-    internal class AttackTrainingAllocator : BaseAllocator
+    internal class BT_AttackAllocator : BaseAllocator
     {
         private static Character _character;
         private static OffenseTraining[] _controllers;
-        private static AttackTrainingAllocator Instance = new();
+        private static BT_AttackAllocator Instance = new();
+        private static Toggle _autoAdvanceToggle;
 
-        public AttackTrainingAllocator() : base(6)
+        public BT_AttackAllocator() : base(6)
         {
             Allocators.Energy.Add(Allocators.Feature.BT_Attack, this);
         }
@@ -28,6 +29,17 @@ namespace jshepler.ngu.mods.AutoAllocator
             var cap = _character.training.attackCaps[id];
             var current = _character.training.attackEnergy[id];
 
+            if (_character.purchases.hasAutoAdvance && _autoAdvanceToggle.isOn)
+            {
+                cap = 0;
+                current = 0;
+                for (var x = id; x < 6; x++)
+                {
+                    cap += _character.training.attackCaps[x];
+                    current += _character.training.attackEnergy[x];
+                }
+            }
+
             var delta = cap - current;
             if (current + delta < 0)
                 delta = -current;
@@ -37,6 +49,9 @@ namespace jshepler.ngu.mods.AutoAllocator
 
         internal override bool IsTargetReached(int id)
         {
+            if (_character.purchases.hasAutoAdvance && _autoAdvanceToggle.isOn)
+                return _character.training.attackEnergy.Sum() >= _character.training.attackCaps.Sum();
+
             return _character.training.attackEnergy[id] >= _character.training.attackCaps[id];
         }
 
@@ -45,12 +60,13 @@ namespace jshepler.ngu.mods.AutoAllocator
         {
             _character = __instance.character;
             _controllers = __instance.trains;
+            _autoAdvanceToggle = __instance.autoAdvance;
 
             for (var x = 0; x < 6; x++)
                 Instance.TextComponents[x] = _controllers[x].transform.Find("Add/Text").GetComponent<Text>();
         }
 
-        [HarmonyPrefix, HarmonyPatch(typeof(OffenseTraining), "addEnergy", new Type[0])]
+        [HarmonyPrefix, HarmonyPatch(typeof(OffenseTraining), "addEnergy", [])]
         private static bool OffenseTraining_addEnergy_prefix(OffenseTraining __instance)
         {
             var id = __instance.id;
@@ -68,12 +84,28 @@ namespace jshepler.ngu.mods.AutoAllocator
             return true;
         }
 
+        internal static bool IgnoreRemoveEnergy = false;
+
         [HarmonyPostfix
-            , HarmonyPatch(typeof(OffenseTraining), "removeEnergy", new Type[0])
-            , HarmonyPatch(typeof(OffenseTraining), "removeEnergy", new[] { typeof(long) })]
+            , HarmonyPatch(typeof(OffenseTraining), "removeEnergy", [])
+            , HarmonyPatch(typeof(OffenseTraining), "removeEnergy", [typeof(long)])]
         private static void OffenseTraining_removeEnergy_postfix(OffenseTraining __instance)
         {
+            if (IgnoreRemoveEnergy)
+                return;
+
             Instance[__instance.id] = false;
+
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                IgnoreRemoveEnergy = true;
+                __instance.removeEnergy(long.MaxValue);
+
+                if (Plugin.Character.settings.syncTraining)
+                    Plugin.Character.allDefenseController.trains[__instance.id].removeEnergy(long.MaxValue);
+
+                IgnoreRemoveEnergy = false;
+            }
         }
     }
 }

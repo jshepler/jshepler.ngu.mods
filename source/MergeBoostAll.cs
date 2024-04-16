@@ -4,7 +4,7 @@ using UnityEngine;
 namespace jshepler.ngu.mods
 {
     [HarmonyPatch]
-    internal class MergeBoostAllHotkeys
+    internal class MergeBoostAll
     {
         [HarmonyPrefix, HarmonyPatch(typeof(Character), "Update")]
         private static bool Character_Update_prefix(Character __instance)
@@ -25,6 +25,17 @@ namespace jshepler.ngu.mods
             }
 
             return true;
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(ButtonShower), "Start")]
+        private static void ButtonShower_Start_postfix(ButtonShower __instance)
+        {
+            __instance.inventory.gameObject.AddComponent<ClickHandlerComponent>()
+                .OnRightClick(e =>
+                {
+                    Plugin.Character.inventoryController.autoMerge();
+                    Plugin.Character.inventoryController.autoBoost();
+                });
         }
     }
 }

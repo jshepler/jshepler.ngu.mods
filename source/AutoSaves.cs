@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using HarmonyLib;
 using UnityEngine;
 
@@ -10,6 +12,21 @@ namespace jshepler.ngu.mods
     [HarmonyPatch]
     internal class AutoSaves
     {
+        internal static string GameName = null;
+
+        private static string ModifiedPersistentDataPath()
+        {
+            var path = Application.persistentDataPath;
+
+            if (GameName != null)
+            {
+                path += $"/{GameName}";
+                Directory.CreateDirectory(path);
+            }
+
+            return path;
+        }
+
         [HarmonyPrepare]
         private static void prep(MethodBase original)
         {
@@ -58,10 +75,11 @@ namespace jshepler.ngu.mods
             var character = Plugin.Character;
             character.lastTime = Epoch.Current();
             var data = character.importExport.getBase64Data();
+            var saveFolder = ModifiedPersistentDataPath();
 
             try
             {
-                File.WriteAllText($"{Application.persistentDataPath}/{saveName}_{DateTime.UtcNow:yyyy-MM-dd_HH-mm-ss}.txt", data);
+                File.WriteAllText($"{saveFolder}/{saveName}_{DateTime.UtcNow:yyyy-MM-dd_HH-mm-ss}.txt", data);
                 Plugin.ShowOverrideNotification($"game saved: {saveName}", 1);
             }
             catch (Exception ex)
@@ -73,7 +91,7 @@ namespace jshepler.ngu.mods
             if (daysToKeep <= 0)
                 return;
 
-            var folder = new DirectoryInfo(Application.persistentDataPath);
+            var folder = new DirectoryInfo(saveFolder);
             var files = folder.GetFiles().Where(f => f.LastWriteTimeUtc < DateTime.UtcNow.AddDays(-daysToKeep));
             foreach (var f in files)
                 f.Delete();
@@ -81,7 +99,7 @@ namespace jshepler.ngu.mods
 
         private static void LoadLastQuicksave()
         {
-            var folder = new DirectoryInfo(Application.persistentDataPath);
+            var folder = new DirectoryInfo(ModifiedPersistentDataPath());
             if (!folder.Exists)
                 return;
 
@@ -102,6 +120,32 @@ namespace jshepler.ngu.mods
             character.mainMenu.setLocalSaveValidity(validity: true);
 
             character.mainMenu.loadAutosaveSteam();
+        }
+
+        private static MethodInfo persistentDataPath = typeof(Application).GetProperty("persistentDataPath", BindingFlags.Static | BindingFlags.Public).GetGetMethod();
+        [HarmonyTranspiler,
+            HarmonyPatch(typeof(OpenFileDialog), "quickSave", typeof(string)),
+            HarmonyPatch(typeof(OpenFileDialog), "quickSaveStandalone"),
+            HarmonyPatch(typeof(OpenFileDialog), "quickSaveSteam"),
+            HarmonyPatch(typeof(OpenFileDialog), "backupSave"),
+            HarmonyPatch(typeof(OpenFileDialog), "backupSaveSteam"),
+            HarmonyPatch(typeof(OpenFileDialog), "deleteLocalSave"),
+            HarmonyPatch(typeof(OpenFileDialog), "quickLoad", []),
+            HarmonyPatch(typeof(OpenFileDialog), "setLocalSave"),
+            HarmonyPatch(typeof(OpenFileDialog), "setLocalSaveSteam"),
+            HarmonyPatch(typeof(OpenFileDialog), "setKartBackupSave"),
+            HarmonyPatch(typeof(OpenFileDialog), "initialLoad"),
+            HarmonyPatch(typeof(OpenFileDialog), "quicklyLoad"),
+            HarmonyPatch(typeof(OpenFileDialog), "startSaveStandalone"),
+            HarmonyPatch(typeof(OpenFileDialog), "startLoadStandalone"),
+            HarmonyPatch(typeof(OpenFileDialog), "loadFileMainMenuStandalone")]
+        private static IEnumerable<CodeInstruction> persistentDataPath_transpiler(IEnumerable<CodeInstruction> instructions, MethodBase __originalMethod)
+        {
+            var cm = new CodeMatcher(instructions)
+                .MatchForward(false, new CodeMatch(OpCodes.Call, persistentDataPath))
+                .Repeat(m => m.SetInstruction(Transpilers.EmitDelegate(ModifiedPersistentDataPath)));
+
+            return cm.InstructionEnumeration();//.DumpToLog() ;
         }
     }
 }

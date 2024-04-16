@@ -40,6 +40,11 @@ This will find matching loadouts in NGU (where loadout name = GO save slot name)
 
 If you have a save slot named `current` in GO, that will be updated to match your currently equipped gear. If you want to use a different name than `current` in GO, edit the above to specificy a different slot name.
 
+## sending naked EMR3 from NGU to GO
+`javascript:fetch("http://localhost:8088/ngu/ngu2go/nakedemr").then(t=>t.json()).then(t=>{let a=appState.capstats;Object.assign(a,t),appHandlers.handleSettings("capstats",a)});`
+
+Sends naked E/M/R3 stats (i.e. without equipment bonuses) to GO for `Gear` tab, on the right for "Hardcap Input".
+
 ## sending aug stats from NGU to GO
 `javascript:fetch("http://localhost:8088/ngu/NGU2GO/augstats").then(t=>t.json()).then(t=>{let s=appState.augstats;Object.assign(s,t),appHandlers.handleSettings("augstats",s)});`
 
@@ -73,7 +78,7 @@ After setting up custom rewards, you can map them to remote triggers in the cfg 
 
 In game, right-click the gear (settings) button in the lower-left of the screen to bring up the remote triggers config panel - which now includes twitch options at the bottom. Enabling `Twitch Integration` will add a row to show the connection status and buttons to connect/disconnect and reset.
 
-If configured correctly, click the `Connect` button to connect to twitch and start the authorization process. Your default browser should open a new tab asking your to login to twitch and grant permission to for NGU to connect to your channel.
+If configured correctly, click the `Connect` button to connect to twitch and start the authorization process. Your default browser should open a new tab asking you to login to twitch and grant permission for NGU to connect to your channel.
 
 ## troubleshooting
 If twitch integration is enabled, the color of the gear icon will change to red if not connected.
@@ -301,8 +306,13 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
     (temp placement, plan to move this info somewhere else)
 
 67. added wish queue
-    shift-click a wish to add/remove to/from the queue
-    press q to toggle the queue window where can delete a wish, re-order wishes, and clear the queue
+    - shift-click a wish to add/remove to/from the queue
+    
+    - press q to toggle the queue window where can delete a wish, re-order wishes, and clear the queue
+    
+    - the queue window has a toggle to enable/disable the queue (setting saved in cfg file)
+    
+    - if queue is empty, next available wish (by current filter/order) will start
 
 68. added number of clicks remaining before button swap on small troll's "click ok 50 times" popup
 
@@ -311,20 +321,23 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
     hold alt key to see breakdown of times per level
 
 70. the Cap Saved Diggers button uses alternate method
-    1. sets saved diggers to level 0
-    2. finds saved digger with lowest drain increase for next level that doesn't go over gross gps
-    3. increase its level by 1
-    4. do again until none found
+    - sets saved diggers to level 0
+
+    - finds saved digger with lowest drain increase for next level that doesn't go over gross gps
+
+    - increase its level by 1
+
+    - do again until none found
 
     (hold alt when clicking to use original method)
 
 71. modified basic training tooltips to be a little cleaner and show more information
 
-    displays the cap after next rebirth as [new]/[min] so know what max reduction will be before getting there
+    - displays the cap after next rebirth as [new]/[min] so know what max reduction will be before getting there
 
-    display at what level max reduction will be reached
+    - display at what level max reduction will be reached
 
-    display time remaining before that level
+    - display time remaining before that level
 
 72. clicking the cap button on a basic training skill while having the sync training setting enabled will split evenly between the two skills
 
@@ -474,7 +487,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 111. options to replace the images for: default player portrait, default daycare kitty, troll kitty
 
-112. right-click on zone forward (right-arrow) button to advance to the zone marked as the "autoadvancer" zone from the "Adventure Advancer" AP purchase
+112. shift-right-click on zone forward (right-arrow) button to advance to the zone marked as the "autoadvancer" zone from the "Adventure Advancer" AP purchase
 
 113. adds titan bonus exp kills remaining (from perk 34) to zone drop table tooltip
 
@@ -489,3 +502,20 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 - suffixes ingredient names with targets (`ingred target`:`pair target`)
 - shift-click the `-` button to reset all ingredients to 0
 - shift-click the `+` button to set optimal levels to all ingredients to give 100% meal efficiency
+
+118. can name games by putting `-game "game name"` in Steam's launch options (right-click game, properties, general tab)
+![steam launch options](steam_launch_options.png)
+
+     save files are kept in a separate folder named with the game name
+
+119. adventure button changes to yellow to indicate when "Move 69" is ready. Starts when move is unlocked and stops when no longer need to use it.
+
+120. right-click on inventory button to merge/boost all (same that happens with auto merge/boost timer triggers)
+
+121. displays % over E/M hardcap under equipment bonuses on inventory page (helps to know which E/M cap items can be removed withouth dropping below hardcap)
+
+122. switches to basic training screen when rebirthing and don't yet have the Intant Training Cap AP purchase
+
+123. BT skill bars are faded until reach max cap reduction - visualzation to help prevent rebirthing too soon and/or getting skills out of sync
+
+124. BT button changes to yellow when a skill is unlocked and stays at level 0

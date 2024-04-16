@@ -10,6 +10,12 @@ namespace jshepler.ngu.mods.Popups
         private static GUIStyle _labelStyle_VertCentered;
         private static Vector2 _scrollView;
 
+        private static bool _enabled
+        {
+            get => Options.WisheQueue.Enabled.Value;
+            set => Options.WisheQueue.Enabled.Value = value;
+        }
+
         internal WishQueuePopup(Character c)
             : base(new Rect(Screen.width * .375f, Screen.height * .2f, Screen.width * .35f, Screen.height * .68f))
         {
@@ -34,6 +40,7 @@ namespace jshepler.ngu.mods.Popups
             GUILayout.BeginHorizontal();
             GUILayout.Label("Wish Queue");
             GUILayout.FlexibleSpace();
+            _enabled = GUILayout.Toggle(_enabled, "Enabled");
             if (GUILayout.Button("clear")) WishQueue.Queue.Clear();
             if (GUILayout.Button("×")) Close();
             GUILayout.EndHorizontal();
