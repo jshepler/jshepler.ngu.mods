@@ -33,7 +33,7 @@ namespace jshepler.ngu.mods.CapCalculators
             throw new NotImplementedException();
         }
 
-        protected override long GetResource(long L)
+        protected override double GetResource(long L)
         {
             throw new NotImplementedException();
         }

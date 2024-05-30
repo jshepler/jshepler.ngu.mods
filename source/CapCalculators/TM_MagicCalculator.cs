@@ -30,10 +30,9 @@ namespace jshepler.ngu.mods.CapCalculators
             return p / d * (r / 50000.0) * h * m * c / L / s;
         }
 
-        protected override long GetResource(long L)
+        protected override double GetResource(long L)
         {
-            var result = L * modifier;
-            return result >= long.MaxValue ? long.MaxValue : (long)result;
+            return L * modifier;
         }
 
         protected override void UpdateModifier()

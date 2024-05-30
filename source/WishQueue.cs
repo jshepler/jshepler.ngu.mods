@@ -61,11 +61,11 @@ namespace jshepler.ngu.mods
         }
 
         // in WishesController.updateAllWishes(), when a wish reaches max level, removeAllResources is called;
-        // this transpiler replaces the call to removeAllResources with a call to CheckQueue below
+        // this transpiler replaces the call to removeAllResources with a call to StartNextWish below
         [HarmonyTranspiler, HarmonyPatch(typeof(WishesController), "updateAllWishes")]
         private static IEnumerable<CodeInstruction> WishesController_updateAllWishes_transpiler(IEnumerable<CodeInstruction> instructions)
         {
-            var removeAllResourcesMethod = typeof(WishesController).GetMethod("removeAllResources", new[] { typeof(int) });
+            var removeAllResourcesMethod = typeof(WishesController).GetMethod("removeAllResources", [typeof(int)]);
 
             var cm = new CodeMatcher(instructions)
                 .MatchForward(false, new CodeMatch(OpCodes.Call, removeAllResourcesMethod));
@@ -91,6 +91,9 @@ namespace jshepler.ngu.mods
             if (nextWishId == -1)
             {
                 _controller.removeAllResources(wishId);
+                WishSplit.SplitResources();
+                _controller.updateText();
+
                 return;
             }
 
@@ -100,6 +103,9 @@ namespace jshepler.ngu.mods
             next.energy += current.energy;
             next.magic += current.magic;
             next.res3 += current.res3;
+
+            WishSplit.RedistributeR3();
+            _controller.updateText();
             _controller.updatebyID(nextWishId);
 
             current.energy = 0;

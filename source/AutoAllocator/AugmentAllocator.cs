@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using jshepler.ngu.mods.CapCalculators;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -117,29 +118,31 @@ namespace jshepler.ngu.mods.AutoAllocator
 
         private static long CalcCapForLevel(int id, long level)
         {
-            var extraSadDivider = _character.settings.rebirthDifficulty >= difficulty.sadistic ? _allAugsController.augments[id].sadisticDivider() : 1.0;
+            var cap = Calculators.AugCalculators[id].ResourceFromLevel(level);
 
-            var allAugsController = _character.augmentsController;
-            double speedDivider = _character.settings.rebirthDifficulty switch
-            {
-                difficulty.normal => allAugsController.normalAugSpeedDividers[id],
-                difficulty.evil => allAugsController.evilAugSpeedDividers[id],
-                difficulty.sadistic => allAugsController.sadisticAugSpeedDividers[id],
-                _ => 1
-            };
+            //var extraSadDivider = _character.settings.rebirthDifficulty >= difficulty.sadistic ? _allAugsController.augments[id].sadisticDivider() : 1.0;
 
-            var cap = 50000d * speedDivider * level * extraSadDivider /
-                (
-                    _character.totalEnergyPower()
-                    * (double)(1f + _character.inventoryController.bonuses[specType.Augs])
-                    * (double)_character.inventory.macguffinBonuses[12]
-                    * (double)_character.hacksController.totalAugSpeedBonus()
-                    * (double)_character.adventureController.itopod.totalAugSpeedBonus()
-                    * (double)_character.cardsController.getBonus(cardBonus.augSpeed)
-                    * (double)(1.0 + _character.allChallenges.noAugsChallenge.evilCompletions() * 0.05)
-                    * (_character.allChallenges.noAugsChallenge.completions() >= 1 ? 1.1000000238418579 : 1.0)
-                    * (_character.allChallenges.noAugsChallenge.evilCompletions() >= _character.allChallenges.noAugsChallenge.maxCompletions ? 1.25 : 1.0)
-                );
+            //var allAugsController = _character.augmentsController;
+            //double speedDivider = _character.settings.rebirthDifficulty switch
+            //{
+            //    difficulty.normal => allAugsController.normalAugSpeedDividers[id],
+            //    difficulty.evil => allAugsController.evilAugSpeedDividers[id],
+            //    difficulty.sadistic => allAugsController.sadisticAugSpeedDividers[id],
+            //    _ => 1
+            //};
+
+            //var cap = 50000d * speedDivider * level * extraSadDivider /
+            //    (
+            //        _character.totalEnergyPower()
+            //        * (double)(1f + _character.inventoryController.bonuses[specType.Augs])
+            //        * (double)_character.inventory.macguffinBonuses[12]
+            //        * (double)_character.hacksController.totalAugSpeedBonus()
+            //        * (double)_character.adventureController.itopod.totalAugSpeedBonus()
+            //        * (double)_character.cardsController.getBonus(cardBonus.augSpeed)
+            //        * (double)(1.0 + _character.allChallenges.noAugsChallenge.evilCompletions() * 0.05)
+            //        * (_character.allChallenges.noAugsChallenge.completions() >= 1 ? 1.1000000238418579 : 1.0)
+            //        * (_character.allChallenges.noAugsChallenge.evilCompletions() >= _character.allChallenges.noAugsChallenge.maxCompletions ? 1.25 : 1.0)
+            //    );
 
             if (cap >= long.MaxValue)
                 return long.MaxValue;

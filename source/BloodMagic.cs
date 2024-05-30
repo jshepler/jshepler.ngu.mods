@@ -8,8 +8,10 @@ namespace jshepler.ngu.mods
     internal class BloodMagic
     {
         // based on AllBloodMagicController.lootBonus() and .goldBonus()
-        private static Func<double, double, float> _calcLootBonusPct = (value, minValue) => (value < minValue) ? 0f : 100F * (float)(Math.Floor(Math.Log(value / minValue, 2.0) + 1.0) * 0.0099999997764825821);
-        private static Func<double, double, float> _calcGoldBonusPct = (value, minValue) => (value < minValue) ? 0f : 100f * (float)(Math.Floor(Math.Pow(Math.Log(value / minValue, 2.0) + 1.0, 2.0)) * 0.0099999997764825821);
+        const double MINBLOOD_LOOT = 10000.0;
+        const double MINBLOOD_GOLD = 1000000.0;
+        private static Func<double, float> _calcLootBonusPct = blood => (blood < MINBLOOD_LOOT) ? 0f : 100F * (float)(Math.Floor(Math.Log(blood / MINBLOOD_LOOT, 2.0) + 1.0) * 0.0099999997764825821);
+        private static Func<double, float> _calcGoldBonusPct = blood => (blood < MINBLOOD_GOLD) ? 0f : 100f * (float)(Math.Floor(Math.Pow(Math.Log(blood / MINBLOOD_GOLD, 2.0) + 1.0, 2.0)) * 0.0099999997764825821);
 
         [HarmonyPostfix, HarmonyPatch(typeof(AllBloodMagicController), "updateBloodDisplay")]
         private static void AllBloodMagicController_updateBloodDisplay_postifx(AllBloodMagicController __instance)
@@ -25,15 +27,14 @@ namespace jshepler.ngu.mods
         {
             var character = __instance.character;
 
-            var minLootBlood = __instance.minLootBlood();
             var lootSpellBlood = character.bloodMagic.lootSpellBlood;
-            var oldPct = _calcLootBonusPct(lootSpellBlood, minLootBlood);
+            var oldPct = _calcLootBonusPct(lootSpellBlood);
             
             var newTotal = lootSpellBlood + character.bloodMagic.bloodPoints;
-            var newPct = _calcLootBonusPct(newTotal, minLootBlood);
+            var newPct = _calcLootBonusPct(newTotal);
             var willGain = newPct - oldPct;
 
-            ___message = $"<b>Blood Spaghetti</b>\n\nGather up all of your Blood and form it into something resembling spaghetti. You can slip spaghetti into a foe's pockets, causing it (and whatever loot they're holding onto) to fall out more often!\n\nFor you math nerds, it's log2(Blood/{minLootBlood}) % better drop chance.\n\n<b>Minimum Blood Required: </b>{minLootBlood}\n<b>Total Blood Invested: </b>{character.display(lootSpellBlood)}\n\n<b>Will gain +{willGain:#,##0.#}% if used now.</b>";
+            ___message = $"<b>Blood Spaghetti</b>\n\nGather up all of your Blood and form it into something resembling spaghetti. You can slip spaghetti into a foe's pockets, causing it (and whatever loot they're holding onto) to fall out more often!\n\nFor you math nerds, it's log2(Blood/{MINBLOOD_LOOT}) % better drop chance.\n\n<b>Minimum Blood Required: </b>{MINBLOOD_LOOT}\n<b>Total Blood Invested: </b>{character.display(lootSpellBlood)}\n\n<b>Will gain +{willGain:#,##0.#}% if used now.</b>";
             __instance.tooltip.showTooltip(___message);
 
             if (!__instance.IsInvoking("lootSpellTooltip"))
@@ -49,15 +50,14 @@ namespace jshepler.ngu.mods
         {
             var character = __instance.character;
 
-            var minGoldBlood = __instance.minGoldBlood();
             var goldSpellBlood = character.bloodMagic.goldSpellBlood;
-            var oldPct = _calcGoldBonusPct(goldSpellBlood, minGoldBlood);
+            var oldPct = _calcGoldBonusPct(goldSpellBlood);
             
             var newTotal = goldSpellBlood + character.bloodMagic.bloodPoints;
-            var newPct = _calcGoldBonusPct(newTotal, minGoldBlood);
+            var newPct = _calcGoldBonusPct(newTotal);
             var willGain = newPct - oldPct;
 
-            ___message = $"<b>Counterfeit Gold</b>\n\nUse the power of Blood to create some counterfeit gold, and slip it into the time machine's time bubble to increase gold production! Lasts until rebirth.\n\nWARNING: MATH. Your bonus GPS is equal to log2(Blood/{minGoldBlood})^2%.\n\n<b>Minimum Blood Required: </b>{minGoldBlood}\n<b>Total Blood Invested: </b>{character.display(goldSpellBlood)}\n\n<b>Will gain +{willGain:#,##0.#}% if used now.</b>";
+            ___message = $"<b>Counterfeit Gold</b>\n\nUse the power of Blood to create some counterfeit gold, and slip it into the time machine's time bubble to increase gold production! Lasts until rebirth.\n\nWARNING: MATH. Your bonus GPS is equal to log2(Blood/{MINBLOOD_GOLD})^2%.\n\n<b>Minimum Blood Required: </b>{MINBLOOD_GOLD}\n<b>Total Blood Invested: </b>{character.display(goldSpellBlood)}\n\n<b>Will gain +{willGain:#,##0.#}% if used now.</b>";
             __instance.tooltip.showTooltip(___message);
 
             if (!__instance.IsInvoking("goldSpellTooltip"))

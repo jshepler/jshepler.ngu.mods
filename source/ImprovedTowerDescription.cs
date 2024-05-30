@@ -114,23 +114,32 @@ namespace jshepler.ngu.mods
             var secondsRemaining = killsRemaining * secondsPerKill; //secondsPerKill == 0 ? 0 : (MAXPROGRESS - currentProgress) / progressPerKill * secondsPerKill;
 
             var ppPerKill = (float)progressPerKill / MAXPROGRESS;
-            var ppPerHour = secondsPerKill == 0 ? 0 : (60 * 60 / secondsPerKill) * ppPerKill;
+            var ppPerDay = secondsPerKill == 0f ? 0 : (60 * 60 * 24 / secondsPerKill) * ppPerKill;
 
             _tooltipText = $"\n\n<b>PP Progress:</b> {currentProgress:#,##0} / {MAXPROGRESS:#,##0} ({currentProgress / MAXPROGRESS * 100f:##0.00}%)"
-                + $"\n\n<b>Seconds per kill:</b> {(secondsPerKill == 0.0 ? "????" : NumberOutput.timeOutput(secondsPerKill))} ({(isEstimated ? "estimated" : currentFloor < optimalFloor ? "sub-optimal" : "optimal")})"
-                + (killsPerPP == 1 ? $"\n<b>PP per kill:</b> {ppPerKill:#,##0.00}" : $"\n<b>Kills per PP:</b> {killsPerPP} taking {(secondsPerPP == 0 ? "????" : NumberOutput.timeOutput(secondsPerPP))}")
-                + $"\n<b>PP per hour:</b> {ppPerHour:#,##0.##}"
-                + $"\n\n<b>Kills to next PP:</b> {killsRemaining} in {(secondsRemaining == 0.0 ? "????" : NumberOutput.timeOutput(secondsRemaining))}";
-
+                + $"\n\n<b>Seconds per kill:</b> {(secondsPerKill == 0f ? "????" : NumberOutput.timeOutput(secondsPerKill))} ({(isEstimated ? "estimated" : currentFloor < optimalFloor ? "sub-optimal" : "optimal")})"
+                + (killsPerPP == 1 ? $"\n<b>PP per kill:</b> {ppPerKill:#,##0.00}" : $"\n<b>Kills per PP:</b> {killsPerPP} taking {(secondsPerPP == 0f ? "????" : NumberOutput.timeOutput(secondsPerPP))}")
+                + $"\n<b>PP per day:</b> {ppPerDay:#,##0.##}";
 
             var tier = character.adventureController.lootDrop.itopodTier(currentFloor);
+            var killsPerEXP = controller.lootDrop.killsPerEXP(tier);
+            var baseExpPerGroup = controller.lootDrop.itopodEXPAwarded(tier);
+            var expPerGroup = controller.character.checkExpAdded(baseExpPerGroup);
+            var secondsPerExpGroup = killsPerEXP * secondsPerKill;
+            var expPerDay = secondsPerKill == 0f ? 0L : (long)(60 * 60 * 24 / secondsPerExpGroup) * expPerGroup;
+
+            _tooltipText += $"\n\n<b>Kills per EXP drop:</b> {killsPerEXP} taking {(secondsPerExpGroup == 0f ? "????" : NumberOutput.timeOutput(secondsPerExpGroup))}"
+                + $"\n<b>EXP per drop:</b> {controller.character.display(expPerGroup)} ({baseExpPerGroup} base)"
+                + $"\n<b>EXP per day:</b> {controller.character.display(expPerDay)}";
+
             var killsToNextAP = controller.lootDrop.killsUntilAP(currentFloor);
-            _tooltipText += $"\n<b>Kills to next AP{(tier > 3 ? "/EXP" : string.Empty)}:</b> {killsToNextAP} in {(secondsPerKill == 0.0 ? "???" : NumberOutput.timeOutput(killsToNextAP * secondsPerKill))}";
+            _tooltipText += $"\n\n<b>Kills to next PP:</b> {killsRemaining} in {(secondsRemaining == 0f ? "????" : NumberOutput.timeOutput(secondsRemaining))}"
+                + $"\n<b>Kills to next AP/EXP:</b> {killsToNextAP} in {(secondsPerKill == 0f ? "???" : NumberOutput.timeOutput(killsToNextAP * secondsPerKill))}";
 
             if (character.achievements.achievementComplete[145] && character.adventure.itopod.perkLevel[68] >= 1)
             {
                 var killsToNextGuff = controller.lootDrop.killsUntilMacguffin();
-                _tooltipText += $"\n<b>Kills to next MacGuffin:</b> {killsToNextGuff} in {(secondsPerKill == 0.0 ? "???" : NumberOutput.timeOutput(killsToNextGuff * secondsPerKill))}";
+                _tooltipText += $"\n<b>Kills to next MacGuffin:</b> {killsToNextGuff} in {(secondsPerKill == 0f ? "???" : NumberOutput.timeOutput(killsToNextGuff * secondsPerKill))}";
             }
 
             _tooltipText += $"\n\n<b>Max Floor: </b> {maxFloor}"

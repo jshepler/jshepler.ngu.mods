@@ -113,7 +113,9 @@ namespace jshepler.ngu.mods.AutoAllocator
             if (Input.GetKey(KeyCode.LeftShift) && Options.Allocators.AutoAllocatorEnabled.Value == true)
             {
                 if (Input.GetKey(KeyCode.LeftAlt))
-                    Enumerable.Range(0, NUMBER_OF_HACKS - 1).Do(i => Instance[i] = !Instance[i]); // -1 to not count THE END hack
+                    Enumerable.Range(0, NUMBER_OF_HACKS - 1) // -1 to not count THE END hack
+                        .Where(i => !Instance.IsTargetReached(i))
+                        .Do(i => Instance[i] = !Instance[i]);
                 else
                     Instance[id] = !Instance[id];
 

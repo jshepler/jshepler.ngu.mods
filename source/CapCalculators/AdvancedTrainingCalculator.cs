@@ -28,10 +28,9 @@ namespace jshepler.ngu.mods.CapCalculators
             return r / 50 * Math.Sqrt(p) * e / (b * L);
         }
 
-        protected override long GetResource(long L)
+        protected override double GetResource(long L)
         {
-            var r = 50 * b * L * Math.Sqrt(p) / (e * p);
-            return r >= long.MaxValue ? long.MaxValue : (long)r;
+            return 50 * b * L * Math.Sqrt(p) / (e * p);
         }
 
         protected override void UpdateModifier()

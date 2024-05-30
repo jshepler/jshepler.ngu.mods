@@ -110,6 +110,7 @@ namespace jshepler.ngu.mods
             var pTarget = pairs[pairIndex].pairTarget;
 
             __instance.nameText.text = $"P{pairIndex + 1}: {__instance.nameText.text} ({iTarget}:{pTarget})";
+            __instance.nameText.resizeTextForBestFit = true;
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(CookingController), "updateDishUI")]

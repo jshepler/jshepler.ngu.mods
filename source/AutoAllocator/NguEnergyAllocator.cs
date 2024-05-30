@@ -33,7 +33,6 @@ namespace jshepler.ngu.mods.AutoAllocator
         {
             var currentLevel = _allNGU.NGU[id].CurrentLevel();
             var cap = (CalcCapForLevel(id, currentLevel + 1) * _character.settings.nguCapModifier).CeilToLong();
-            //var cap = _character.NGUController.energyNGUCapAmount(id);
             var current = _character.NGU.skills[id].energy;
 
             var delta = cap - current;
@@ -144,9 +143,8 @@ namespace jshepler.ngu.mods.AutoAllocator
             __instance.energyMagicText.text = $"[{_ratios[_character.settings.nguLevelTrack][__instance.id]:#,###}:1]";
         }
 
-        private static long CalcCapForLevel(int id, long level)
+        private static double CalcCapForLevel(int id, long level)
         {
-            //_calcs[id].UpdateModifier();
             return Calculators.NGU_EnergyCalculators[id].ResourceFromLevel(level);// _calcs[id].EnergyFromLevel(level);
         }
 
@@ -178,7 +176,7 @@ namespace jshepler.ngu.mods.AutoAllocator
             _character.idleEnergy += _character.NGU.skills[id].energy;
             _character.NGU.skills[id].energy = 0;
 
-            var cap = CalcCapForLevel(id, (long)targetLevel);
+            var cap = CalcCapForLevel(id, (long)targetLevel).CeilToLong();
             if (cap > _character.idleEnergy)
                 cap = _character.idleEnergy;
 

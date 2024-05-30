@@ -18,9 +18,9 @@ namespace jshepler.ngu.mods.BarTooltips
             var wanXL = baseSpeeds[OSType.wandoosXL] / energySpeed + 1;
 
             ___message += $"\n\n<b>Current Speed Caps:</b>"
-                + $"\n - <b>Wandoos 98:</b> {(wan98 > long.MaxValue ? "n/a" : character.display(wan98))}"
-                + $"\n - <b>Wandoos MEH:</b> {(wanMeh > long.MaxValue ? "n/a" : character.display(wanMeh))}"
-                + $"\n - <b>Wandoos XL:</b> {(wanXL > long.MaxValue ? "n/a" : character.display(wanXL))}";
+                + $"\n - <b>Wandoos 98:</b> {character.display(wan98)}"
+                + $"\n - <b>Wandoos MEH:</b> {character.display(wanMeh)}"
+                + $"\n - <b>Wandoos XL:</b> {character.display(wanXL)}";
 
             var ppt = __instance.energyProgressToAdd();
             var tpb = ppt == 0 ? 0 : Mathf.CeilToInt(1 / ppt);
@@ -44,9 +44,9 @@ namespace jshepler.ngu.mods.BarTooltips
             var wanXL = baseSpeeds[OSType.wandoosXL] / magicSpeed + 1;
 
             ___message += $"\n\n<b>Current Speed Caps:</b>"
-                + $"\n - <b>Wandoos 98:</b> {(wan98 > long.MaxValue ? "n/a" : character.display(wan98))}"
-                + $"\n - <b>Wandoos MEH:</b> {(wanMeh > long.MaxValue ? "n/a" : character.display(wanMeh))}"
-                + $"\n - <b>Wandoos XL:</b> {(wanXL > long.MaxValue ? "n/a" : character.display(wanXL))}";
+                + $"\n - <b>Wandoos 98:</b> {character.display(wan98)}"
+                + $"\n - <b>Wandoos MEH:</b> {character.display(wanMeh)}"
+                + $"\n - <b>Wandoos XL:</b> {character.display(wanXL)}";
 
             var ppt = __instance.magicProgressToAdd();
             var tpb = ppt == 0 ? 0 : Mathf.CeilToInt(1 / ppt);

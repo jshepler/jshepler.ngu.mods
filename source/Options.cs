@@ -14,8 +14,11 @@ namespace jshepler.ngu.mods
             Options.AutoQuesting.UseButter = Config.Bind("AutoQuesting", "UseButter", false, "if enabled, when automatically staring a manual major quest, use butter if available");
             Options.AutoSnipe.TargetZone = Config.Bind("AutoSnipe", "TargetZone", 0, "used to target specific enemy in specific zone, other zones always snipe bosses; enter zone number (from wiki: https://ngu-idle.fandom.com/wiki/Adventure_Mode#Zones)");
             Options.AutoSnipe.TargetEnemy = Config.Bind("AutoSnipe", "TargetEnemy", 0, "used to target specific enemy in specific zone; enter enemy number (from bestiary), 0 = bosses");
+            Options.AutoMergeTransform.Enabled = Config.Bind("AutoMergeTransform", "Enabled", true, "enables/disables auto merging and transforming of pendants and looties");
 
             Options.CheckForNewVersion.Enabled = Config.Bind("CheckForNewVersion", "Enabled", true, "checks for new version when loading a save and every hour after");
+            Options.CustomResolution.Width = Config.Bind("CustomResolution", "Width", 0, "custom resolution width, 0 = disabled");
+            Options.CustomResolution.Height = Config.Bind("CustomResolution", "Height", 0, "custom resolution height, 0 = disabled");
 
             Options.DefaultDaycareKitty.Filename = Config.Bind("DefaultDaycareKitty", "Filename", "", "filename of 250x110 image in config folder, used to replace default kitty sprite, leave empty to disable");
             Options.DefaultPlayerPortait.BossId = Config.Bind("DefaultPlayerPortait", "BossId", 0, "replaces default player portrait with the portrait of boss id (enemy # from bestiary), 0 = disabled");
@@ -55,6 +58,7 @@ namespace jshepler.ngu.mods
             Options.Twitch.RewardTriggers.Kitty = Config.Bind("Twitch.RewardTriggers", "Kitty", "", "Custom reward name to trigger troll kitty event");
 
             Options.WisheQueue.Enabled = Config.Bind("WisheQueue", "Enabled", true, "enables the wish queue");
+            Options.WishR3Cap.Enabled = Config.Bind("WishR3Cap", "Enabled", true, "when auto-allocating resources or when a wish completes a level, will (re)distribute R3 amongst running wishes to not be more than is needed for min wish time");
         }
 
         internal static class RemoteTriggers
@@ -174,6 +178,22 @@ namespace jshepler.ngu.mods
         }
 
         internal static class WisheQueue
+        {
+            internal static ConfigEntry<bool> Enabled;
+        }
+
+        internal static class WishR3Cap
+        {
+            internal static ConfigEntry<bool> Enabled;
+        }
+
+        internal static class CustomResolution
+        {
+            internal static ConfigEntry<int> Width;
+            internal static ConfigEntry<int> Height;
+        }
+
+        internal static class AutoMergeTransform
         {
             internal static ConfigEntry<bool> Enabled;
         }

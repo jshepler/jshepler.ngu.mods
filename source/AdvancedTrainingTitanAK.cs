@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
 using HarmonyLib;
+using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace jshepler.ngu.mods
 {
@@ -28,28 +30,73 @@ namespace jshepler.ngu.mods
 
 
         private static Character character;
-        private static AllAdvancedTraining advancedTraining;
+        private static AllAdvancedTraining _advancedTraining;
+        private static HoverTooltip _tooltip;
+        private static bool _showTooltip = false;
 
         private static float totalPowerWithoutAdvPower;
         private static float totalDefWithoutAdvDef;
         private static float totalRegenWithoutAdvDef;
 
+        private static Func<bool> _isButtonInteractable;
+
         [HarmonyPostfix, HarmonyPatch(typeof(ButtonShower), "Start")]
         private static void ButtonShower_showTitanTimer_Start(ButtonShower __instance)
         {
             character = __instance.character;
-            advancedTraining = character.advancedTrainingController;
+            _advancedTraining = character.advancedTrainingController;
+            _tooltip = __instance.tooltip;
+
+            _isButtonInteractable = () => __instance.advancedTraining.interactable;
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(ButtonShower), "showTitanTimer")]
+        private static void OnPointerEnter(PointerEventData e)
+        {
+            if (_isButtonInteractable())
+            {
+                _showTooltip = true;
+                character.StartCoroutine(ShowTooltip());
+            }
+        }
+
+        private static void OnPointerExit(PointerEventData e)
+        {
+            _showTooltip = false;
+        }
+
+        private static WaitForSeconds _tooltipDelay = new WaitForSeconds(1);
+        private static IEnumerator ShowTooltip()
+        {
+            while (_showTooltip)
+            {
+                var text = BuildTooltipText();
+                _tooltip.showTooltip($"<b>Adv. Training needed to autokill Titans:</b>{text}");
+
+                yield return _tooltipDelay;
+            }
+
+            _tooltip.hideTooltip();
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(ButtonShower), "showTitanTimer"), HarmonyPriority(2)]
         private static void ButtonShower_showTitanTimer_postfix(ButtonShower __instance, ref string ___message)
         {
             if (!Plugin.GameHasStarted || __instance.adventure.interactable == false || string.IsNullOrWhiteSpace(___message))
                 return;
 
-            totalPowerWithoutAdvPower = character.totalAdvAttack() / (advancedTraining.adventurePowerBonus(0) + 1f);
-            totalDefWithoutAdvDef = character.totalAdvDefense() / (advancedTraining.adventureToughnessBonus(0) + 1f);
-            totalRegenWithoutAdvDef = character.totalAdvHPRegen() / (advancedTraining.adventureToughnessBonus(0) + 1f);
+            var text = BuildTooltipText();
+            if (text != null)
+            {
+                ___message += $"\n\n<b>Adv. Training needed to autokill Titans:</b>{text}";
+                __instance.tooltip.showTooltip(___message);
+            }
+        }
+
+        private static string BuildTooltipText()
+        {
+            totalPowerWithoutAdvPower = character.totalAdvAttack() / (_advancedTraining.adventurePowerBonus(0) + 1f);
+            totalDefWithoutAdvDef = character.totalAdvDefense() / (_advancedTraining.adventureToughnessBonus(0) + 1f);
+            totalRegenWithoutAdvDef = character.totalAdvHPRegen() / (_advancedTraining.adventureToughnessBonus(0) + 1f);
 
             var effectiveBossId = character.effectiveBossID();
             var sb = new StringBuilder();
@@ -251,11 +298,7 @@ namespace jshepler.ngu.mods
             {
             }
 
-            if (sb.Length > 0)
-            {
-                ___message += $"\n\n<b>Adv. Training needed to autokill Titans:</b>{sb}";
-                __instance.tooltip.showTooltip(___message);
-            }
+            return sb.Length == 0 ? null : sb.ToString();
         }
 
 #pragma warning disable Harmony003

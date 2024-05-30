@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace jshepler.ngu.mods
 {
@@ -106,6 +107,16 @@ namespace jshepler.ngu.mods
                     if (numberKey < 3)
                     {
                         __instance.beastQuestPerkController.changePage(numberKey - 1);
+                        return false;
+                    }
+
+                    return true;
+
+                case Menu.ItemList:
+                    if (numberKey < 6)
+                    {
+                        __instance.allItemList.changePage(numberKey - 1);
+                        return false;
                     }
 
                     return true;
@@ -114,6 +125,35 @@ namespace jshepler.ngu.mods
                 default:
                     return true;
             }
+        }
+
+
+        private static Button[] _itemListPageButtons = null;
+
+        [HarmonyPostfix,
+            HarmonyPatch(typeof(AllItemListController), "refreshMenu"),
+            HarmonyPatch(typeof(AllItemListController), "changePage")]
+        private static void AllItemListController_updateSelectedPage()
+        {
+            if (Plugin.Character == null)
+                return;
+
+            if (_itemListPageButtons == null)
+            {
+                _itemListPageButtons = new Button[5];
+                var pages = GameObject.Find("Canvas/Item Page 1 Canvas/Item List Page 1 Menu")?.transform;
+
+                _itemListPageButtons[0] = pages.Find("Page 1").GetComponent<Button>();
+                _itemListPageButtons[1] = pages.Find("Page 2").GetComponent<Button>();
+                _itemListPageButtons[2] = pages.Find("Page 3").GetComponent<Button>();
+                _itemListPageButtons[3] = pages.Find("Page 4").GetComponent<Button>();
+                _itemListPageButtons[4] = pages.Find("Page 4 (1)").GetComponent<Button>();
+            }
+
+            var currentPage = Plugin.Character.allItemList.itemList[0].id / 108;
+
+            for (var x = 0; x < 5; x++)
+                _itemListPageButtons[x].image.color = x == currentPage ? Plugin.ButtonColor_Yellow : Color.white;
         }
     }
 }

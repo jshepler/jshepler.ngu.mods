@@ -38,10 +38,9 @@ namespace jshepler.ngu.mods.CapCalculators
             return ppt;
         }
 
-        protected override long GetResource(long L)
+        protected override double GetResource(long L)
         {
-            var result = L * modifier;
-            return result >= long.MaxValue ? long.MaxValue : (long)result;
+            return L * modifier;
         }
 
         protected override void UpdateModifier()

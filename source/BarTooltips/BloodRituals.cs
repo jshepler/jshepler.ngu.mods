@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using System.Text.RegularExpressions;
+using HarmonyLib;
 using UnityEngine;
 
 namespace jshepler.ngu.mods.BarTooltips
@@ -6,6 +7,8 @@ namespace jshepler.ngu.mods.BarTooltips
     [HarmonyPatch]
     internal class BloodRituals
     {
+        private static Regex rex = new Regex("<b>Current Speed Cap: </b>.*?Magic");
+
         [HarmonyPostfix, HarmonyPatch(typeof(BloodMagicController), "showTooltip")]
         private static void BloodMagicController_showTooltip_postfix(BloodMagicController __instance, ref string ___message)
         {
@@ -13,20 +16,14 @@ namespace jshepler.ngu.mods.BarTooltips
             var tpb = ppt == 0 ? 0 : Mathf.CeilToInt(1 / ppt);
             var capPct = ppt * 100f;
 
-            /* ppt = mc * mp / speed / sad * bonus
-             *   t = c  * p  / d     / s   * b
-             *   c = d * s * t / (p * b)
-             *   c = d * s * 1 / (p * b)  setting t = 1 to calc cap (how much m to reach 1.0 progress per tick, or 100% speed, or 1 tick per bar)
-             *   c = d * s / (p * b)
-             */
-
-            //var realCap = (double)__instance.character.bloodMagicController.sadisticSpeedDividers[__instance.id]
-            //    * (double)__instance.sadisticDivider()
-            //    / ((double)__instance.character.totalMagicPower() * (double)__instance.totalBloodMagicSpeedBonus());
+            if (__instance.character.settings.rebirthDifficulty == difficulty.sadistic)
+            {
+                var realCap = FixCapButtonCalcs.calcBloodRitualCap(__instance.id);
+                ___message = rex.Replace(___message, $"<b>Current Speed Cap: </b> {__instance.character.display(realCap)} Magic");
+            }
 
             ___message += $"\n\n<b>% Allocated:</b> {capPct}%"
                 + $"\n   (ppt: {ppt:0.0000000} = {tpb}t/bar)";
-                //+ $"\n   ({realCap})";
 
             __instance.tooltip.showTooltip(___message);
         }

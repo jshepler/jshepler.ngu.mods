@@ -37,10 +37,9 @@ namespace jshepler.ngu.mods.CapCalculators
             return ppt;
         }
 
-        protected override long GetResource(long L)
+        protected override double GetResource(long L)
         {
-            var r = L * modifier;
-            return r >= long.MaxValue ? long.MaxValue : (long)r;
+            return L * modifier;
         }
 
         protected override void UpdateModifier()
@@ -56,24 +55,21 @@ namespace jshepler.ngu.mods.CapCalculators
             c = character.cardsController.getBonus(cardBonus.augSpeed);
             s = (character.settings.rebirthDifficulty >= difficulty.sadistic) ? 5E+07 : 1.0;
 
-            n = (character.allChallenges.noAugsChallenge.evilCompletions() >= character.allChallenges.noAugsChallenge.maxCompletions)
-                ? 1.25
-                : 1;
+            n = character.allChallenges.noAugsChallenge.completions() >= 1 ? 1.1000000238418579 : 1.0;
 
             a = 1.0 + character.allChallenges.noAugsChallenge.evilCompletions() * 0.05;
-            if (character.allChallenges.noAugsChallenge.completions() >= 1)
-            {
-                a *= 1.1000000238418579;
-            }
+            a *= (character.allChallenges.noAugsChallenge.evilCompletions() >= character.allChallenges.noAugsChallenge.maxCompletions)
+                ? 1.25
+                : 1;
 
             modifier = 50000.0 * d * s / (p * e * m * h * k * c * a * n);
         }
 
-        private float augUpgradeDivider(int id) => _controller.character.settings.rebirthDifficulty switch
+        private double augUpgradeDivider(int id) => _controller.character.settings.rebirthDifficulty switch
         {
             difficulty.normal => _controller.normalUpgradeSpeedDividers[id],
             difficulty.evil => _controller.evilUpgradeSpeedDividers[id],
-            difficulty.sadistic => _controller.sadisticUpgradeSpeedDividers[id],
+            difficulty.sadistic => _controller.sadisticUpgradeSpeedDividers[id] / 50000.0,
             _ => 0
         };
     }

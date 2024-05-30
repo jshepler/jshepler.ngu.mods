@@ -13,11 +13,11 @@ namespace jshepler.ngu.mods.CapCalculators
         }
 
         protected abstract void UpdateModifier();
-        protected abstract long GetResource(long L);
+        protected abstract double GetResource(long L);
         protected abstract long GetLevel(long r);
         protected abstract double GetProgressPerTick(long r, long L);
 
-        internal virtual long ResourceFromLevel(long level)
+        internal virtual double ResourceFromLevel(long level)
         {
             if (_dirty)
             {

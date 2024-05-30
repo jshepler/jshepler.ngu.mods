@@ -1,4 +1,4 @@
-# jshepler.ngu.mods
+# jshepler.ngu.
 Collection of mods I wrote for myself.
 
 I had not intended to make these public, as I don't want to support them long-term (i.e. when no longer playing the game). A few people have asked that I share the code, so here you go.
@@ -128,6 +128,8 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 17. auto merge/transform unprotected pendants and looties in inventory
 
+    *option to disable in config file*
+
 18. when in the spend exp menu, on the energy tab:
     - shift-clicking the "Buy ALL Custom" button will buy all custom E/M
     - control-shift-clicking the "Buy ALL Custom" button will buy all custom E/M/R3
@@ -152,7 +154,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 24. when starting a manual quest, if current zone has unlocked quest item, that item is assigned as the quest (instead of random quest item)
 
 25. improved bar tooltips, adds:
-    - current speed cap: augs, AT, TM, wandoos (all OS at same time), NGUs
+    - current speed cap: augs, AT, TM, wandoos (all OS at same time), NGUs ***(displays real cap, even if over hardcap)***
     - % of cap allocated: augs, AT, TM, BM, wandoos, NGUs, beards\*
     - over-capped duration (time until no longer over-capped): augs, AT, TM, wandoos, NGUs, beards\*
     - current speed - progress per tick & ticks per bar: augs, AT, TM, wandoos, NGUs, beards
@@ -275,7 +277,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
     - enabled auto-allocators (mod 31)
     - wish queue (mod 67)
 
-58. number keys changes page on: ygg, diggers, beards, hacks, wishes
+58. number keys changes page on: ygg, diggers, beards, hacks, wishes, item list
 
 59. press F11 to toggle fullscreen mode
 
@@ -399,9 +401,12 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 85. improved ITOPOD description (zone tooltip)
     - cleaned up the text
-    - added time to next PP/AP/EXP/guff
-    - added PP/hour
-    - added max and optimal floors
+    - seconds per kill
+    - kills per PP (if less than 1 PP per kill) or PP per kill (if 1 or more PP per kill)
+    - PP per day
+    - kills per EXP drop
+    - EXP per drop
+    - EXP per day
 
     time to next PP uses 2 calcs: one for when floor \<= optimal floor and another > optimal floor
 
@@ -503,8 +508,11 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 - shift-click the `-` button to reset all ingredients to 0
 - shift-click the `+` button to set optimal levels to all ingredients to give 100% meal efficiency
 
+  *the ingredient text will auto-resize to fit (thanks Ms. Rager)*
+
 118. can name games by putting `-game "game name"` in Steam's launch options (right-click game, properties, general tab)
-![steam launch options](steam_launch_options.png)
+
+     ![steam launch options](steam_launch_options.png)
 
      save files are kept in a separate folder named with the game name
 
@@ -512,10 +520,43 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 120. right-click on inventory button to merge/boost all (same that happens with auto merge/boost timer triggers)
 
-121. displays % over E/M hardcap under equipment bonuses on inventory page (helps to know which E/M cap items can be removed withouth dropping below hardcap)
+121. displays % over E/M P/C hardcap under equipment bonuses on inventory page (helps to know which E/M power/cap items can be removed withouth dropping below hardcap)
 
 122. switches to basic training screen when rebirthing and don't yet have the Intant Training Cap AP purchase
 
 123. BT skill bars are faded until reach max cap reduction - visualzation to help prevent rebirthing too soon and/or getting skills out of sync
 
 124. BT button changes to yellow when a skill is unlocked and stays at level 0
+
+125. option to config file to set custom resolution - the game keeps a 16:10 scaling, so if you don't set a 16:10 resolution you will have black bars
+
+     ***this is an alternative to using the launch options* `-screen-width 1280 -screen-height 800`**
+
+126. tracks some resources gained this/last rebirth:
+  - EXP shown on `Spend EXP` button tooltip
+  - AP shown on `4G's SELLOUT SHOP` button tooltip
+  - PP shown on `I.T.O.P.O.D PERKS` button tooltip (adventure screen)
+  - QP shown on `Questing` button tooltip
+  - seeds shown on seeds icon tooltip (ygg screen)
+  - poop shown on poop icon tooltip (ygg screen)
+
+127. shift-click equipped items or items in daycare to toggle PROTECTED (like it does when shift-clicking items in inventory)
+
+128. capping wish R3 - when auto-allocating resources to wishes, R3 will be capped to be no more than what's needed for the minimum wish completion time
+
+     auto-allocation happens when:
+      - alt-clicking + button to split resources between multi-selected wishes
+      - when a wish completes a level < max levels
+      - when a wish completes all levels and wish queue is enabled
+
+     the excess R3 will be used in remaining wishes and if all wishes have their R3 capped, excess will return to idle
+
+     ***R3 capping can be disabled in config file***
+
+129. when wish queue is disable and wish reaches max level, its resources will be reallocated to the remaining wishes - R3 capping will happen if enabled
+
+130. new regular cards (not chonker or THE END cards) are inserted before first chonker card in an attempt to help keep them organized/separated and to make it a little easier to cast/yeet normal cards
+
+131. fix game bug with cap buttons that manifests in sadistic, when cap > hardcap
+
+     TLDR; the cap buttons allocate based on the cap that's clamped to hardcap, but the progress a bar gains per progress uses the real cap that can be higher than hardcap

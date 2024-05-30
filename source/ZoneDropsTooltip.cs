@@ -200,34 +200,8 @@ namespace jshepler.ngu.mods
             return text;
         }
 
-        #region bug fixes
 
-        /* clock dimension is supposed to drop a busted copy of wandoos 98, but has a bug that results in 0% DC
-
-changing:
-	// if ((double)value < (double)num3 * 0.012 * (double)num2)
-	ldloc.0
-	conv.r8
-	ldloc.3
-	conv.r8
-	ldc.r8 0.012
-	mul
-	ldloc.2
-	conv.r8
-	mul
-
-to:
-	// if (value < (num3 += 0.012f * num2))
-	ldloc.0
-	ldloc.3
-	ldc.r4 0.012
-	ldloc.2
-	mul
-	add
-	dup
-	stloc.3
-
-         */
+        // clock dimension is supposed to drop a busted copy of wandoos 98, but has a bug that results in 0% DC
         [HarmonyTranspiler, HarmonyPatch(typeof(LootDrop), "zone7Drop")]
         private static IEnumerable<CodeInstruction> LootDrop_zone7Drop_transpiler(IEnumerable<CodeInstruction> instructions)
         {
@@ -244,7 +218,36 @@ to:
 
             return cm.InstructionEnumeration();//.DumpToLog();
         }
-
-        #endregion
     }
 }
+
+/*
+clock dimension is supposed to drop a busted copy of wandoos 98, but has a bug that results in 0% DC
+
+changing:
+    num3 = 0f;
+    if ((double)value < (double)num3 * 0.012 * (double)num2) // 0f * 0.012 * num2 = 0
+
+	ldloc.0
+	conv.r8
+	ldloc.3
+	conv.r8
+	ldc.r8 0.012
+	mul
+	ldloc.2
+	conv.r8
+	mul
+
+to:
+    num3 = 0f;
+	if (value < (num3 += 0.012f * num2))
+
+	ldloc.0
+	ldloc.3
+	ldc.r4 0.012
+	ldloc.2
+	mul
+	add
+	dup
+	stloc.3
+ */

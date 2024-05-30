@@ -134,10 +134,8 @@ namespace jshepler.ngu.mods.AutoAllocator
             __instance.energyMagicText.text = $"[{_ratios[character.settings.nguLevelTrack][__instance.id]:#,###}:1]";
         }
 
-        private static long CalcCapForLevel(int id, long level)
+        private static double CalcCapForLevel(int id, long level)
         {
-            //_calcs[id].UpdateModifier();
-            //return _calcs[id].MagicFromLevel(level);
             return Calculators.NGU_MagicCalculators[id].ResourceFromLevel(level);
         }
 
@@ -169,7 +167,7 @@ namespace jshepler.ngu.mods.AutoAllocator
             _character.magic.idleMagic += _character.NGU.magicSkills[id].magic;
             _character.NGU.magicSkills[id].magic = 0;
 
-            var cap = CalcCapForLevel(id, (long)targetLevel);
+            var cap = CalcCapForLevel(id, (long)targetLevel).CeilToLong();
             if (cap > _character.magic.idleMagic)
                 cap = _character.magic.idleMagic;
 

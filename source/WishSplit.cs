@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using HarmonyLib;
 using UnityEngine;
 
@@ -10,6 +11,44 @@ namespace jshepler.ngu.mods
     {
         private static HashSet<int> _selectedIds = new();
         private static int MaxWishes => Plugin.Character.wishesController.curWishSlots();
+
+        private static long IdleEnergy
+        {
+            get => Plugin.Character.idleEnergy;
+            set => Plugin.Character.idleEnergy = value;
+        }
+
+        private static long IdleMagic
+        {
+            get => Plugin.Character.magic.idleMagic;
+            set => Plugin.Character.magic.idleMagic = value;
+        }
+
+        private static long IdleRes3
+        {
+            get => Plugin.Character.res3.idleRes3;
+            set => Plugin.Character.res3.idleRes3 = value;
+        }
+
+        private static Func<int, long> wishR3Cap => wishId =>
+        {
+            var wc = Plugin.Character.wishesController;
+
+            var cap = Mathf.Ceil(
+                Mathf.Pow(
+                    wc.minimumWishTime()
+                    * wc.wishSpeedDivider(wishId)
+                    / wc.energyFactor(wishId)
+                    / wc.magicFactor(wishId)
+                    / wc.totalWishSpeedBonuses()
+                    , 1.0f / 0.17f)
+                / Plugin.Character.totalRes3Power());
+
+            if (cap >= long.MaxValue)
+                return long.MaxValue;
+
+            return (long)cap;
+        };
 
         [HarmonyPostfix, HarmonyPatch(typeof(WishPodUIController), "selectThisWish")]
         private static void WishPodUIController_selectThisWish_postfix(WishPodUIController __instance)
@@ -43,34 +82,59 @@ namespace jshepler.ngu.mods
                 __instance.wishIcon.color = Color.white;
         }
 
-        private static void ClearSelected()
-        {
-            _selectedIds.Clear();
-            Plugin.Character.wishesController.updateAllPods();
-        }
-
-
         [HarmonyPrefix
-            , HarmonyPatch(typeof(WishesController), "addEnergy", new Type[] { })
-            , HarmonyPatch(typeof(WishesController), "addMagic", new Type[] { })
-            , HarmonyPatch(typeof(WishesController), "addRes3", new Type[] { })]
+            , HarmonyPatch(typeof(WishesController), "addEnergy", [])
+            , HarmonyPatch(typeof(WishesController), "addMagic", [])
+            , HarmonyPatch(typeof(WishesController), "addRes3", [])]
         private static bool WishesController_addResource_prefix(WishesController __instance)
         {
             if (!Input.GetKey(KeyCode.LeftAlt))
                 return true;
 
-            var count = _selectedIds.Count;
-            if (count == 0)
-                return false;
+            var wishes = __instance.character.wishes.wishes;
+            var selected = _selectedIds.Select(i => wishes[i]).ToList();
+            SplitResources(selected);
 
-            __instance.removeAllResources();
+            ClearSelected();
+            __instance.updateText();
+
+            return false;
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(WishesController), "doLevelupEffect")]
+        private static void WishesController_doLevelupEffect_postfix(int id, int level, WishesController __instance)
+        {
+            if (level >= __instance.maxWishLevel(id))
+                return; // the code that starts the next wish will handle it
+
+            RedistributeR3();
+            __instance.updateText();
+        }
+
+        internal static void SplitResources()
+        {
+            var runningWishes = Plugin.Character.wishes.wishes
+                .Where(w => w.energy > 0 && w.magic > 0 && w.res3 > 0)
+                .ToList();
+
+            SplitResources(runningWishes);
+        }
+
+        internal static void SplitResources(List<Wish> wishes)
+        {
+            var count = wishes.Count;
+            if (count == 0)
+                return;
+
+            var controller = Plugin.Character.wishesController;
+            controller.removeAllResources();
+
             var eSplit = IdleEnergy / count;
             var mSplit = IdleMagic / count;
             var r3Split = IdleRes3 / count;
 
-            foreach (var id in _selectedIds)
+            foreach (var wish in wishes)
             {
-                var wish = Plugin.Character.wishes.wishes[id];
                 wish.energy = eSplit;
                 wish.magic = mSplit;
                 wish.res3 = r3Split;
@@ -80,28 +144,44 @@ namespace jshepler.ngu.mods
                 IdleRes3 -= r3Split;
             }
 
-            ClearSelected();
-            __instance.updateText();
-
-            return false;
+            RedistributeR3();
         }
 
-        private static long IdleEnergy
+        internal static void RedistributeR3()
         {
-            get => Plugin.Character.idleEnergy;
-            set => Plugin.Character.idleEnergy = value;
+            if (!Options.WishR3Cap.Enabled.Value)
+                return;
+
+            var character = Plugin.Character;
+
+            var runningWishes = character.wishes.wishes
+                .Select((w, i) => new { wish = w, cap = wishR3Cap(i) })
+                .Where(w => w.wish.energy > 0 && w.wish.magic > 0 && w.wish.res3 > 0)
+                .OrderBy(w => w.cap)
+                .ToList();
+
+            character.wishesController.removeAllRes3();
+            var amountLeft = character.res3.idleRes3;
+
+            while (runningWishes.Count > 0)
+            {
+                var rw = runningWishes[0];
+                var amount = Math.Min(amountLeft / runningWishes.Count, rw.cap);
+                if (amount > amountLeft)
+                    amount = amountLeft;
+
+                rw.wish.res3 += amount;
+                amountLeft -= amount;
+                runningWishes.RemoveAt(0);
+            }
+
+            character.res3.idleRes3 = amountLeft;
         }
 
-        private static long IdleMagic
+        private static void ClearSelected()
         {
-            get => Plugin.Character.magic.idleMagic;
-            set => Plugin.Character.magic.idleMagic = value;
-        }
-
-        private static long IdleRes3
-        {
-            get => Plugin.Character.res3.idleRes3;
-            set => Plugin.Character.res3.idleRes3 = value;
+            _selectedIds.Clear();
+            Plugin.Character.wishesController.updateAllPods();
         }
     }
 }

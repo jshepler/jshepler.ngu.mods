@@ -120,6 +120,11 @@ namespace jshepler.ngu.mods
                 }
             }
 
+            var width = Options.CustomResolution.Width.Value;
+            var height = Options.CustomResolution.Height.Value;
+            if (width > 0 && height > 0)
+                Screen.SetResolution(width, height, false);
+
             OnGameStart?.Invoke(null, EventArgs.Empty);
         }
 
@@ -249,14 +254,38 @@ namespace jshepler.ngu.mods
                 HasFocus = hasFocus;
             }
         }
+
+        //[HarmonyTranspiler, HarmonyPatch(typeof(Character), "constantLevelGain")]
+        private static IEnumerable<CodeInstruction> constantLevelGain(IEnumerable<CodeInstruction> instructions)
+        {
+            var cm = new CodeMatcher(instructions)
+                .MatchForward(false, new CodeMatch(OpCodes.Ldc_I4_S, (sbyte)50))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Conv_I8))
+                .SetInstruction(new CodeInstruction(OpCodes.Ldc_I8, 50L));
+
+            return cm.InstructionEnumeration();
+        }
     }
 }
 
 /*
 notes:
-    the load save button from startup screen calls: MainMenuController.loadFileSave() -> MainMenuController.loadFileKartridge() -> OpenFileDialog.loadFileMainMenuStandalone()
-    the load save button bottom-left game screen calls: OpenFileDialog.startLoadStandalone()
-    both eventually call ImportExport.loadData(SaveData)
+    the load save button from startup screen calls:
+        MainMenuController.loadFileSave()
+        ->  MainMenuController.loadFileKartridge()
+            ->  OpenFileDialog.loadFileMainMenuStandalone()
+                ->  OpenFileDialog.loadIntoGame()
+                    ->  ImportExport.loadData()
+                    ->  Character.addOfflineProgress()
+
+    the load save button bottom-left game screen calls:
+        OpenFileDialog.startLoadStandalone()
+        ->  OpenFileDialog.quickLoad()
+            ->  importExport.loadBase64ToData()
+                ->  ImportExport.loadData()
+        ->  Character.addOfflineProgress()
+
+    both eventually call ImportExport.loadData(SaveData) which updates the game from SaveData -> PlayerData
 
     reg key: HKEY_CURRENT_USER\SOFTWARE\NGU Industries\NGU Idle
  */

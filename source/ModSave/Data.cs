@@ -95,6 +95,78 @@ namespace jshepler.ngu.mods.ModSave
             set => Set("AutoMayGenMode", value);
         }
 
+        internal static long ExpGainedLastRB
+        {
+            get => Get("ExpGainedLastRB", 0L);
+            set => Set("ExpGainedLastRB", value);
+        }
+
+        internal static long ExpGainedThisRB
+        {
+            get => Get("ExpGainedThisRB", 0L);
+            set => Set("ExpGainedThisRB", value);
+        }
+
+        internal static long SeedsGainedLastRB
+        {
+            get => Get("SeedsGainedLastRB", 0L);
+            set => Set("SeedsGainedLastRB", value);
+        }
+
+        internal static long SeedsGainedThisRB
+        {
+            get => Get("SeedsGainedThisRB", 0L);
+            set => Set("SeedsGainedThisRB", value);
+        }
+
+        internal static long PoopGainedLastRB
+        {
+            get => Get("PoopGainedLastRB", 0L);
+            set => Set("PoopGainedLastRB", value);
+        }
+
+        internal static long PoopGainedThisRB
+        {
+            get => Get("PoopGainedThisRB", 0L);
+            set => Set("PoopGainedThisRB", value);
+        }
+
+        internal static long APGainedLastRB
+        {
+            get => Get("APGainedLastRB", 0L);
+            set => Set("APGainedLastRB", value);
+        }
+
+        internal static long APGainedThisRB
+        {
+            get => Get("APGainedThisRB", 0L);
+            set => Set("APGainedThisRB", value);
+        }
+
+        internal static long QPGainedLastRB
+        {
+            get => Get("QPGainedLastRB", 0L);
+            set => Set("QPGainedLastRB", value);
+        }
+
+        internal static long QPGainedThisRB
+        {
+            get => Get("QPGainedThisRB", 0L);
+            set => Set("QPGainedThisRB", value);
+        }
+
+        internal static long PPGainedLastRB
+        {
+            get => Get("PPGainedLastRB", 0L);
+            set => Set("PPGainedLastRB", value);
+        }
+
+        internal static long PPGainedThisRB
+        {
+            get => Get("PPGainedThisRB", 0L);
+            set => Set("PPGainedThisRB", value);
+        }
+
         // REMINDER: NO TYPES DEFINED IN MODS ELSE NOT LOADABLE IN VANILLA
     }
 }

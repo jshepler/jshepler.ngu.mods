@@ -14,6 +14,9 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(InventoryController), "autoMerge")]
         private static void InventoryController_autoMerge_postifx(InventoryController __instance)
         {
+            if (!Options.AutoMergeTransform.Enabled.Value)
+                return;
+
             var numberOfInventorySlots = __instance.curSpaces();
             var inventory = __instance.character.inventory;
             var equipmentList = inventory.inventory;

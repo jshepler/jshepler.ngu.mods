@@ -9,7 +9,7 @@ namespace jshepler.ngu.mods
         private static bool _isReady = false;
 
         [HarmonyPostfix, HarmonyPatch(typeof(Move69), "Update")]
-        private static void Move69_Update_postfix(Move69 __instance, float ___move69Timer)
+        private static void Move69_Update_postfix(Move69 __instance, ref float ___move69Timer)
         {
             _isReady = ___move69Timer > __instance.character.move69Cooldown();
         }
@@ -17,7 +17,7 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(ButtonShower), "updateButtons")]
         private static void ButtonShower_updateButtons_postfix(ButtonShower __instance, Text ___adventureText)
         {
-            if (__instance.adventure.IsInteractable() && __instance.character.adventure.move69Used < 69 && _isReady)
+            if (__instance.character.adventure.move69Unlocked && __instance.character.adventure.move69Used < 69 && _isReady)
             {
                 __instance.adventure.image.color = Plugin.ButtonColor_Yellow;
                 ___adventureText.text = "Move 69 Ready";

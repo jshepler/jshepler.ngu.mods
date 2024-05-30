@@ -309,6 +309,18 @@ namespace jshepler.ngu.mods
             return l;
         }
 
+        internal static long CeilToLong(this double num)
+        {
+            if (num >= long.MaxValue)
+                return long.MaxValue;
+
+            var l = (long)num;
+            if (num > l && l < long.MaxValue)
+                l++;
+
+            return l;
+        }
+
         #endregion
 
         internal static Menu CurrentMenu(this Character character)
