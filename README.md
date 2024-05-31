@@ -546,8 +546,8 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
      auto-allocation happens when:
       - alt-clicking + button to split resources between multi-selected wishes
-      - when a wish completes a level < max levels
-      - when a wish completes all levels and wish queue is enabled
+      - when a wish completes a level < max level
+      - when a wish completes all levels and wish queue is enabled, resources get transferred to new wish and R3 is rebalanced/capped amongst all running wishes
 
      the excess R3 will be used in remaining wishes and if all wishes have their R3 capped, excess will return to idle
 
