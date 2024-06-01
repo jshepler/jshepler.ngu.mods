@@ -104,13 +104,14 @@ namespace jshepler.ngu.mods
             next.magic += current.magic;
             next.res3 += current.res3;
 
-            WishSplit.RedistributeR3();
-            _controller.updateText();
-            _controller.updatebyID(nextWishId);
-
             current.energy = 0;
             current.magic = 0;
             current.res3 = 0;
+
+            WishSplit.RedistributeR3();
+
+            _controller.updateText();
+            _controller.updatebyID(nextWishId);
         }
 
         private static int GetNextWishId()

@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
+using System.Security.Policy;
 using HarmonyLib;
 using jshepler.ngu.mods.GameData;
 using jshepler.ngu.mods.GameData.DropConditions;
 using UnityEngine;
+using UnityEngine.XR;
 
 namespace jshepler.ngu.mods
 {
@@ -26,6 +28,8 @@ namespace jshepler.ngu.mods
         };
 
         private static Func<int, bool> _hasDropped = itemId => Plugin.Character.inventory.itemList.itemDropped[itemId];
+
+        private static Func<int, bool> _showItem = itemId => Options.DropTableTooltip.UnknownItems.Value != Options.DropTableTooltip.UnknownItemDisplay.Hide || _hasDropped(itemId);
 
         private static Func<int, string> _name = itemId =>
         {
@@ -90,30 +94,33 @@ namespace jshepler.ngu.mods
                 }
             }
 
+            text += DropString(zone.MacGuffinDrop) + DropString(zone.QuestItemDrop);
 
-            if (zone.MacGuffinDrop != null
-                && (!Options.DropTableTooltip.OnlyUnlocked.Value
-                    || (EnemiesKilledDropCondition.Walerp5Killed.IsConditionMet()
-                        && (zone.MacGuffinDrop.Condition == null || zone.MacGuffinDrop.Condition.IsConditionMet()))))
-            {
-                var killsRemaining = 1000 - Plugin.Character.adventureController.globalKillCounter % 1000;
-                var name = _name((int)zone.MacGuffinDrop.MacGuffinItem);
-                text += $"\n\n<b>MacGuffin:</b> ({killsRemaining} kills remaining)\n<b><color=green>100%</color></b> for {name}";
-            }
+            //if (zone.MacGuffinDrop != null
+            //    && (!Options.DropTableTooltip.OnlyUnlocked.Value
+            //        || (EnemiesKilledDropCondition.Walerp5Killed.IsConditionMet()
+            //            && (zone.MacGuffinDrop.Condition == null || zone.MacGuffinDrop.Condition.IsConditionMet()))))
+            //{
+            //    var killsRemaining = 1000 - Plugin.Character.adventureController.globalKillCounter % 1000;
+            //    var name = _name((int)zone.MacGuffinDrop.MacGuffinItem);
+            //    text += $"\n\n<b>MacGuffin:</b> ({killsRemaining} kills remaining)\n<b><color=green>100%</color></b> for {name}";
+            //}
 
-            if (zone.QuestItemDrop != null
-                && (!Options.DropTableTooltip.OnlyUnlocked.Value
-                    || (Plugin.Character.settings.beastOn
-                        && zone.QuestItemDrop.Condition.IsConditionMet())))
-            {
-                var dc = Plugin.Character.beastQuestController.questDropChance();
-                var color = dc >= 1.0f ? "green" : "red";
-                var name = _name((int)zone.QuestItemDrop.QuestItem).Substring(40);
-                text += $"\n\n<b>Quest Item:</b>\n<b><color={color}>{_dcP(dc)}</color></b> for {name}";
-            }
+            //if (zone.QuestItemDrop != null
+            //    && (!Options.DropTableTooltip.OnlyUnlocked.Value
+            //        || (Plugin.Character.settings.beastOn
+            //            && zone.QuestItemDrop.Condition.IsConditionMet())))
+            //{
+            //    var dc = Plugin.Character.beastQuestController.questDropChance();
+            //    var color = dc >= 1.0f ? "green" : "red";
+            //    var name = _name((int)zone.QuestItemDrop.QuestItem).Substring(40);
+            //    text += $"\n\n<b>Quest Item:</b>\n<b><color={color}>{_dcP(dc)}</color></b> for {name}";
+            //}
 
             // flubber has a custom DC that scales with highest boss killed in current rebirth and is not affected by DC modifiers
-            if (_zoneId == 0 && (!Options.DropTableTooltip.OnlyUnlocked.Value || Plugin.Character.bossID > 58))
+            if (_zoneId == 0
+                && (!Options.DropTableTooltip.OnlyUnlocked.Value || Plugin.Character.bossID > 58)
+                && _showItem((int)Items.Tutorial_Flubber))
             {
                 // bossID is 0-based, flubber is available after killing boss 59, so bossID = 58
                 // boss will be 60-301, so bossID will be 59-300
@@ -135,6 +142,45 @@ namespace jshepler.ngu.mods
             return false;
         }
 
+        private static string DropString(MacGuffinDrop drop)
+        {
+            if (drop == null || !_showItem((int)drop.MacGuffinItem))
+                return null;
+
+            if (Options.DropTableTooltip.OnlyUnlocked.Value)
+            {
+                if (EnemiesKilledDropCondition.Walerp5Killed.IsConditionMet() == false)
+                    return null;
+
+                if (drop.Condition != null && drop.Condition.IsConditionMet() == false)
+                    return null;
+            }
+
+            var killsRemaining = 1000 - Plugin.Character.adventureController.globalKillCounter % 1000;
+            var name = _name((int)drop.MacGuffinItem);
+            return $"\n\n<b>MacGuffin:</b> ({killsRemaining} kills remaining)\n<b><color=green>100%</color></b> for {name}";
+        }
+
+        private static string DropString(QuestItemDrop drop)
+        {
+            if (drop == null || !_showItem((int)drop.QuestItem))
+                return null;
+
+            if (Options.DropTableTooltip.OnlyUnlocked.Value)
+            {
+                if (!Plugin.Character.settings.beastOn)
+                    return null;
+
+                if (drop.Condition != null && drop.Condition.IsConditionMet() == false)
+                    return null;
+            }
+
+            var dc = Plugin.Character.beastQuestController.questDropChance();
+            var color = dc >= 1.0f ? "green" : "red";
+            var name = _name((int)drop.QuestItem).Substring(40);
+            return $"\n\n<b>Quest Item:</b>\n<b><color={color}>{_dcP(dc)}</color></b> for {name}";
+        }
+
         private static string DropsString(DropGroup group, bool isTitan = false)
         {
             var text = string.Empty;
@@ -149,6 +195,9 @@ namespace jshepler.ngu.mods
             foreach (var idc in group.Items.OrderByDescending(i => i.BaseDC))
             {
                 if (idc.Condition != null && !idc.Condition.IsConditionMet() && Options.DropTableTooltip.OnlyUnlocked.Value)
+                    continue;
+
+                if (idc.ItemIds.Any(i => i < 1 || _showItem(i)) == false)
                     continue;
 
                 var moddedDC = idc.BaseDC * _dcMulti + idc.BonuseDC;
@@ -190,7 +239,7 @@ namespace jshepler.ngu.mods
                         else
                         {
                             text += "1 of the following:";
-                            foreach (var id in idc.ItemIds.OrderBy(i => i))
+                            foreach (var id in idc.ItemIds.Where(i => _showItem(i)).OrderBy(i => i))
                                 text += $"\n    {_name(id)}";
                         }
                         break;
