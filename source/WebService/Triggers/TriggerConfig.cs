@@ -114,7 +114,7 @@ namespace jshepler.ngu.mods.WebService.Triggers
 
         private static void InitPopup()
         {
-            _windowRect = new Rect(Screen.width / 2 - 200, Screen.height / 2 - 114, 400, 300);
+            _windowRect = new Rect(Screen.width / 2 - 200, Screen.height / 2 - 114, 400, 340);
             _blocker = buildBLocker();
             IsOpen = false;
 
@@ -211,6 +211,13 @@ namespace jshepler.ngu.mods.WebService.Triggers
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("disabled", !FightBossEnabled ? _selected : _notSelected)) FightBossEnabled = false;
             if (GUILayout.Button("enabled", FightBossEnabled ? _selected : _notSelected)) FightBossEnabled = true;
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal("box");
+            GUILayout.Label("Kitty");
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("disabled", !KittyEnabled ? _selected : _notSelected)) KittyEnabled = false;
+            if (GUILayout.Button("enabled", KittyEnabled ? _selected : _notSelected)) KittyEnabled = true;
             GUILayout.EndHorizontal();
 
             GUILayout.FlexibleSpace();

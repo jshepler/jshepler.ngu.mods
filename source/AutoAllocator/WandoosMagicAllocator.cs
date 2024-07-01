@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using UnityEngine;
+using UnityEngine.TextCore;
 using UnityEngine.UI;
 
 namespace jshepler.ngu.mods.AutoAllocator
@@ -24,7 +25,8 @@ namespace jshepler.ngu.mods.AutoAllocator
 
         internal override long CalcCapDelta(int id)
         {
-            var cap = _controller.capAmountMagic();
+            var dCap = (double)_controller.baseMagicTime() / (double)_controller.character.totalWandoosMagicSpeed() * 1.000002;
+            var cap = dCap >= long.MaxValue ? long.MaxValue : (long)dCap;
             var current = _character.wandoos98.wandoosMagic;
 
             var delta = cap - current;

@@ -93,6 +93,10 @@ namespace jshepler.ngu.mods
 
             var wishes = __instance.character.wishes.wishes;
             var selected = _selectedIds.Select(i => wishes[i]).ToList();
+
+            if (selected.Count == 0)
+                selected = wishes.Where(w => w.energy > 0 || w.magic > 0 || w.res3 > 0).ToList();
+
             SplitResources(selected);
 
             ClearSelected();

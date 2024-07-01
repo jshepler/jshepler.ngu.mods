@@ -2,7 +2,7 @@
     <PropertyGroup>
         <TargetFramework>net46</TargetFramework>
         <AssemblyName>jshepler.ngu.mods</AssemblyName>
-        <Version>1.8.1</Version>
+        <Version>1.9</Version>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <LangVersion>latest</LangVersion>
         <GameFolder>D:\Steam\steamapps\common\NGU IDLE</GameFolder>
@@ -20,9 +20,6 @@
     <ItemGroup>
         <Reference Include="$(GameLibrariesFolder)Assembly-CSharp.dll" />
         <Reference Include="$(GameLibrariesFolder)UnityEngine.UI.dll" />
-        <Reference Include="PresentationFramework">
-          <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6\PresentationFramework.dll</HintPath>
-        </Reference>
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">

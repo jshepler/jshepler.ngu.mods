@@ -17,6 +17,13 @@ namespace jshepler.ngu.mods
         private static bool _appendDaycareText = false;
         private static bool _appendDualWieldText = false;
 
+        // prepends item id
+        [HarmonyPostfix, HarmonyPatch(typeof(InventoryController), "itemTooltipText", [typeof(Equipment)])]
+        private static void InventoryController_itemTooltipText_postfix(Equipment item, ref string __result)
+        {
+            __result = $"<b>({item.id})</b> {__result}";
+        }
+
         // daycare
         [HarmonyPrefix, HarmonyPatch(typeof(DaycareItemController), "OnPointerEnter")]
         private static bool DaycareItemController_OnPointerEnter_prefix(DaycareItemController __instance)
@@ -151,7 +158,7 @@ namespace jshepler.ngu.mods
                 if (Input.GetKey(KeyCode.LeftAlt))
                     text += BuildItemSourcesString(item);
 
-                Plugin.Character.tooltip.showTooltip(text);
+                Plugin.Character.tooltip.showOverrideTooltip(text);
                 yield return _waiter;
             }
         }

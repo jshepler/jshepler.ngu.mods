@@ -67,7 +67,7 @@ namespace jshepler.ngu.mods
             if (idle <= 0)
                 return true;
 
-            var cap = (double)__instance.baseEnergyTime() / (double)character.totalWandoosEnergySpeed();
+            var cap = (double)__instance.baseEnergyTime() / (double)character.totalWandoosEnergySpeed() * 1.000002;
             var allocate = cap.CeilToLong();
 
             if(idle < allocate)
@@ -89,7 +89,7 @@ namespace jshepler.ngu.mods
             if (idle <= 0)
                 return true;
 
-            var cap = (double)__instance.baseMagicTime() / (double)character.totalWandoosMagicSpeed();
+            var cap = (double)__instance.baseMagicTime() / (double)character.totalWandoosMagicSpeed() * 1.000002;
             var allocate = cap.CeilToLong();
             if (idle < allocate)
                 allocate = (cap / Math.Ceiling(cap / idle)).CeilToLong();
@@ -110,7 +110,7 @@ namespace jshepler.ngu.mods
             var character = __instance.character;
             var controller = character.bloodMagicController;
 
-            if (id > controller.ritualsUnlocked())
+            if (id >= controller.ritualsUnlocked())
                 return true;
 
             var idle = character.magic.idleMagic + character.bloodMagic.ritual[id].magic;
@@ -147,7 +147,7 @@ namespace jshepler.ngu.mods
                 _ => 0
             };
 
-            return speedDivider / (power * speedBonus);// * 1.0000020265579224;
+            return speedDivider / (power * speedBonus) * 1.000002;
         }
     }
 }

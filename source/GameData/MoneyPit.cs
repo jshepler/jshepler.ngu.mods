@@ -4,7 +4,9 @@ namespace jshepler.ngu.mods.GameData
 {
     internal static class MoneyPit
     {
-        public static Dictionary<int, List<string>> TierRewards = new()
+        internal static int[] TierExponents = [0, 5, 7, 9, 11, 13, 15, 18, 21, 24, 27, 30, 50, 55, 60, 65, 70];
+
+        internal static Dictionary<int, List<string>> TierRewards = new()
         {
             // tier 1
             { 7, new() {

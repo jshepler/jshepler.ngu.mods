@@ -42,7 +42,8 @@ namespace jshepler.ngu.mods.AutoAllocator
             var targetLevel = _character.hacks.hacks[id].level + 1;
             var v = (float)Math.Pow(1.0078, (targetLevel - 1)) * targetLevel;
 
-            var cap = (long)(v * d / (p * s));
+            var capf = v * d / (p * s);
+            var cap = capf >= long.MaxValue ? long.MaxValue : (long)capf;
             var current = _character.hacks.hacks[id].res3;
 
             var delta = cap - current;

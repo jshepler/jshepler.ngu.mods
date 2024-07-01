@@ -22,8 +22,8 @@ namespace jshepler.ngu.mods.ModSave
         }
 
         // we use this to change the serialization type from ModPlayerData to PlayerData,
-        // and then manually add all the fields, including the mod data we want to include
         // this is so a vanilla game can deserialize the save without choking on the ModPlayerData type since it wouldn't exist
+        // unfortunately, this also means we need to manually add all the values to be serialized
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.SetType(typeof(PlayerData));

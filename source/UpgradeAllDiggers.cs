@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using UnityEngine;
 
 namespace jshepler.ngu.mods
 {
@@ -12,6 +13,29 @@ namespace jshepler.ngu.mods
         {
             _controller = __instance.character.allDiggers;
             __instance.diggers.gameObject.AddComponent<ClickHandlerComponent>().OnRightClick(e => UpgradeAll());
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(ButtonShower), "updateButtons")]
+        private static void ButtonShower_updateButtons_postfix(ButtonShower __instance)
+        {
+            if (Options.DiggerUpggradeIndicator.Enabled.Value == false)
+                return;
+
+            var character = __instance.character;
+            if (!character.settings.diggersOn || character.highestBoss < 30)
+                return;
+
+            var canUpgrade = false;
+            for (var x = 0; x < character.diggers.diggers.Count; x++)
+            {
+                if (_controller.upgradeCost(x) > character.realGold)
+                    continue;
+
+                canUpgrade = true;
+                break;
+            }
+
+            __instance.diggers.image.color = canUpgrade ? Plugin.ButtonColor_Yellow : Color.white;
         }
 
         private static void UpgradeAll()

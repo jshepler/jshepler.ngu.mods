@@ -14,16 +14,21 @@ namespace jshepler.ngu.mods.BarTooltips
 
             var currentLevel = character.advancedTraining.level[id];
             var energy = character.advancedTraining.energy[id];
+            if (energy == 0)
+                energy = character.totalCapEnergy();
 
             var message = string.Empty;
             var targetLevel = character.advancedTraining.levelTarget[id];
             if (targetLevel > currentLevel)
             {
-                if (energy == 0)
-                    energy = character.totalCapEnergy();
+                var secondsToTarget = (targetLevel - currentLevel) / 50.0;
 
-                var currentProgress = character.advancedTraining.barProgress[id];
-                var secondsToTarget = Calculators.AdvancedTrainingCalculators[id].TimeToTarget(currentLevel, targetLevel, energy, currentProgress);
+                if (character.wishes.wishes[190].level == 0)
+                {
+                    var currentProgress = character.advancedTraining.barProgress[id];
+                    secondsToTarget = Calculators.AdvancedTrainingCalculators[id].TimeToTarget(currentLevel, targetLevel, energy, currentProgress);
+                }
+
                 var ttt = Tooltips.BuildTimeToTargetText(secondsToTarget);
                 message += $"\n{ttt}";
             }

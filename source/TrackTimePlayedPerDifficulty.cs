@@ -71,6 +71,9 @@ namespace jshepler.ngu.mods
 
         private static void CheckTime()
         {
+            //Data.TotalTimePlayedNormal = new System.TimeSpan(123, 23, 25, 54, 0).TotalSeconds;
+            //Data.TotalTimePlayedEvil = new System.TimeSpan(207, 15, 11, 30, 0).TotalSeconds;
+
             var diff = Plugin.Character.totalPlaytime.totalseconds
                 - Data.TotalTimePlayedNormal
                 - Data.TotalTimePlayedEvil

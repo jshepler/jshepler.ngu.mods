@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 using System.Text;
 using HarmonyLib;
-using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace jshepler.ngu.mods
 {
@@ -31,51 +28,16 @@ namespace jshepler.ngu.mods
 
         private static Character character;
         private static AllAdvancedTraining _advancedTraining;
-        private static HoverTooltip _tooltip;
-        private static bool _showTooltip = false;
 
         private static float totalPowerWithoutAdvPower;
         private static float totalDefWithoutAdvDef;
         private static float totalRegenWithoutAdvDef;
-
-        private static Func<bool> _isButtonInteractable;
 
         [HarmonyPostfix, HarmonyPatch(typeof(ButtonShower), "Start")]
         private static void ButtonShower_showTitanTimer_Start(ButtonShower __instance)
         {
             character = __instance.character;
             _advancedTraining = character.advancedTrainingController;
-            _tooltip = __instance.tooltip;
-
-            _isButtonInteractable = () => __instance.advancedTraining.interactable;
-        }
-
-        private static void OnPointerEnter(PointerEventData e)
-        {
-            if (_isButtonInteractable())
-            {
-                _showTooltip = true;
-                character.StartCoroutine(ShowTooltip());
-            }
-        }
-
-        private static void OnPointerExit(PointerEventData e)
-        {
-            _showTooltip = false;
-        }
-
-        private static WaitForSeconds _tooltipDelay = new WaitForSeconds(1);
-        private static IEnumerator ShowTooltip()
-        {
-            while (_showTooltip)
-            {
-                var text = BuildTooltipText();
-                _tooltip.showTooltip($"<b>Adv. Training needed to autokill Titans:</b>{text}");
-
-                yield return _tooltipDelay;
-            }
-
-            _tooltip.hideTooltip();
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(ButtonShower), "showTitanTimer"), HarmonyPriority(2)]
@@ -83,6 +45,14 @@ namespace jshepler.ngu.mods
         {
             if (!Plugin.GameHasStarted || __instance.adventure.interactable == false || string.IsNullOrWhiteSpace(___message))
                 return;
+
+            //var character = __instance.character;
+            //if (character.adventure.waldoFinds < 4 && character.adventure.waldoDefeats > character.adventure.waldoFinds)
+            //{
+            //    var menu = character.waldoUnlocker.currentMenu == -1 ? "---" : Enum.GetName(typeof(Menu), character.waldoUnlocker.currentMenu);
+            //    var seconds = 180 - (character.waldoUnlocker.waldoTimer % 180);
+            //    ___message += $"\n <b>... hiding in:</b> {menu} ({seconds})";
+            //}
 
             var text = BuildTooltipText();
             if (text != null)

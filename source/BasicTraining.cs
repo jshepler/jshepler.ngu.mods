@@ -47,15 +47,14 @@ namespace jshepler.ngu.mods
 
             Plugin.Character.idleEnergy += attackEnergy[id] + defenseEnergy[id];
 
-            var amountNeeded = attackCaps[id] + defenseCaps[id];
-            if (amountNeeded <= Plugin.Character.idleEnergy)
+            if (Plugin.Character.idleEnergy >= attackCaps[id] + defenseCaps[id])
             {
                 attackEnergy[id] = attackCaps[id];
                 defenseEnergy[id] = defenseCaps[id];
             }
             else
             {
-                var half = Plugin.Character.idleEnergy / 2f;
+                var half = (float)(Plugin.Character.idleEnergy / 2);
                 attackEnergy[id] = Mathf.CeilToInt(attackCaps[id] / (float)Mathf.CeilToInt(attackCaps[id] / half));
                 defenseEnergy[id] = Mathf.CeilToInt(defenseCaps[id] / (float)Mathf.CeilToInt(defenseCaps[id] / half));
             }

@@ -91,13 +91,14 @@ namespace jshepler.ngu.mods.AutoAllocator
 
         private static long CalcCapForLevel(long level)
         {
-            var cap = 50000f * level * _controller.baseSpeedDivider() /
+            var cap = 50000.0 * level * (double)_controller.baseSpeedDivider() /
                 (
-                    (double)_character.totalEnergyPower()
+                      (double)_character.totalEnergyPower()
                     * (double)_character.allChallenges.timeMachineChallenge.TMSpeedBonus()
                     * (double)_character.hacksController.totalTMSpeedBonus()
                     * (double)_character.cardsController.getBonus(cardBonus.TMSpeed)
-                );
+                )
+                * 1.000002;
 
             if (cap >= long.MaxValue)
                 return long.MaxValue;

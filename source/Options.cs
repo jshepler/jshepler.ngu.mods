@@ -25,6 +25,7 @@ namespace jshepler.ngu.mods
             Options.DefaultPlayerPortait.Filename = Config.Bind("DefaultPlayerPortait", "Filename", "", "filename of 184x184 image in config folder, used to replace default player portrait (overrides BossId option), leave empty to disable");
             Options.TrollKitty.Filename = Config.Bind("TrollKitty", "Filename", "", "filename of 900x600 image in config folder, used to replace troll kitty sprite, leave empty to disable");
 
+            Options.DiggerUpggradeIndicator.Enabled = Config.Bind("DiggerUpggradeIndicator", "Enabled", false, "if enabled, digger button will light up yellow if any digger can be upgraded");
             Options.DropTableTooltip.Enabled = Config.Bind("DropTableTooltip", "Enabled", true, "enables display of zones' Drop Table tooltip by holding the alt key");
             Options.DropTableTooltip.OnlyUnlocked = Config.Bind("DropTableTooltip", "OnlyUnlocked", true, "if true, only items that meet their drop conditions will be displayed");
             Options.DropTableTooltip.UnknownItems = Config.Bind("DropTableTooltip", "UnknownItems", DropTableTooltip.UnknownItemDisplay.Blur, "how unknown items (not yet dropped) are displayed; Blur replaces names with \"????\"");
@@ -59,6 +60,8 @@ namespace jshepler.ngu.mods
 
             Options.WisheQueue.Enabled = Config.Bind("WisheQueue", "Enabled", true, "enables the wish queue");
             Options.WishR3Cap.Enabled = Config.Bind("WishR3Cap", "Enabled", true, "when auto-allocating resources or when a wish completes a level, will (re)distribute R3 amongst running wishes to not be more than is needed for min wish time");
+
+            Options.FruitActivationIndicator.Enabled = Config.Bind("FruitActivationIndicator", "Enabled", false, "when enabled, the Yggdrasil button will light up red if any fruit needs activation");
         }
 
         internal static class RemoteTriggers
@@ -194,6 +197,16 @@ namespace jshepler.ngu.mods
         }
 
         internal static class AutoMergeTransform
+        {
+            internal static ConfigEntry<bool> Enabled;
+        }
+
+        internal static class FruitActivationIndicator
+        {
+            internal static ConfigEntry<bool> Enabled;
+        }
+
+        internal static class DiggerUpggradeIndicator
         {
             internal static ConfigEntry<bool> Enabled;
         }

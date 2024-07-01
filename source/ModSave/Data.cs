@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace jshepler.ngu.mods.ModSave
 {
@@ -165,6 +164,24 @@ namespace jshepler.ngu.mods.ModSave
         {
             get => Get("PPGainedThisRB", 0L);
             set => Set("PPGainedThisRB", value);
+        }
+
+        internal static int CurrentDiggerLoadoutId
+        {
+            get => Get("CurrentDiggerLoadoutId", 0);
+            set => Set("CurrentDiggerLoadoutId", value);
+        }
+
+        internal static Dictionary<int, List<int>> DiggerLoadouts
+        {
+            get => Get<Dictionary<int, List<int>>>("DiggerLoadouts", new() { { 0, new() }, { 1, new() }, { 2, new() } });
+            set => Set("DiggerLoadouts", value);
+        }
+
+        internal static Dictionary<int, List<long>> DiggerLevels
+        {
+            get => Get<Dictionary<int, List<long>>>("DiggerLevels", new() { { 0, new() }, { 1, new() }, { 2, new() } });
+            set => Set("DiggerLevels", value);
         }
 
         // REMINDER: NO TYPES DEFINED IN MODS ELSE NOT LOADABLE IN VANILLA

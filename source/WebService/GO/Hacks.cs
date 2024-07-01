@@ -62,7 +62,7 @@ namespace jshepler.ngu.mods.WebService.GO
                 hacks[x] = new Hack
                 {
                     level = Plugin.Character.hacks.hacks[x].level,
-                    redcuer = ShowHackMilestoneReducersTooltip.GetReducerCount(Plugin.Character, x)
+                    redcuer = BarTooltips.Hacks.GetReducerCount(Plugin.Character, x)
                 };
 
             return hacks;

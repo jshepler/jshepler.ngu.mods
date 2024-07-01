@@ -1,4 +1,4 @@
-# jshepler.ngu.
+﻿# jshepler.ngu.
 Collection of mods I wrote for myself.
 
 I had not intended to make these public, as I don't want to support them long-term (i.e. when no longer playing the game). A few people have asked that I share the code, so here you go.
@@ -158,7 +158,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
     - % of cap allocated: augs, AT, TM, BM, wandoos, NGUs, beards\*
     - over-capped duration (time until no longer over-capped): augs, AT, TM, wandoos, NGUs, beards\*
     - current speed - progress per tick & ticks per bar: augs, AT, TM, wandoos, NGUs, beards
-    - time to target: augs, AT, TM, NGUs
+    - time to target: augs, AT, TM, NGUs, hacks
     - banked amounts to: AT, TM, beards
 
     \* I know you don't allocate resources to beards, but the game still calculates progress per tick, which can be used to show a % "allocated" in order to show how much over "cap" the bar is, and to calc/display how long until no longer capped (i.e. how long it will be BB'd) - this helps to project when you won't need beard diggers running to stay BB'd for 24 hour rebirths
@@ -270,7 +270,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
     holding shift when clicking the save button will do a clean save (save file dialog's title has "(CLEAN)" appended)
 
     current data being persisted:
-    - auto questing enabled (mod 24)
+    - auto questing enabled (mod 34)
     - last loadout (mod 43)
     - last ygg rewards (mod 41)
     - last iron pill gain
@@ -380,6 +380,11 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
     - UrlPrefix: what appears before \<command\>, can be used to specify machine name or IP
     - enable/disable individual commands
 
+    the gear (settings) button in the lower-left of the screen (next to Info 'n Stuff):
+    - green/white = master enabled/disabled
+    - F10 to toggle enabled/disabled
+    - right-click the button (or press shift-F10) to open the in-game config panel
+
 82. added config file:
     - option to control remote triggers
     - option to enable/disable auto-harvest/eat fruits when fully grown
@@ -395,9 +400,9 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 84. evenly split resources between selected wishes
 
-    alt-click to select multiple wishes (up to max wish slots)
-
-    alt-click any of the resource + buttons to remove all resources from all wishes, and then split all idle resources to selected wishes
+    - alt-click to select multiple wishes (up to max wish slots)
+    - alt-click any of the resource + buttons to remove all resources from all wishes, and then split all idle resources to selected wishes
+    - if no wishes are multi-selected, alt-click resource allocation will be done on any any wish that has any resource currently allocated
 
 85. improved ITOPOD description (zone tooltip)
     - cleaned up the text
@@ -407,6 +412,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
     - kills per EXP drop
     - EXP per drop
     - EXP per day
+    - the optimal floor even if > max floor
 
     time to next PP uses 2 calcs: one for when floor \<= optimal floor and another > optimal floor
 
@@ -560,3 +566,25 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 131. fix game bug with cap buttons that manifests in sadistic, when cap > hardcap
 
      TLDR; the cap buttons allocate based on the cap that's clamped to hardcap, but the progress a bar gains per progress uses the real cap that can be higher than hardcap
+
+132. cube boosting info:
+  - cube tooltip shows current boost divider
+  - boost tooltips show how much will be added to cube
+
+133. prepends item id to item name on item tooltips
+
+134. digger loadouts
+  - the save and load diggers button text changed to show which loadout will be saved/loaded
+  - holding alt changes the digger page buttons to digger loadout buttons and highlights current loadout
+  - while holding alt, click the loadout buttons to change loadouts (can also just press alt-1, alt-2, or alt-3)
+  - when saving a digger loadout, the current levels will be saved and used as soft-caps when loading a loadout using alt-click or alt-#
+
+135. added indicator for when any fruit needs manual activation - Yggdrasil button turns red (option in cfg to enable, defaults to false)
+
+136. added indicator for when any digger can be upgraded - Gold Diggers button turns yellow (option in cfg to enable, defaults to false)
+
+137. shift-click the "Use" button on EMR potion α (alpha) to convert 24 of them to 1 δ (delta)
+
+138. shift-click the + button next to a hack's target to set that hack's hard cap
+
+139. pressing shift-F5 will do a clean quicksave - doesn't include any save data from my mods (useful for loading into GO)

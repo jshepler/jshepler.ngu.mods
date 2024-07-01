@@ -9,8 +9,7 @@ namespace jshepler.ngu.mods
         private static void BeastQuestController_constructQuestList_postfix(BeastQuestController __instance)
         {
             var character = __instance.character;
-            var quest = character.beastQuest;
-            if (quest.idleMode)
+            if (character.beastQuest.idleMode)
                 return;
 
             var currentZone = character.adventure.zone;

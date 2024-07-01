@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Reflection.Emit;
 using HarmonyLib;
 using UnityEngine;
@@ -8,6 +9,19 @@ namespace jshepler.ngu.mods
     [HarmonyPatch]
     internal class InfinityCubeSoftCap
     {
+        internal static float CubeBoostDivider
+        {
+            get
+            {
+                var character = Plugin.Character;
+                if (character == null)
+                    return 1f;
+
+                return (character.adventure.itopod.perkLevel[26] >= 1 ? 50f : 100f)
+                    / character.wishesController.totalBoostRatioDivider();
+            }
+        }
+
         [HarmonyTranspiler, HarmonyPatch(typeof(LoadoutController), "infinityCubeTooltip")]
         private static IEnumerable<CodeInstruction> LoadoutController_infinityCubeTooltip_transpiler(IEnumerable<CodeInstruction> instructions)
         {
@@ -86,12 +100,17 @@ namespace jshepler.ngu.mods
             var total = (long)(cubePower + cubeToughness);
             var nextTier = total < 10 ? 1 : (int)Mathf.Log10(total);
 
-            if (nextTier > 10)
-                return "\n\n<color=blue><b>AT MAX TIER</b></color>";
+            var text = "\n\n<color=blue><b>AT MAX TIER</b></color>";
+            if (nextTier <= 10)
+            {
+                var need = Mathf.Pow(10, nextTier + 1) - total;
+                text = $"\n\n<b>P + T (uncapped):</b> {character.display(total)}"
+                        + $"\n<b>Need for next tier:</b> {character.display(need)}";
+            }
 
-            var need = Mathf.Pow(10, nextTier + 1) - total;
-            return $"\n\n<b>P + T (uncapped):</b> {character.display(total)}"
-                    + $"\n<b>Need for next tier:</b> {character.display(need)}";
+            text += $"\n\n<b>Boost Divider:</b> {CubeBoostDivider:0.0#}";
+
+            return text;
         }
     }
 }

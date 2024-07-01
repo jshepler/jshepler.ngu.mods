@@ -36,7 +36,19 @@ namespace jshepler.ngu.mods
             Plugin.OnUpdate += (o, e) =>
             {
                 if (Input.GetKeyDown(KeyCode.F5))
-                    DoSave($"QuickSave");
+                {
+                    if (Plugin.Character.settings.dailySaveRewardTime.totalseconds >= 82800.0)
+                    {
+                        Plugin.Character.settings.dailySaveRewardTime.reset();
+                        Plugin.ShowOverrideNotification($"You (tried) to manually save your file today! Here's {Plugin.Character.addAP(200)} AP as a bribe!");
+                    }
+
+                    if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+                        DoSave("QuickSave (CLEAN)", true);
+                    else
+                        DoSave("QuickSave");
+                }
+
                 else if (Input.GetKeyDown(KeyCode.F6))
                     LoadLastQuicksave();
             };
@@ -70,8 +82,10 @@ namespace jshepler.ngu.mods
             }
         }
 
-        private static void DoSave(string saveName)
+        private static void DoSave(string saveName, bool doCleanSave = false)
         {
+            ModSave.Patches.DoCleanSave = doCleanSave;
+
             var character = Plugin.Character;
             character.lastTime = Epoch.Current();
             var data = character.importExport.getBase64Data();

@@ -1,13 +1,22 @@
-﻿using HarmonyLib;
+﻿using System.Linq;
+using HarmonyLib;
 using UnityEngine;
 
-namespace jshepler.ngu.mods
+namespace jshepler.ngu.mods.BarTooltips
 {
     [HarmonyPatch]
-    internal class ShowHackMilestoneReducersTooltip
+    internal class Hacks
     {
+        private static CapCalculators.HacksCalculator[] _calc;
+
+        [HarmonyPostfix, HarmonyPatch(typeof(HacksController), "Start")]
+        private static void HacksController_Start_postfix(HacksController __instance)
+        {
+            _calc = __instance.character.hacks.hacks.Select((h, i) => new CapCalculators.HacksCalculator(__instance, i)).ToArray();
+        }
+
         [HarmonyPostfix, HarmonyPatch(typeof(HacksController), "showTooltip", typeof(int))]
-        private static void HacksController_showTooltip_postfix(HacksController __instance, int id)
+        private static void HacksController_showTooltip_postfix(int id, HacksController __instance)
         {
             if (id == 15)
                 return;
@@ -18,16 +27,24 @@ namespace jshepler.ngu.mods
 
             var currentBonus = __instance.hackBonus(id);
             text += $"\n\n<b>Current Effect:</b> {character.display(currentBonus * 100f, 1)}%";
-            
+
             var nextLevelBonus = __instance.hackBonus(id, 1);
             text += $"\n<b>Next Level:</b> {character.display(nextLevelBonus * 100f, 1)}%";
 
             var timeUntilNextLevel = __instance.timeLeft(id);
             text += $"\n<b>Time Until Next Level:</b> {timeUntilNextLevel}";
 
+            var hack = character.hacks.hacks[id];
+            if (hack.level < hack.target)
+            {
+                var r3 = hack.res3 > 0 ? hack.res3 : character.totalCapRes3();
+                var secondsToTarget = _calc[id].TimeToTarget(hack.level, hack.target, r3, hack.progress);
+                text += $"\n<b>Time to Target:</b> {NumberOutput.timeOutput(secondsToTarget)}";
+            }
+
             var msGained = __instance.numMilestonesReached(id);
             text += $"\n\n<b>Milestones reached:</b> {msGained}";
-            
+
             var reducerCount = GetReducerCount(character, id);
             var maxReducerCount = GetMaxReducerCount(character, id);
             text += $" (with {reducerCount}/{maxReducerCount} reducers)";
@@ -46,12 +63,11 @@ namespace jshepler.ngu.mods
                 return;
             }
 
-            var level = character.hacks.hacks[id].level;
             var msThreshold = props.milestoneThreshold;
 
             for (var x = 0; x <= maxReducerCount; x++)
             {
-                var lastGained = Mathf.FloorToInt(level / (msThreshold - x));
+                var lastGained = Mathf.FloorToInt(hack.level / (msThreshold - x));
                 var lastBonus = Mathf.Pow(msBaseBonus, lastGained);
                 text += $"\n   <b>@{x} reducers:</b> {lastGained} => {character.display(lastBonus * 100f, 1)}%";
             }

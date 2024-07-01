@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
+using UnityEngine;
 
 namespace jshepler.ngu.mods.AutoAllocator
 {
@@ -26,19 +27,80 @@ namespace jshepler.ngu.mods.AutoAllocator
         [HarmonyPostfix, HarmonyPatch(typeof(Character), "removeMostEnergy")]
         private static void ClearEnergyAllocators()
         {
-            Allocators.Energy.Values.Do(a => a.DisableAll());
+            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+                switch (Plugin.Character.CurrentMenu())
+                {
+                    case Menu.AdvancedTraining:
+                        Allocators.Energy[Allocators.Feature.AdvancedTraining].DisableAll();
+                        break;
+
+                    case Menu.Augments:
+                        Allocators.Energy[Allocators.Feature.Augment].DisableAll();
+                        Allocators.Energy[Allocators.Feature.AugmentUpgrade].DisableAll();
+                        break;
+
+                    case Menu.BasicTraining:
+                        Allocators.Energy[Allocators.Feature.BT_Attack].DisableAll();
+                        Allocators.Energy[Allocators.Feature.BT_Defense].DisableAll();
+                        break;
+
+                    case Menu.NGU_Energy:
+                        Allocators.Energy[Allocators.Feature.NGU_Energy].DisableAll();
+                        break;
+
+                    case Menu.TimeMachine:
+                        Allocators.Energy[Allocators.Feature.TM_Energy].DisableAll();
+                        break;
+
+                    case Menu.Wandoos:
+                        Allocators.Energy[Allocators.Feature.Wandoos_Energy].DisableAll();
+                        break;
+                }
+
+            else
+                Allocators.Energy.Values.Do(a => a.DisableAll());
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(Character), "removeMostMagic")]
         private static void ClearMagicAllocators()
         {
-            Allocators.Magic.Values.Do(a => a.DisableAll());
+            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+                switch (Plugin.Character.CurrentMenu())
+                {
+                    case Menu.BloodMagic_Rituals:
+                        Allocators.Magic[Allocators.Feature.BloodRitual].DisableAll();
+                        break;
+
+                    case Menu.NGU_Magic:
+                        Allocators.Magic[Allocators.Feature.NGU_Magic].DisableAll();
+                        break;
+
+                    case Menu.TimeMachine:
+                        Allocators.Magic[Allocators.Feature.TM_Magic].DisableAll();
+                        break;
+
+                    case Menu.Wandoos:
+                        Allocators.Magic[Allocators.Feature.Wandoos_Magic].DisableAll();
+                        break;
+                }
+
+            else
+                Allocators.Magic.Values.Do(a => a.DisableAll());
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(Character), "removeAllRes3")]
         private static void ClearRes3Allocators()
         {
-            Allocators.Res3.Values.Do(a => a.DisableAll());
+            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+                switch (Plugin.Character.CurrentMenu())
+                {
+                    case Menu.Hacks:
+                        Allocators.Res3[Allocators.Feature.Hacks].DisableAll();
+                        break;
+                }
+
+            else
+                Allocators.Res3.Values.Do(a => a.DisableAll());
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(Rebirth), "engage", typeof(bool))]

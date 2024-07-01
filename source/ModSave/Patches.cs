@@ -14,18 +14,18 @@ namespace jshepler.ngu.mods.ModSave
     {
         // this adds a way to make a clean save (without the extra data)
         // useful for things like using the gear optimizer as it fails to load modded save
-        private static bool _cleanSave = false;
+        internal static bool DoCleanSave = false;
 
         [HarmonyPrefix, HarmonyPatch(typeof(OpenFileDialog), "startSaveStandalone")]
         private static void OpenFileDialog_startSaveStandalone_prefix()
         {
-            _cleanSave = Input.GetKey(KeyCode.LeftShift);
+            DoCleanSave = Input.GetKey(KeyCode.LeftShift);
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(StandaloneFileBrowser), "SaveFilePanel", typeof(string), typeof(string), typeof(string), typeof(string))]
         private static void StandaloneFileBrowser_SaveFilePanel_prefix(ref string title)
         {
-            if (_cleanSave)
+            if (DoCleanSave)
                 title += " (CLEAN)";
         }
 
@@ -48,9 +48,9 @@ namespace jshepler.ngu.mods.ModSave
 
         private static PlayerData CreatePlayerData()
         {
-            if (_cleanSave)
+            if (DoCleanSave)
             {
-                _cleanSave = false;
+                DoCleanSave = false;
                 return new PlayerData();
             }
 

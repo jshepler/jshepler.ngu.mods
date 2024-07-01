@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
@@ -90,7 +91,7 @@ namespace jshepler.ngu.mods
             var character = Plugin.Character;
             var controller = character.adventureController;
 
-            var optimalFloor = character.calculateBestItopodLevel();
+            var optimalFloor = CalculateOptimalFloor();
             var maxFloor = character.adventure.highestItopodLevel;
             var currentFloor = controller.itopodLevel;
 
@@ -142,8 +143,26 @@ namespace jshepler.ngu.mods
                 _tooltipText += $"\n<b>Kills to next MacGuffin:</b> {killsToNextGuff} in {(secondsPerKill == 0f ? "???" : NumberOutput.timeOutput(killsToNextGuff * secondsPerKill))}";
             }
 
-            _tooltipText += $"\n\n<b>Max Floor: </b> {maxFloor}"
+            _tooltipText += $"\n\n<b>Max Floor: </b> {maxFloor - 1}"
                 + $"\n<b>Optimal Floor:</b> {optimalFloor}";
+        }
+
+        private static int CalculateOptimalFloor()
+        {
+            var character = Plugin.Character;
+
+            var totalAdvAttack = character.totalAdvAttack();
+            if (totalAdvAttack < 700f)
+                return 0;
+
+            var optimalAttack = totalAdvAttack / 765f * character.idleAttackPower();
+
+            int floor = Convert.ToInt32(Math.Floor(Math.Log(optimalAttack, 1.05)));
+
+            if (floor < 1)
+                return 1;
+
+            return floor;
         }
     }
 }

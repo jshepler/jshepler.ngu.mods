@@ -1,4 +1,6 @@
-﻿using HarmonyLib;
+﻿using System.Collections.Generic;
+using System.Linq;
+using HarmonyLib;
 using UnityEngine;
 
 namespace jshepler.ngu.mods
@@ -12,7 +14,17 @@ namespace jshepler.ngu.mods
             if (Input.GetKey(KeyCode.LeftAlt))
                 return true;
 
-            var character = __instance.character;
+            ApplyDiggerLoadout(__instance);
+
+            Plugin.ShowNotification("Saved diggers have been capped!", 2f);
+            __instance.refreshMenu();
+
+            return false;
+        }
+
+        internal static void ApplyDiggerLoadout(AllGoldDiggerController controller, List<long> softCaps = null)
+        {
+            var character = controller.character;
             var diggers = character.diggers.diggers;
 
             var activeDiggers = character.diggers.activeDiggers;
@@ -34,13 +46,19 @@ namespace jshepler.ngu.mods
                 var cheapestId = -1;
                 var cheapestDrain = double.MaxValue;
 
-                foreach (var id in loadoutDiggers)
+                for (var x = 0; x < loadoutDiggers.Count; x++)
                 {
+                    var id = loadoutDiggers[x];
+
+                    // ignore those >= soft cap
+                    if (softCaps != null && x < softCaps.Count && diggers[id].curLevel >= softCaps[x])
+                        continue;
+
                     // ignore those at max
                     if (diggers[id].curLevel >= diggers[id].maxLevel)
                         continue;
 
-                    var drain = __instance.drain(id, 1) - __instance.drain(id);
+                    var drain = controller.drain(id, 1) - controller.drain(id);
                     if (totalDrain + drain > grossGps)
                         continue;
 
@@ -59,15 +77,10 @@ namespace jshepler.ngu.mods
             }
 
             foreach (var id in loadoutDiggers)
-                if(diggers[id].curLevel == 0)
+                if (diggers[id].curLevel == 0)
                     diggers[id].active = false;
 
-            activeDiggers.AddRange(loadoutDiggers);
-
-            Plugin.ShowNotification("Saved diggers have been capped!", 2f);
-            __instance.refreshMenu();
-
-            return false;
+            activeDiggers.AddRange(loadoutDiggers.Where(i => diggers[i].active));
         }
     }
 }
