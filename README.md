@@ -1,4 +1,4 @@
-﻿# jshepler.ngu.
+﻿# jshepler.ngu.mods
 Collection of mods I wrote for myself.
 
 I had not intended to make these public, as I don't want to support them long-term (i.e. when no longer playing the game). A few people have asked that I share the code, so here you go.
@@ -6,11 +6,19 @@ I had not intended to make these public, as I don't want to support them long-te
 The majority are QoL enhancements. There are a couple bug fixes, and few thigns that are somewhat cheaty-ish but nothing majorly so.
 
 # Installation
-These mods are written for [bepinex](https://github.com/BepInEx/BepInEx) v5.4.21, which can be downloaded [here](https://github.com/BepInEx/BepInEx/releases/tag/v5.4.21). Download the x64 version and extract the contents into NGU Idle's game folder `...\Steam\steamapps\common\NGU IDLE`.
+These mods are written for [bepinex](https://github.com/BepInEx/BepInEx) v5.4.21, which can be downloaded [here](https://github.com/BepInEx/BepInEx/releases/tag/v5.4.21). Download the x64 version and extract the contents of the zip file:
+
+![bepinex zip contents](bepinex_zip_contents.png)
+
+to NGU Idle's game folder `...\Steam\steamapps\common\NGU IDLE`:
+
+![NGU folder after extraion](bepinex_extracted.png)
 
 Bepinex will set itself up the first time the game is run after extracting the zip. So start the game, then exit the game.
 
-Download the latest jshepler.ngu.mods.dll file from [releases](https://github.com/jshepler/jshepler.ngu.mods/releases) and put it in `...\Steam\steamapps\common\NGU IDLE\BepInEx\plugins`.
+Download the latest `jshepler.ngu.mods.dll` file from [releases](https://github.com/jshepler/jshepler.ngu.mods/releases) and put it in `...\Steam\steamapps\common\NGU IDLE\BepInEx\plugins`.
+
+![dll file location](dll.png)
 
 # Configuration
 The first time the game is run after installing the mods, a configuration file is created: `...\Steam\steamapps\common\NGU IDLE\BepInEx\config\jshepler.ngu.mods.cfg`.
@@ -20,15 +28,19 @@ The config file is only read when the game starts, so exit the game before makin
 There are only a few config options at the moment. I'll probably add options in the future for the more questionable things.
 
 # GO integration bookmarklets
-These are used in the [Gear Optimizer](https://gmiclotte.github.io/gear-optimizer) to talk to NGU. They require you to use GO v0.9.2 or higher - check the [About](https://gmiclotte.github.io/gear-optimizer/#/about/) tab in GO.
+***NOTE (unrelated to bookmarklets): importing saves from modded NGU into GO won't work unless you import a clean save - see mods 57 and 139 below.***
 
-Because the data in GO is held on your computer instead of GO's server, NGU can't talk to GO to get/send any data. I also can't inject new controls into GO to talk to NGU. Therefore, need to use bookmarklets to execute javascript in the context of the active browser tab to talk to NGU.
+Bookarmklets are bookmarks that execute javascript instead of taking you to a specified URL. They run in the active browser tab as part of the site being viewed.
+
+The bookmarklets below are used in the [Gear Optimizer](https://gmiclotte.github.io/gear-optimizer) site to talk to NGU. They require you to use GO v0.9.2 or higher - check the [About](https://gmiclotte.github.io/gear-optimizer/#/about/) tab in GO. **You must be on GO when using these bookmarklets or they won't work.**
 
 Create a new bookmark. I like using the bookmark bar for easy access and in a sub-folder. You can name them whatever you want. Here's what I named mine:
 
 ![what I called mine](GO_bookmarklets.png)
 
-For the URLs, paste the following javascript:
+For the URL field, you're going to paste some javascript instead of a URL:
+
+![bookmarklet URL](GO_bookmarklets_URL.png)
 
 ## sending loadouts from GO to NGU
 `javascript:fetch("http://localhost:8088/ngu/go2ngu/loadouts",{method:"POST",body:JSON.stringify(appState.savedequip)});`
