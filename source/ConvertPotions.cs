@@ -18,7 +18,7 @@ namespace jshepler.ngu.mods
 
             character.arbitrary.energyPotion1Count -= 24;
             character.arbitrary.energyPotion3Count++;
-            __instance.updateMenu();
+            __instance.character.allArbitrary.updateMenu();
 
             return false;
         }
@@ -35,7 +35,41 @@ namespace jshepler.ngu.mods
 
             character.arbitrary.magicPotion1Count -= 24;
             character.arbitrary.magicPotion3Count++;
-            __instance.updateMenu();
+            __instance.character.allArbitrary.updateMenu();
+
+            return false;
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(ArbitraryController), "startUseRes3Potion1")]
+        private static bool ArbitraryController_startUseRes3Potion1_prefix(ArbitraryController __instance)
+        {
+            if (!Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift))
+                return true;
+
+            var character = __instance.character;
+            if (character.arbitrary.res3Potion1Count < 24)
+                return true;
+
+            character.arbitrary.res3Potion1Count -= 24;
+            character.arbitrary.res3Potion3Count++;
+            __instance.character.allArbitrary.updateMenu();
+
+            return false;
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(ArbitraryController), "startUseLootCharm1")]
+        private static bool ArbitraryController_startUseLootCharm1_prefix(ArbitraryController __instance)
+        {
+            if (!Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift))
+                return true;
+
+            var character = __instance.character;
+            if (character.arbitrary.lootCharm1Count < 24)
+                return true;
+
+            character.arbitrary.lootCharm1Count -= 24;
+            character.arbitrary.lootCharm2Count++;
+            __instance.character.allArbitrary.updateMenu();
 
             return false;
         }

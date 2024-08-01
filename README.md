@@ -14,6 +14,8 @@ to NGU Idle's game folder `...\Steam\steamapps\common\NGU IDLE`:
 
 ![NGU folder after extraion](bepinex_extracted.png)
 
+***NOTE: if using linux, need to add `WINEDLLOVERRIDES="winhttp=n,b" %command%` to the game's launch options in steam.***
+
 Bepinex will set itself up the first time the game is run after extracting the zip. So start the game, then exit the game.
 
 Download the latest `jshepler.ngu.mods.dll` file from [releases](https://github.com/jshepler/jshepler.ngu.mods/releases) and put it in `...\Steam\steamapps\common\NGU IDLE\BepInEx\plugins`.
@@ -257,7 +259,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 50. add tab navigation to various fields, supports shift-tab and wrap-around (tabbing past first/last field, wraps to other end)
 
-    currently: augment targets, advanced training targets, time machine targets, NGUs targets, digger levels, Hacks targets
+    currently: augment targets, advanced training targets, time machine targets, NGUs targets, digger levels, Hacks targets, EMR3 custom purchase amounts
 
 51. shift-click cap button to get a popup of buttons for the partial caps 10-50%, click to allocate that amount
 
@@ -538,7 +540,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 120. right-click on inventory button to merge/boost all (same that happens with auto merge/boost timer triggers)
 
-121. displays % over E/M P/C hardcap under equipment bonuses on inventory page (helps to know which E/M power/cap items can be removed withouth dropping below hardcap)
+121. displays excess EMPC under `EQUIPMENT BONUSES` - how much of the bonus from equipment is "wasted" as it puts you over hard cap
 
 122. switches to basic training screen when rebirthing and don't yet have the Intant Training Cap AP purchase
 
@@ -577,7 +579,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 131. fix game bug with cap buttons that manifests in sadistic, when cap > hardcap
 
-     TLDR; the cap buttons allocate based on the cap that's clamped to hardcap, but the progress a bar gains per progress uses the real cap that can be higher than hardcap
+     TLDR; the cap buttons allocate based on the cap that's clamped to hardcap, but the progress a bar gains per tick uses the real cap that can be higher than hardcap
 
 132. cube boosting info:
   - cube tooltip shows current boost divider
@@ -595,8 +597,29 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 136. added indicator for when any digger can be upgraded - Gold Diggers button turns yellow (option in cfg to enable, defaults to false)
 
-137. shift-click the "Use" button on EMR potion α (alpha) to convert 24 of them to 1 δ (delta)
+137. shift-click the "Use" button on some consumables to convert them to another consumable:
+  - 24 EMR3 potion alphas to 1 potion delta
+  - 24 lucky charms to 1 super lucky charm
 
 138. shift-click the + button next to a hack's target to set that hack's hard cap
 
 139. pressing shift-F5 will do a clean quicksave - doesn't include any save data from my mods (useful for loading into GO)
+
+140. when in a challenge and not at max zone, adventure button lights up yellow (except when in ITOPOD)
+
+141. shift-click the buy button on SOME consumables to sell them back. I tried to make sure nothing could be cheesed to make more AP (e.g. selling 24 epot1 and buying 1 epot3 results in gaining 20 AP).
+  - energy potions beta and delta (not alpha)
+  - magic potions beta and delta (not alpha)
+  - res3 potions beta and delta (not alpha)
+  - energy bar bars
+  - magic bar bars
+  - super lucky charms
+  - muffins
+  - infusers
+  - pens
+
+142. tooltip to quest description text that shows breakdown of qp reward
+
+143. tooltip to fruits' eat/harevest button that shows what will be gained if eaten/harvested now
+
+144. fixes game bug with walderp fight that if player survives the explosion from doing the wrong attack, walderp's next fight would be another explosion due to the code thinking the player didn't do any attack in time

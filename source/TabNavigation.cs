@@ -12,9 +12,9 @@ namespace jshepler.ngu.mods
     // started out trying to use Selectable::FindSelectableOnUp/Down
     // based on code from: https://forum.unity.com/threads/tab-between-input-fields.263779/
     //
-    // But input fields aren't the only selectable and this games has over 1k selectables in the scene, even
+    // But input fields aren't the only selectable and this game has over 1k selectables in the scene, even
     // if only displaying a portion of them. The method above works until viewing different feature pages, then
-    // it would start seleting fields in pages other than the current one. The code started getting pretty messy,
+    // it would start selecting fields in pages other than the current page. The code started getting pretty messy,
     // especially the wrap-around code when tabbing past the first/last field, so I put it on hold and tried a different approach.
     //
     // Building a list of fields as they are created, sort them in order of transform.position.y, allowed me to
@@ -24,16 +24,7 @@ namespace jshepler.ngu.mods
     internal class TabNavigation
     {
         private static EventSystem _system;
-        private static List<InputField> _augFields = new();
-        private static List<InputField> _atFields = new();
-        private static List<InputField> _tmFields = new();
-        private static List<InputField> _eNguFields = new();
-        private static List<InputField> _mNguFields = new();
-        private static List<InputField> _diggerFields = new();
-        private static List<InputField> _hacksFields = new();
-
-        //private static Dictionary<Menu, List<InputField>> _menuFields;
-
+        private static Dictionary<Menu, List<InputField>> _fields = new();
         private static bool _sorted = false;
 
         [HarmonyPrepare]
@@ -49,51 +40,80 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(AugmentController), "Start")]
         private static void AugmentController_Start_postfix(AugmentController __instance)
         {
+            if (!_fields.ContainsKey(Menu.Augments))
+                _fields.Add(Menu.Augments, new());
+
+            _fields[Menu.Augments].Add(__instance.augmentTarget);
+            _fields[Menu.Augments].Add(__instance.upgradeTarget);
+
             __instance.augmentTarget.navigation = Navigation.defaultNavigation;
-            _augFields.Add(__instance.augmentTarget);
-            
             __instance.upgradeTarget.navigation = Navigation.defaultNavigation;
-            _augFields.Add(__instance.upgradeTarget);
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(AdvancedTrainingController), "Start")]
         private static void AdvancedTrainingController_Start_postfix(AdvancedTrainingController __instance)
         {
+            if (!_fields.ContainsKey(Menu.AdvancedTraining))
+                _fields.Add(Menu.AdvancedTraining, new());
+
+            _fields[Menu.AdvancedTraining].Add(__instance.target);
             __instance.target.navigation = Navigation.defaultNavigation;
-            _atFields.Add(__instance.target);
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(NGUController), "Start")]
         private static void NGUController_Start_postfix(NGUController __instance)
         {
+            if (!_fields.ContainsKey(Menu.NGU_Energy))
+                _fields.Add(Menu.NGU_Energy, new());
+
+            _fields[Menu.NGU_Energy].Add(__instance.target);
             __instance.target.navigation = Navigation.defaultNavigation;
-            _eNguFields.Add(__instance.target);
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(NGUMagicController), "Start")]
         private static void NGUMagicController_Start_postfix(NGUMagicController __instance)
         {
+            if (!_fields.ContainsKey(Menu.NGU_Magic))
+                _fields.Add(Menu.NGU_Magic, new());
+
+            _fields[Menu.NGU_Magic].Add(__instance.magicTarget);
             __instance.magicTarget.navigation = Navigation.defaultNavigation;
-            _mNguFields.Add(__instance.magicTarget);
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(TimeMachineController), "Start")]
         private static void TimeMachineController_Start_postfix(TimeMachineController __instance)
         {
-            _tmFields.Add(__instance.speedTarget);
-            _tmFields.Add(__instance.multiTarget);
+            _fields.Add(Menu.TimeMachine, [__instance.speedTarget, __instance.multiTarget]);
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(AllGoldDiggerController), "Start")]
         private static void AllGoldDiggerController_Start_postfix(AllGoldDiggerController __instance)
         {
-            _diggerFields = __instance.pods.Select(p => p.diggerLevelInput).ToList();
+            _fields.Add(Menu.GoldDiggers, __instance.pods.Select(p => p.diggerLevelInput).ToList());
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(HacksController), "Start")]
         private static void HacksController_Start_postfix(HacksController __instance)
         {
-            _hacksFields = __instance.pods.Select(p => p.target).ToList();
+            _fields.Add(Menu.Hacks, __instance.pods.Select(p => p.target).ToList());
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(EnergyPurchases), "Start")]
+        private static void EnergyPurchaes_Start_postfix(EnergyPurchases __instance)
+        {
+            _fields.Add(Menu.EXP_Energy, [__instance.powerInput, __instance.capInput, __instance.barInput]);
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(MagicPurchases), "Start")]
+        private static void MagicPurchases_Start_postfix(MagicPurchases __instance)
+        {
+            _fields.Add(Menu.EXP_Magic, [__instance.powerInput, __instance.capInput, __instance.barInput]);
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(Resource3Purchases), "Start")]
+        private static void Resource3Purchases_Start_postfix(Resource3Purchases __instance)
+        {
+            _fields.Add(Menu.EXP_R3, [__instance.powerInput, __instance.capInput, __instance.barInput]);
         }
 
         private static void OnUpdate(object sender, EventArgs e)
@@ -107,20 +127,26 @@ namespace jshepler.ngu.mods
 
             if (!_sorted) sortLists();
 
-            var list = Plugin.Character.CurrentMenu() switch
-            {
-                Menu.Augments => _augFields,
-                Menu.AdvancedTraining => _atFields,
-                Menu.TimeMachine => _tmFields,
-                Menu.NGU_Energy => _eNguFields,
-                Menu.NGU_Magic => _mNguFields,
-                Menu.GoldDiggers => _diggerFields,
-                Menu.Hacks => _hacksFields,
-                _ => null
-            };
+            //var list = Plugin.Character.CurrentMenu() switch
+            //{
+            //    Menu.Augments => _augFields,
+            //    Menu.AdvancedTraining => _atFields,
+            //    Menu.TimeMachine => _tmFields,
+            //    Menu.NGU_Energy => _eNguFields,
+            //    Menu.NGU_Magic => _mNguFields,
+            //    Menu.GoldDiggers => _diggerFields,
+            //    Menu.Hacks => _hacksFields,
+            //    _ => null
+            //};
 
-            if (list == null)
-                return; // not in a supported menu
+            //if (list == null)
+            //    return; // not in a supported menu
+
+            var menu = Plugin.Character.CurrentMenu();
+            if (!_fields.ContainsKey(menu))
+                return;
+
+            var list = _fields[menu];
 
             var index = list.IndexOf((InputField)current);
             if (index == -1)
@@ -145,9 +171,8 @@ namespace jshepler.ngu.mods
 
         private static void sortLists()
         {
-            var comparer = new FieldOrderComparer();
-
             // this works, just experimenting with different ways to sort
+            //var comparer = new FieldOrderComparer();
             //_augFields = _augFields.OrderBy(i => i.transform.position, comparer).ToList();
             //_atFields = _atFields.OrderBy(i => i.transform.position, comparer).ToList();
             //_eNguFields = _eNguFields.OrderBy(i => i.transform.position, comparer).ToList();
@@ -155,12 +180,15 @@ namespace jshepler.ngu.mods
             //_diggerFields = _diggerFields.OrderBy(i => i.transform.position, comparer).ToList();
             //_hacksFields = _hacksFields.OrderBy(i => i.transform.position, comparer).ToList();
 
-            _augFields.Sort(CompareFieldPosition);
-            _atFields.Sort(CompareFieldPosition);
-            _eNguFields.Sort(CompareFieldPosition);
-            _mNguFields.Sort(CompareFieldPosition);
-            _diggerFields.Sort(CompareFieldPosition);
-            _hacksFields.Sort(CompareFieldPosition);
+            //_augFields.Sort(CompareFieldPosition);
+            //_atFields.Sort(CompareFieldPosition);
+            //_eNguFields.Sort(CompareFieldPosition);
+            //_mNguFields.Sort(CompareFieldPosition);
+            //_diggerFields.Sort(CompareFieldPosition);
+            //_hacksFields.Sort(CompareFieldPosition);
+
+            foreach (var l in _fields.Values)
+                l.Sort(CompareFieldPosition);
 
             _sorted = true;
         }

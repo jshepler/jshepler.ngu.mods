@@ -50,7 +50,7 @@ namespace jshepler.ngu.mods
             _image.fillAmount = 1f;
 
             Plugin.OnUpdate += OnUpdate;
-            Plugin.onGUI += OnGUI;
+            //Plugin.onGUI += OnGUI;
 
             btn.gameObject.AddComponent<ClickHandlerComponent>()
                 .OnRightClick(e => Plugin.Character.StartCoroutine(RunFight()));
@@ -68,6 +68,7 @@ namespace jshepler.ngu.mods
             __instance.defenseText.text += $"\n(boss dmg / my hp): {_dmgTakenPct:f1}%";
         }
 
+        // removes "bossText.text = "Fight Boss"
         [HarmonyTranspiler, HarmonyPatch(typeof(ButtonShower), "updateButtons")]
         private static IEnumerable<CodeInstruction> ButtonShower_updateButtons_transpiler(IEnumerable<CodeInstruction> instructions)
         {
@@ -105,10 +106,10 @@ namespace jshepler.ngu.mods
 
             if (Input.GetKeyDown(KeyCode.B))
                 character.StartCoroutine(RunFight());
-        }
+        //}
 
-        private static void OnGUI(object sender, EventArgs e)
-        {
+        //private static void OnGUI(object sender, EventArgs e)
+        //{
             var nuking = Plugin.Character.bossController.nukeBoss;
             var fighting = Plugin.Character.bossController.isFighting;
 

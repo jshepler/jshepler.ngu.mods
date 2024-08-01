@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using HarmonyLib;
 
 namespace jshepler.ngu.mods
@@ -6,6 +7,8 @@ namespace jshepler.ngu.mods
     [HarmonyPatch]
     internal class ZoneUnlockNotification
     {
+        private static int[] zoneUnlockBossIds = [0, 4, 7, 17, 37, 48, 58, 58, 66, 66, 74, 82, 82, 90, 100, 100, 108, 116, 116, 124, 132, 137, 359, 401, 426, 459, 467, 467, 475, 483, 491, 491, 501, 727, 752, 777, 810, 818, 826, 826, 834, 842, 850, 850, 871, 897, 902];
+
         [HarmonyPostfix, HarmonyPatch(typeof(BossController), "advanceBoss")]
         private static void BossController_advanceBoss_postfix(BossController __instance)
         {
@@ -19,6 +22,21 @@ namespace jshepler.ngu.mods
             zones.Do(z => __instance.tooltip.showTooltip($"unlocked zone: {Plugin.Character.adventureController.zoneName(z-1)}", 3));
         }
 
-        private static int[] zoneUnlockBossIds = new[] { 0, 4, 7, 17, 37, 48, 58, 58, 66, 66, 74, 82, 82, 90, 100, 100, 108, 116, 116, 124, 132, 137, 359, 401, 426, 459, 467, 467, 475, 483, 491, 491, 501, 727, 752, 777, 810, 818, 826, 826, 834, 842, 850, 850, 871, 897, 902 };
+        [HarmonyPostfix, HarmonyPatch(typeof(ButtonShower), "updateButtons")]
+        private static void ButtonShower_updateButtons_postfix(ButtonShower __instance)
+        {
+            var character = __instance.character;
+            if (!character.challenges.inChallenge || character.challenges.laserSwordChallenge.inChallenge || character.bossID < 4)
+                return;
+
+            var maxZone = character.adventureController.zoneDropdown.options.Count - 2;
+            while (GameData.Evaluators.TitanZoneIds.Contains(maxZone))
+                maxZone--;
+
+            if (character.adventure.zone >= maxZone)
+                return;
+
+            __instance.adventure.image.color = Plugin.ButtonColor_Yellow;
+        }
     }
 }

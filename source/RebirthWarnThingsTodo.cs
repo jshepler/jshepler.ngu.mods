@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Linq;
+using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,13 +12,16 @@ namespace jshepler.ngu.mods
     {
         private static Button _button;
 
-        [HarmonyPostfix, HarmonyPatch(typeof(Rebirth), "Awake")]
-        private static void Character_Start_postfix(Character __instance)
+        [HarmonyPrepare]
+        private static void prep(MethodInfo method)
         {
+            if (method != null)
+                return;
+
             Plugin.OnGameStart += (o, e) =>
             {
                 _button = GameObject.Find("Canvas/Rebirth Canvas/Rebirth Menu/Rebirth Button").GetComponent<Button>();
-                __instance.StartCoroutine(SetRebirthColor());
+                Plugin.Character.StartCoroutine(SetRebirthColor());
             };
         }
 

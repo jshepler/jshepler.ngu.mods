@@ -185,6 +185,23 @@ namespace jshepler.ngu.mods
             return cm.InstructionEnumeration();
         }
 
+        [HarmonyPrefix, HarmonyPatch(typeof(MainMenuController), "updateMiscText")]
+        private static bool MainMenuController_updateMiscText_prefix(MainMenuController __instance)
+        {
+            var build = __instance.character.getVersionAsString();
+            __instance.buildText.text = $"<b>Build {build}</b>(jshepler mods {PluginInfo.PLUGIN_VERSION})";
+            __instance.buildText.resizeTextForBestFit = true;
+            return false;
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(VersionNumbering), "Start")]
+        private static bool VersionNumbering_Start_prefix(VersionNumbering __instance)
+        {
+            var build = __instance.character.getVersionAsString();
+            __instance.versionNumber.text = $"<b>Build {build}</b>\n(jshepler mods {PluginInfo.PLUGIN_VERSION})";
+            return false;
+        }
+
         internal static void ShowNotification(string text, float seconds = 3f)
         {
             Character?.tooltip.showTooltip(text, seconds);
@@ -238,7 +255,7 @@ namespace jshepler.ngu.mods
                 {
                     var tag = data["tag_name"].Value;
                     if (!string.IsNullOrWhiteSpace(tag) && tag != PluginInfo.PLUGIN_VERSION)
-                        ShowOverrideNotification($"<b><color=blue>jshepler.ngu.mods</color></b>\n\nCurrent Version: <b>{PluginInfo.PLUGIN_VERSION}</b>\nLatest Version: <b>{tag}</b>", 10f);
+                        ShowOverrideNotification($"<b><color=blue>jshepler.ngu.mods</color></b>\n\nNew Version Available: <b>{tag}</b>", 10f);
                 }
 
                 yield return _waitForOneHour;

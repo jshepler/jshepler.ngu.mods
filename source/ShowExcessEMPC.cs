@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace jshepler.ngu.mods
 {
     [HarmonyPatch]
-    internal class ShowEMOverHardCap
+    internal class ShowExcessEMPC
     {
         const float EM_CAP_HARDCAP = 9e+18f;
         const float EM_POW_HARDCAP = 1e+18f;
@@ -68,7 +68,7 @@ namespace jshepler.ngu.mods
 
             if (ePowTotal > EM_POW_HARDCAP)
             {
-                sb.Append("\nePow over hardcap: ");
+                sb.Append("\nexcess EP: ");
 
                 if (ePowNoEquip >= EM_POW_HARDCAP)
                     sb.Append($"{(ePowEquipBonus * 100f):#,##0.#}%");
@@ -83,7 +83,7 @@ namespace jshepler.ngu.mods
 
             if (eCapTotal > EM_CAP_HARDCAP)
             {
-                sb.Append("\neCap over hardcap: ");
+                sb.Append("\nexcess EC: ");
 
                 if (eCapNoEquip >= EM_CAP_HARDCAP)
                     sb.Append($"{(eCapEquipBonus * 100f):#,##0.#}%");
@@ -98,7 +98,7 @@ namespace jshepler.ngu.mods
 
             if (mPowTotal > EM_POW_HARDCAP)
             {
-                sb.Append("\nmPow over hardcap: ");
+                sb.Append("\nexcess MP: ");
 
                 if (mPowNoEquip >= EM_POW_HARDCAP)
                     sb.Append($"{(mPowEquipBonus * 100f):#,##0.#}%");
@@ -113,7 +113,7 @@ namespace jshepler.ngu.mods
 
             if (mCapTotal > EM_CAP_HARDCAP)
             {
-                sb.Append("\nmCap over hardcap: ");
+                sb.Append("\nexcess MC: ");
 
                 if (mCapNoEquip >= EM_CAP_HARDCAP)
                     sb.Append($"{(mCapEquipBonus * 100f):#,##0.#}%");

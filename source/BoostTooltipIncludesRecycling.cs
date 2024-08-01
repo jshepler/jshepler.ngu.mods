@@ -11,7 +11,8 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(InventoryController), "itemTooltipText", typeof(Equipment))]
         private static void InventoryController_itemTooltipText_postfix(Equipment item, InventoryController __instance, ref string __result)
         {
-            if (!item.isBoost() || !__instance.character.settings.autoboostRecycledBoosts) return;
+            if (!item.isBoost())// || !__instance.character.settings.autoboostRecycledBoosts)
+                return;
 
             var equip = __instance.itemInfo.genLoot(item.id, true);
             var boostBonus = __instance.character.allItemList.boostBonus();

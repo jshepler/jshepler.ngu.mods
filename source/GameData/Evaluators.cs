@@ -5,10 +5,10 @@ namespace jshepler.ngu.mods.GameData
     internal class Evaluators
     {
         internal static long TitanQP(int zoneId) { return (long)(titanQP(zoneId) * titanVersionMulti(zoneId)); }
-        internal static long TitanPP(int zoneId) { return (long)(titanPP(zoneId) * titanVersionMulti(zoneId)); }
+        internal static long TitanPPP(int zoneId) { return (long)(titanPPP(zoneId) * titanVersionMulti(zoneId)); }
         internal static long TitanAP(int zoneId) { return Plugin.Character.checkAPAdded(titanAP(zoneId)); }
 
-        internal static int[] TitanZoneIds = { 6, 8, 11, 14, 16, 19, 23, 26, 30, 34, 38, 42 };
+        internal static int[] TitanZoneIds = [6, 8, 11, 14, 16, 19, 23, 26, 30, 34, 38, 42];
 
         internal static long TitanExp(int zoneId)
         {
@@ -88,7 +88,7 @@ namespace jshepler.ngu.mods.GameData
             };
         }
 
-        private static long titanPP(int zoneId)
+        private static long titanPPP(int zoneId)
         {
             return zoneId switch
             {

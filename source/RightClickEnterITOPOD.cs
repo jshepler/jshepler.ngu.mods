@@ -20,6 +20,12 @@ namespace jshepler.ngu.mods
                 .AddComponent<ClickHandlerComponent>()
                 .OnRightClick(e =>
                 {
+                    if (__instance.character.arbitrary.boughtLazyITOPOD)
+                    {
+                        __instance.character.arbitrary.lazyITOPODOn = true;
+                        __instance.character.adventureController.updateShifterUI();
+                    }
+
                     _optimalFloorButton.onClick.Invoke();
                     _enterPodButton.onClick.Invoke();
                 });

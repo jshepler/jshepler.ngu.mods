@@ -2,12 +2,10 @@
     <PropertyGroup>
         <TargetFramework>net46</TargetFramework>
         <AssemblyName>jshepler.ngu.mods</AssemblyName>
-        <Version>1.9</Version>
+        <Version>1.10</Version>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <LangVersion>latest</LangVersion>
         <GameFolder>D:\Steam\steamapps\common\NGU IDLE</GameFolder>
-        <PluginsFolder>$(GameFolder)\BepInEx\plugins</PluginsFolder>
-        <GameLibrariesFolder>$(GameFolder)\NGUIdle_Data\Managed\</GameLibrariesFolder>
     </PropertyGroup>
 
     <ItemGroup>
@@ -18,8 +16,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Reference Include="$(GameLibrariesFolder)Assembly-CSharp.dll" />
-        <Reference Include="$(GameLibrariesFolder)UnityEngine.UI.dll" />
+        <Reference Include="$(GameFolder)\NGUIdle_Data\Managed\Assembly-CSharp.dll" />
+        <Reference Include="$(GameFolder)\NGUIdle_Data\Managed\UnityEngine.UI.dll" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
@@ -27,7 +25,6 @@
     </ItemGroup>
 
     <Target Name="CopyDLL" AfterTargets="Build">
-        <Copy SourceFiles="$(TargetDir)$(AssemblyName).dll" DestinationFolder="$(PluginsFolder)" />
-        <!--<Copy SourceFiles="$(TargetDir)$(AssemblyName).dll" DestinationFolder="D:\mods\ngu idle\standalone\BepInEx\plugins" />-->
+        <Copy SourceFiles="$(TargetDir)$(AssemblyName).dll" DestinationFolder="$(GameFolder)\BepInEx\plugins" />
     </Target>
 </Project>

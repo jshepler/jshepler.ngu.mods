@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
-using System.Security.Policy;
 using HarmonyLib;
 using jshepler.ngu.mods.GameData;
 using jshepler.ngu.mods.GameData.DropConditions;
 using UnityEngine;
-using UnityEngine.XR;
 
 namespace jshepler.ngu.mods
 {
@@ -177,7 +175,10 @@ namespace jshepler.ngu.mods
 
             var dc = Plugin.Character.beastQuestController.questDropChance();
             var color = dc >= 1.0f ? "green" : "red";
-            var name = _name((int)drop.QuestItem).Substring(40);
+            var name = _name((int)drop.QuestItem);//.Substring(40);
+            if (name != "????")
+                name = name.Substring(40);
+
             return $"\n\n<b>Quest Item:</b>\n<b><color={color}>{_dcP(dc)}</color></b> for {name}";
         }
 
@@ -218,8 +219,8 @@ namespace jshepler.ngu.mods
                         break;
 
                     case (int)Items.PP:
-                        var pp = Evaluators.TitanPP(_zoneId);
-                        text += $"{_number(pp)} PP progress ({_number(idc.BaseAmount)} base)";
+                        var pp = Evaluators.TitanPPP(_zoneId);
+                        text += $"{_number(pp / 1e+6D)} PP ({(idc.BaseAmount / 1e+6D):0.###} base)";
                         break;
 
                     case (int)Items.AP:

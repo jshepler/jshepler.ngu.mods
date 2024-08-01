@@ -28,11 +28,15 @@ namespace jshepler.ngu.mods
             if (!Input.GetKey(KeyCode.LeftShift))
                 return true;
 
-            var cap = __instance.capValue();
-            
+            // if last ritual, make sure it's unlocked
+            if (__instance.id == 7 && __instance.character.allChallenges.trollChallenge.completions() < 6)
+                return true;
+
+            var cap = FixCapButtonCalcs.calcBloodRitualCap(__instance.id);// __instance.capValue();
             var caps = new List<long>();
+
             for (var x = 0; x < 9; x++)
-                caps.Add(cap / (x + 2));
+                caps.Add((cap / (x + 2)).CeilToLong());
 
             _controller = __instance;
             _popup.OpenAt(Event.current.mousePosition, caps);

@@ -21,7 +21,7 @@ namespace jshepler.ngu.mods
         private static void StandaloneFileBrowser_OpenFilePanel_prefix(ref string title)
         {
             if (_skipOfflineProgress)
-                title += " (SKIPPIPNG OFFLINE PROGRESS)";
+                title += " (SKIPPING OFFLINE PROGRESS)";
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(Character), "addOfflineProgress")]

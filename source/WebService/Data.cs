@@ -27,13 +27,13 @@ namespace jshepler.ngu.mods.WebService
         private static string getBaseEMR()
         {
             var root = new JSONObject();
-            root.Add("epower", Plugin.Character.energyPower);
+            root.Add("epower", Plugin.Character.energyPower.ToString("0.#"));
             root.Add("ecap", Plugin.Character.capEnergy);
             root.Add("ebars", Plugin.Character.energyBars);
-            root.Add("mpower", Plugin.Character.magic.magicPower);
+            root.Add("mpower", Plugin.Character.magic.magicPower.ToString("0.#"));
             root.Add("mcap", Plugin.Character.magic.capMagic);
             root.Add("mbars", Plugin.Character.magic.magicPerBar);
-            root.Add("r3power", Plugin.Character.res3.res3Power);
+            root.Add("r3power", Plugin.Character.res3.res3Power.ToString("0.#"));
             root.Add("r3cap", Plugin.Character.res3.capRes3);
             root.Add("r3bars", Plugin.Character.res3.res3PerBar);
 

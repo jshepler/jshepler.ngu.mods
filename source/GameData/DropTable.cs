@@ -600,7 +600,7 @@ namespace jshepler.ngu.mods.GameData
                         })
                 }
 
-                , MacGuffinDrop = new MacGuffinDrop(Items.Guff_Stat)
+                , MacGuffinDrop = new MacGuffinDrop(Items.Guff_Stat, new SetCompleteDropCondition(ItemSets.Choco))
                 , QuestItemDrop = new QuestItemDrop(Items.Quest_Toothbrush, ItemSets.Choco)
             });
 
@@ -1310,7 +1310,7 @@ namespace jshepler.ngu.mods.GameData
             {
                 TitanV1Drops = new DropGroup(1.5E+17f
                     , new DropItems(1.00f, 8000, Items.Exp)
-                    , new DropItems(1.00f, 1e+6f, Items.PP)
+                    , new DropItems(1.00f, 1000000, Items.PP)
                     , new DropItems(1.00f, 6, Items.QP) { Condition = WishDropCondition.T12QP }
                     , new DropItems(1.4E-08f, 0.25f, Items.T12_ChofficeHatOfGreed)
                     , new DropItems(1.4E-08f, 0.25f, Items.T12_WoodenOfficeApronOfMight)

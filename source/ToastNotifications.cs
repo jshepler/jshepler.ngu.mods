@@ -81,10 +81,10 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(UIThemeController), "changeTheme")]
         private static void UIThemeController_changeTheme_postfix(int newID)
         {
-            _scaleFactor = Plugin.Character.tooltip.canvas.scaleFactor;
+            //_scaleFactor = Plugin.Character.tooltip.canvas.scaleFactor;
 
-            var rect = Traverse.Create(Plugin.Character.tooltip).Field<RectTransform>("tooltipRect").Value.rect;
-            _xPos = Screen.width - (rect.width * _scaleFactor) - 5;
+            //var rect = Traverse.Create(Plugin.Character.tooltip).Field<RectTransform>("tooltipRect").Value.rect;
+            //_xPos = Screen.width - (rect.width * _scaleFactor) - 5;
 
             _baseTooltip = GameObject.Instantiate(Plugin.Character.tooltip.tooltip, _toastsContainer.transform);
             _baseTooltip.transform.position = new Vector3(_xPos, -1000);
@@ -205,6 +205,9 @@ namespace jshepler.ngu.mods
 
             // setting a GameObject active doesn't happen until next frame, and the ContentSizeFitter component won't do its thing until then
             yield return null;
+
+            _scaleFactor = Plugin.Character.tooltip.canvas.scaleFactor;
+            _xPos = Screen.width - (toast.Width * _scaleFactor) - 5;
 
             Vector3 pos;
             if (_topDown)
