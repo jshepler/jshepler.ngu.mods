@@ -622,4 +622,4 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 143. tooltip to fruits' eat/harevest button that shows what will be gained if eaten/harvested now
 
-144. fixes game bug with walderp fight that if player survives the explosion from doing the wrong attack, walderp's next fight would be another explosion due to the code thinking the player didn't do any attack in time
+144. fixes game bug with walderp fight that if player survives the explosion from doing the wrong attack, walderp's next attack would be another explosion due to the code thinking the player didn't do any attack in time
