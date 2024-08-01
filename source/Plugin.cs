@@ -199,6 +199,7 @@ namespace jshepler.ngu.mods
         {
             var build = __instance.character.getVersionAsString();
             __instance.versionNumber.text = $"<b>Build {build}</b>\n(jshepler mods {PluginInfo.PLUGIN_VERSION})";
+            __instance.versionNumber.resizeTextForBestFit = true;
             return false;
         }
 
