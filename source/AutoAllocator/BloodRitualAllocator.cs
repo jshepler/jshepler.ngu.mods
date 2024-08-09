@@ -29,7 +29,7 @@ namespace jshepler.ngu.mods.AutoAllocator
             if (id > character.bloodMagicController.ritualsUnlocked())
                 return 0;
 
-            var cap = _allBM.bloodMagics[id].capValue();
+            var cap = FixCapButtonCalcs.calcBloodRitualCap(id).CeilToLong();// _allBM.bloodMagics[id].capValue();
             var current = character.bloodMagic.ritual[id].magic;
 
             var delta = cap - current;

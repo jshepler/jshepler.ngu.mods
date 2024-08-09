@@ -14,7 +14,7 @@ namespace jshepler.ngu.mods.BarTooltips
             var character = __instance.character;
 
             var ppt = character.allBeards.beardProgressPerTick(id);
-            var capPct = ((decimal)ppt).Truncate(4) * 100m;
+            var capPct = ((decimal)ppt * 100).Truncate(5);
 
             var tpb = ppt == 0 ? 0 : Mathf.CeilToInt(1 / ppt);
 

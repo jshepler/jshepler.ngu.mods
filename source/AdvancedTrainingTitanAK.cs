@@ -173,7 +173,7 @@ namespace jshepler.ngu.mods
             {
                 for (var x = 1; x < 5; x++)
                 {
-                    if (character.bestiary.enemies[343 + x].kills >= 24) continue;
+                    if (character.bestiary.enemies[343 + x].kills > 23) continue;
 
                     pt = x switch
                     {
@@ -195,7 +195,7 @@ namespace jshepler.ngu.mods
             {
                 for (var x = 1; x < 5; x++)
                 {
-                    if (character.bestiary.enemies[364 + x].kills >= 4) continue;
+                    if (character.bestiary.enemies[364 + x].kills > 4) continue;
 
                     pt = x switch
                     {
@@ -217,7 +217,7 @@ namespace jshepler.ngu.mods
             {
                 for (var x = 1; x < 5; x++)
                 {
-                    if (character.bestiary.enemies[368 + x].kills >= 4) continue;
+                    if (character.bestiary.enemies[368 + x].kills > 4) continue;
 
                     pt = x switch
                     {
@@ -239,7 +239,7 @@ namespace jshepler.ngu.mods
             {
                 for (var x = 1; x < 5; x++)
                 {
-                    if (character.bestiary.enemies[372 + x].kills >= 4) continue;
+                    if (character.bestiary.enemies[372 + x].kills > 4) continue;
 
                     pt = x switch
                     {
@@ -342,77 +342,5 @@ namespace jshepler.ngu.mods
                 return !(a > b);
             }
         }
-
-
-
-
-        // not using this class or the following Dictionary, but keeping it in case I ever change my mind,
-        // don't want to type all this crap again
-        class TitanAutokillRequirements
-        {
-            public string Name;
-            public PTR[] Requirements;
-            public Func<int> GetVersion;
-
-            public TitanAutokillRequirements(string name, Func<int> fnGetVersion, PTR[] ptReqs)
-            {
-                this.Name = name;
-                this.GetVersion = fnGetVersion ?? new Func<int>(() => 0);
-                this.Requirements = ptReqs;
-            }
-        }
-
-        // data from AdventureController manageFight() and autokillTitanXAchieved()
-        // key is effective boss id for titan
-        private static Dictionary<int, TitanAutokillRequirements> _tar = new Dictionary<int, TitanAutokillRequirements>
-        {
-            {58, new TitanAutokillRequirements("GRB", null, new[] { new PTR(3000f, 2500f) }) },
-            {66, new TitanAutokillRequirements("GCT", null, new[] { new PTR(9000f, 7000f) }) },
-            {82, new TitanAutokillRequirements("JAKE", null, new[] { new PTR(25000f, 15000f) }) },
-            {100, new TitanAutokillRequirements("UUG", null, new[] { new PTR(800000f, 400000f, 14000f) }) },
-            {116, new TitanAutokillRequirements("WALDERP", null, new[] { new PTR(1.3e+7f, 7.0e+6f, 150000f) }) },
-
-            {132, new TitanAutokillRequirements("THE BEAST",
-                () => character.adventure.titan6Version,
-                new[]
-                {
-                    new PTR(2.5E+09f, 1.6E+09f, 2.5e+07f),
-                    new PTR(2.5E+10f, 1.6E+10f, 2.5e+08f),
-                    new PTR(2.5E+11f, 1.6E+11f, 2.5e+09f),
-                    new PTR(2.5E+12f, 1.6E+12f, 2.5e+10f)
-                })},
-
-            {426, new TitanAutokillRequirements("GREASY NERD",
-                () => character.adventure.titan7Version,
-                new []
-                {
-                    new PTR(5E+14f, 2.5E+14f, 5E+12f),
-                    new PTR(1E+16f, 5E+15f, 1E+14f),
-                    new PTR(2E+17f, 1E+17f, 2E+15f),
-                    new PTR(5E+18f, 2.5E+18f, 5E+16f)
-                })
-            },
-
-            // GODMOTHER
-            {467, null },
-            
-            // EXILE
-            {491, null },
-            
-            // IT HUNGERS
-            {727, null },
-            
-            // ROCK LOBSTER
-            {826, null },
-            
-            // AMALGAMATE
-            {848, null },
-            
-            // TIPPI
-            {897, null },
-            
-            // TRAITOR
-            {902, null }
-        };
     }
 }

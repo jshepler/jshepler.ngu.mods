@@ -280,7 +280,7 @@ namespace jshepler.ngu.mods
 
         #region Maths
 
-        // based on https://stackoverflow.com/a/43639947
+        // https://stackoverflow.com/a/43639947
         internal static decimal Truncate(this decimal d, byte decimals)
         {
             decimal r = Math.Round(d, decimals);

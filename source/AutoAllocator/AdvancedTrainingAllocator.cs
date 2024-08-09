@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using UnityEngine;
-using UnityEngine.TextCore;
 using UnityEngine.UI;
 
 namespace jshepler.ngu.mods.AutoAllocator
@@ -15,17 +14,6 @@ namespace jshepler.ngu.mods.AutoAllocator
         private static Character _character;
         private static AdvancedTrainingController[] _controllers;
         private static AdvancedTrainingAllocator Instance = new();
-
-        //private static AdvancedTrainingController _controller(int id) =>
-        //    id switch
-        //    {
-        //        0 => _allAT.defense,
-        //        1 => _allAT.attack,
-        //        2 => _allAT.block,
-        //        3 => _allAT.wandoosEnergy,
-        //        4 => _allAT.wandoosMagic,
-        //        _ => null
-        //    };
 
         internal AdvancedTrainingAllocator() : base(5)
         {
@@ -139,12 +127,9 @@ namespace jshepler.ngu.mods.AutoAllocator
         {
             var power = (double)_character.totalEnergyPower();
             var speedBonus = (double)_character.totalAdvancedTrainingSpeedBonus();
-            var cap = (50 * _controllers[id].baseTime * level * Math.Sqrt(power) / (speedBonus * power));
+            var cap = 50 * _controllers[id].baseTime * level * Math.Sqrt(power) / (speedBonus * power) * 1.000002;
 
-            if (cap >= long.MaxValue)
-                return long.MaxValue;
-
-            return ((long)cap) + 1;
+            return cap >= long.MaxValue ? long.MaxValue : (long)cap;
         }
 
         private static void OverCap(int id)

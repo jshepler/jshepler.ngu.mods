@@ -36,10 +36,6 @@ namespace jshepler.ngu.mods
 
         private static void TransformAll(int selection)
         {
-            // don't really need this check as the buttons wouldn't be visible
-            //if (_controller.character.allChallenges.level100Challenge.completions() >= _controller.character.allChallenges.level100Challenge.maxCompletions)
-            //    return;
-
             _controller.character.settings.autoTransform = selection;
             _controller.updateTransformToggles();
 
@@ -52,10 +48,13 @@ namespace jshepler.ngu.mods
                 var item = equipmentList[slotIndex];
                 if (item == null || !item.isBoost() || !item.removable)
                     continue;
+
+                var newItem = _controller.itemInfo.autoTransform(item, selection);
+                equipmentList[slotIndex] = newItem;
                 
-                var id = (item.id - 1) % 13 + 1 + (selection - 1) * 13;
-                item.id = id;
-                item.type = (part)(selection + 5);
+                //var id = (item.id - 1) % 13 + 1 + (selection - 1) * 13;
+                //item.id = id;
+                //item.type = (part)(selection + 5);
 
                 _controller.updateItem(slotIndex);
             }
