@@ -49,7 +49,7 @@ namespace jshepler.ngu.mods.BarTooltips
 
             var bank = character.adventureController.itopod.totalBankedAdvTraining();
             if (bank > 0f)
-                message += $"\n\n<b>Banked ({bank * 100f:0}%):</b> {character.display(currentLevel * bank)}";
+                message += $"\n\n<b>Banked ({bank * 100f:0}%):</b> {character.display((long)(currentLevel * bank))}";
 
             __instance.tooltip.showTooltip($"{LastTooltip.Message}{message}");
         }

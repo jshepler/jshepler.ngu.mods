@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
-using SimpleJSON;
 using UnityEngine;
-using UnityEngine.Networking;
 
 namespace jshepler.ngu.mods
 {
@@ -141,8 +138,6 @@ namespace jshepler.ngu.mods
 
             // unlocks krissmuss ui theme from christmass 2019 event
             __instance.settings.prizePicked = 6;
-
-            CheckForNewVersion();
         }
 
         // when starting a new game, there is no offline progress and mods that rely on this event
@@ -211,56 +206,6 @@ namespace jshepler.ngu.mods
         internal static void ShowOverrideNotification(string text, float seconds = 3f)
         {
             Character?.tooltip.showOverrideTooltip(text, seconds);
-        }
-
-        private static Coroutine _checkForNewVersion;
-        private static void CheckForNewVersion()
-        {
-            if (Options.CheckForNewVersion.Enabled.Value == false)
-                return;
-
-            if (_checkForNewVersion != null)
-                Character.StopCoroutine(_checkForNewVersion);
-
-            _checkForNewVersion = Character.StartCoroutine(CheckForNewVersionEx());
-        }
-
-        private static WaitForSeconds _waitForOneHour = new WaitForSeconds(3600f);
-        private static IEnumerator CheckForNewVersionEx()
-        {
-            string json;
-
-            while (true)
-            {
-                using (var req = UnityWebRequest.Get("https://api.github.com/repos/jshepler/jshepler.ngu.mods/releases/latest"))
-                {
-                    yield return req.SendWebRequest();
-
-                    if (req.isNetworkError)
-                    {
-                        LogInfo($"CheckForUpdate(): network error: {req.error}");
-                        yield break;
-                    }
-
-                    if (req.isHttpError)
-                    {
-                        LogInfo($"CheckForUpdate(): http error: {req.responseCode}");
-                        yield break;
-                    }
-
-                    json = req.downloadHandler.text;
-                }
-
-                var data = JSONNode.Parse(json);
-                if (data.HasKey("tag_name"))
-                {
-                    var tag = data["tag_name"].Value;
-                    if (!string.IsNullOrWhiteSpace(tag) && tag != PluginInfo.PLUGIN_VERSION)
-                        ShowOverrideNotification($"<b><color=blue>jshepler.ngu.mods</color></b>\n\nNew Version Available: <b>{tag}</b>", 10f);
-                }
-
-                yield return _waitForOneHour;
-            }
         }
 
         internal class FocusEventArgs : EventArgs

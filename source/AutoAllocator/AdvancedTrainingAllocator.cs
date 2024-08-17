@@ -184,7 +184,10 @@ namespace jshepler.ngu.mods.AutoAllocator
             var idleEnergy = _character.idleEnergy;
             foreach (var c in runnableControllers)
             {
-                var amount = (long)((parts[c.id] / sumOfParts) * idleEnergy);
+                //var amount = (long)((parts[c.id] / sumOfParts) * idleEnergy);
+                var dAmount = (parts[c.id] / sumOfParts) * idleEnergy;
+                var amount = dAmount >= long.MaxValue ? long.MaxValue : (long)dAmount;
+
                 _character.advancedTraining.energy[c.id] = amount;
                 _character.idleEnergy -= amount;
 

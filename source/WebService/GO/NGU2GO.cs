@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using SimpleJSON;
 
@@ -13,17 +14,17 @@ namespace jshepler.ngu.mods.WebService.GO
             switch (resource)
             {
                 case "augstats":
-                    json = Augments.BuildHackStats();
+                    json = BuildAugStats();
                     context.Response.SendResponse(HttpStatusCode.OK, json, ContentTypes.JSON);
                     return () => Plugin.ShowOverrideNotification("NGU2GO: aug stats");
 
                 case "ngustats":
-                    json = NGUs.BuildNGUStats();
+                    json = BuildNGUStats();
                     context.Response.SendResponse(HttpStatusCode.OK, json, ContentTypes.JSON);
                     return () => Plugin.ShowOverrideNotification("NGU2GO: ngu stats");
 
                 case "nakedemr":
-                    json = getNakedEMR();
+                    json = NakedEMR3.BuildNakedEMR3();
                     context.Response.SendResponse(HttpStatusCode.OK, json, ContentTypes.JSON);
                     return () => Plugin.ShowOverrideNotification("NGU2GO: naked EMR3");
 
@@ -43,141 +44,73 @@ namespace jshepler.ngu.mods.WebService.GO
             }
         }
 
-        private static string getNakedEMR()
+        private static string BuildAugStats()
         {
-            var c = Plugin.Character;
-            var bonuses = c.inventoryController.bonuses;
-
             var root = new JSONObject();
-            root.Add("Nude Energy Cap", nakedEcap());
-            root.Add("Nude Magic Cap", nakedMcap());
-            root.Add("Nude Energy Power", nakedEpow());
-            root.Add("Nude Magic Power", nakedMpow());
-            root.Add("Nude Energy Bars", nakedEbars());
-            root.Add("Nude Magic Bars", nakedMbars());
-            root.Add("Nude Resource 3 Power", nakedR3pow());
-            root.Add("Nude Resource 3 Cap", nakedR3cap());
-            root.Add("Nude Resource 3 Bars", nakedR3bars());
-            root.Add("modifiers", true);
+            root.Add("augspeed", Plugin.Character.augmentsController.getTotalSpeedFactor());
+            root.Add("ecap", Plugin.Character.totalCapEnergy());
+            root.Add("gps", Plugin.Character.goldPerSecond());
+            root.Add("lsc", Plugin.Character.challenges.laserSwordChallenge.curCompletions);
+            root.Add("nac", Plugin.Character.challenges.noAugsChallenge.curCompletions);
+            root.Add("version", (int)Plugin.Character.settings.rebirthDifficulty);
 
             return root.ToString();
         }
 
-        private static long nakedEpow()
+        private static string BuildNGUStats()
         {
-            var c = Plugin.Character;
+            var character = Plugin.Character;
 
-            var d = (double)c.energyPower
-                * c.adventureController.itopod.totalEnergyPowerBonus()
-                * c.inventory.macguffinBonuses[0]
-                * c.beastQuestPerkController.totalEnergyPowerBonus()
-                * c.wishesController.totalEnergyPowerBonus();
+            var en = character.NGU.skills.Select(s => s.level).ToArray();
+            var ee = character.NGU.skills.Select(s => s.evilLevel).ToArray();
+            var es = character.NGU.skills.Select(s => s.sadisticLevel).ToArray();
 
-            return d > long.MaxValue ? long.MaxValue : (long)d;
-        }
+            var eNGUs = new JSONArray();
+            for (var x = 0; x < 9; x++)
+            {
+                var o = new JSONObject();
+                o.Add("normal", en[x]);
+                o.Add("evil", ee[x]);
+                o.Add("sadistic", es[x]);
+                eNGUs.Add(o);
+            }
 
-        private static long nakedEcap()
-        {
-            var c = Plugin.Character;
+            var energy = new JSONObject();
+            energy.Add("ngus", eNGUs);
+            energy.Add("cap", Plugin.Character.totalCapEnergy());
+            energy.Add("nguspeed", character.totalNGUSpeedBonus() * character.totalEnergyPower() * character.NGUController.energyNGUBonus() * character.allDiggers.totalEnergyNGUBonus() * character.adventureController.itopod.totalEnergyNGUBonus() * character.inventory.macguffinBonuses[4] * character.hacksController.totalEnergyNGUBonus() * character.beastQuestPerkController.totalEnergyNGUSpeed() * character.allChallenges.trollChallenge.totalEnergyNGUBonus() * character.wishesController.totalEnergyNGUSpeed() * character.cardsController.getBonus(cardBonus.energyNGUSpeed));
 
-            var d = (double)c.capEnergy
-                * c.adventureController.itopod.totalEnergyCapBonus()
-                * c.inventory.macguffinBonuses[1]
-                * c.beastQuestPerkController.totalEnergyCapBonus()
-                * c.wishesController.totalEnergyCapBonus();
 
-            return d > long.MaxValue ? long.MaxValue : (long)d;
-        }
+            var mn = character.NGU.magicSkills.Select(s => s.level).ToArray();
+            var me = character.NGU.magicSkills.Select(s => s.evilLevel).ToArray();
+            var ms = character.NGU.magicSkills.Select(s => s.sadisticLevel).ToArray();
 
-        private static long nakedEbars()
-        {
-            var c = Plugin.Character;
+            var mNGUs = new JSONArray();
+            for (var x = 0; x < 7; x++)
+            {
+                var o = new JSONObject();
+                o.Add("normal", mn[x]);
+                o.Add("evil", me[x]);
+                o.Add("sadistic", ms[x]);
+                mNGUs.Add(o);
+            }
 
-            var d = (double)c.energyBars
-                * c.adventureController.itopod.totalEnergyBarBonus()
-                * c.inventory.macguffinBonuses[6]
-                * c.beastQuestPerkController.totalEnergyBarBonus()
-                * c.wishesController.totalEnergyBarBonus();
+            var magic = new JSONObject();
+            magic.Add("ngus", mNGUs);
+            magic.Add("cap", Plugin.Character.totalCapMagic());
+            magic.Add("nguspeed", character.totalNGUSpeedBonus() * character.totalMagicPower() * character.NGUController.magicNGUBonus() * character.allDiggers.totalMagicNGUBonus() * character.adventureController.itopod.totalMagicNGUBonus() * character.allChallenges.trollChallenge.totalMagicNGUBonus() * character.inventory.macguffinBonuses[5] * character.hacksController.totalMagicNGUBonus() * character.beastQuestPerkController.totalMagicNGUSpeed() * character.wishesController.totalMagicNGUSpeed() * character.cardsController.getBonus(cardBonus.magicNGUSpeed));
 
-            return d > long.MaxValue ? long.MaxValue : (long)d;
-        }
+            var quirks = new JSONObject();
+            quirks.Add("e2n", (character.beastQuest.quirkLevel[14] == 1));
+            quirks.Add("s2e", (character.beastQuest.quirkLevel[89] == 1));
 
-        private static long nakedMpow()
-        {
-            var c = Plugin.Character;
+            var root = new JSONObject();
+            root.Add("energy", energy);
+            root.Add("magic", magic);
+            root.Add("quirk", quirks);
+            root.Add("blueHeart", character.inventory.itemList.itemMaxxed[(int)GameData.Items.Heart_Blue]);
 
-            var d = c.magic.magicPower
-                * c.adventureController.itopod.totalMagicPowerBonus()
-                * c.inventory.macguffinBonuses[2]
-                * c.beastQuestPerkController.totalMagicPowerBonus()
-                * c.wishesController.totalMagicPowerBonus();
-
-            return d > long.MaxValue ? long.MaxValue : (long)d;
-        }
-
-        private static long nakedMcap()
-        {
-            var c = Plugin.Character;
-
-            var d = (double)c.magic.capMagic
-                * c.adventureController.itopod.totalMagicCapBonus()
-                * c.inventory.macguffinBonuses[3]
-                * c.beastQuestPerkController.totalMagicCapBonus()
-                * c.wishesController.totalMagicCapBonus();
-
-            return d > long.MaxValue ? long.MaxValue : (long)d;
-        }
-
-        private static long nakedMbars()
-        {
-            var c = Plugin.Character;
-
-            var d = (double)c.magic.magicPerBar
-                * c.adventureController.itopod.totalMagicBarBonus()
-                * c.inventory.macguffinBonuses[7]
-                * c.beastQuestPerkController.totalMagicBarBonus()
-                * c.wishesController.totalMagicBarBonus();
-
-            return d > long.MaxValue ? long.MaxValue : (long)d;
-        }
-
-        private static long nakedR3pow()
-        {
-            var c = Plugin.Character;
-
-            var d = (double)c.res3.res3Power
-                * c.adventureController.itopod.totalRes3PowerBonus()
-                * c.inventory.macguffinBonuses[20]
-                * c.beastQuestPerkController.totalRes3PowerBonus()
-                * c.wishesController.totalRes3PowerBonus();
-
-            return d > long.MaxValue ? long.MaxValue : (long)d;
-        }
-
-        private static long nakedR3cap()
-        {
-            var c = Plugin.Character;
-
-            var d = (double)c.res3.capRes3
-                * c.adventureController.itopod.totalRes3CapBonus()
-                * c.inventory.macguffinBonuses[21]
-                * c.beastQuestPerkController.totalRes3CapBonus()
-                * c.wishesController.totalRes3CapBonus();
-
-            return d > long.MaxValue ? long.MaxValue : (long)d;
-        }
-
-        private static long nakedR3bars()
-        {
-            var c = Plugin.Character;
-
-            var d = (double)c.res3.res3PerBar
-                * c.adventureController.itopod.totalRes3BarBonus()
-                * c.inventory.macguffinBonuses[22]
-                * c.beastQuestPerkController.totalRes3BarBonus()
-                * c.wishesController.totalRes3BarBonus();
-
-            return d > long.MaxValue ? long.MaxValue : (long)d;
+            return root.ToString();
         }
     }
 }

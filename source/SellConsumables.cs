@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace jshepler.ngu.mods
 {
-    [HarmonyPatch]
+    //[HarmonyPatch]
     internal class SellConsumables
     {
         private static int[] _sellable = [1, 3, 5, 6, 26, 27, 30, 43, 60, 61, 78, 79];

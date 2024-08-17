@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net46</TargetFramework>
+        <TargetFramework>net48</TargetFramework>
         <AssemblyName>jshepler.ngu.mods</AssemblyName>
-        <Version>1.11</Version>
+        <Version>1.12</Version>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <LangVersion>latest</LangVersion>
         <GameFolder>D:\Steam\steamapps\common\NGU IDLE</GameFolder>

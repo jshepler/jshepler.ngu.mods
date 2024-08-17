@@ -73,5 +73,39 @@ namespace jshepler.ngu.mods
 
             return false;
         }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(ArbitraryController), "startUseEnergyBarBar1")]
+        private static bool ArbitraryController_startUseEnergyBarBar1_prefix(ArbitraryController __instance)
+        {
+            if (!Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift))
+                return true;
+
+            var character = __instance.character;
+            if (character.arbitrary.energyBarBar1Count < 5)
+                return true;
+
+            character.arbitrary.energyBarBar1Count -= 5;
+            character.arbitrary.macGuffinBooster1Count++;
+            __instance.character.allArbitrary.updateMenu();
+
+            return false;
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(ArbitraryController), "startUseMagicBarBar1")]
+        private static bool ArbitraryController_startUseMagicBarBar1_prefix(ArbitraryController __instance)
+        {
+            if (!Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift))
+                return true;
+
+            var character = __instance.character;
+            if (character.arbitrary.magicBarBar1Count < 5)
+                return true;
+
+            character.arbitrary.magicBarBar1Count -= 5;
+            character.arbitrary.macGuffinBooster1Count++;
+            __instance.character.allArbitrary.updateMenu();
+
+            return false;
+        }
     }
 }

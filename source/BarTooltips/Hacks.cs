@@ -52,6 +52,11 @@ namespace jshepler.ngu.mods.BarTooltips
             var levelsToNext = __instance.levelsToNextMilestone(id);
             text += $"\n<b>Next Milestone in:</b> {levelsToNext} levels";
 
+            var baseEffect = __instance.properties[id].baseEffectPerLevel;
+            var levelEffect = 1f + hack.level * baseEffect;
+            text += $"\n\n<b>Hack Effect (base):</b> {character.display(baseEffect * 100f, 1, 3)}%"
+                + $"\n<b>Hack Effect (leveled):</b> {character.display(levelEffect * 100f, 1, 3)}%";
+
             var msBaseBonus = props.milestoneEffect;
             var msTotalBonus = Mathf.Pow(msBaseBonus, msGained);
             text += $"\n\n<b>Milestone bonus (base):</b> {character.display(msBaseBonus * 100f, 1)}%";
