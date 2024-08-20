@@ -607,7 +607,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 140. when in a challenge and not at max zone, adventure button lights up yellow (except when in ITOPOD)
 
-141. shift-click the buy button on SOME consumables to sell them back. I tried to make sure nothing could be cheesed to make more AP (e.g. selling 24 epot1 and buying 1 epot3 results in gaining 20 AP).
+141. ~~shift-click the buy button on SOME consumables to sell them back. I tried to make sure nothing could be cheesed to make more AP (e.g. selling 24 epot1 and buying 1 epot3 results in gaining 20 AP).~~ ***DISABLED***
   - energy potions beta and delta (not alpha)
   - magic potions beta and delta (not alpha)
   - res3 potions beta and delta (not alpha)
