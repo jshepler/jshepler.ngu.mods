@@ -172,6 +172,30 @@ namespace jshepler.ngu.mods.ModSave
             set => Set("CurrentDiggerLoadoutId", value);
         }
 
+        internal static float CubePowerBoostThisRB
+        {
+            get => Get("CubePowerBoostThisRB", 0f);
+            set => Set("CubePowerBoostThisRB", value);
+        }
+
+        internal static float CubePowerBoostLastRB
+        {
+            get => Get("CubePowerBoostLastRB", 0f);
+            set => Set("CubePowerBoostLastRB", value);
+        }
+
+        internal static float CubeToughnessBoostThisRB
+        {
+            get => Get("CubeToughnessBoostThisRB", 0f);
+            set => Set("CubeToughnessBoostThisRB", value);
+        }
+
+        internal static float CubeToughnessBoostLastRB
+        {
+            get => Get("CubeToughnessBoostLastRB", 0f);
+            set => Set("CubeToughnessBoostLastRB", value);
+        }
+
         internal static Dictionary<int, List<int>> DiggerLoadouts
         {
             get => Get<Dictionary<int, List<int>>>("DiggerLoadouts", new() { { 0, new() }, { 1, new() }, { 2, new() } });
@@ -182,6 +206,12 @@ namespace jshepler.ngu.mods.ModSave
         {
             get => Get<Dictionary<int, List<long>>>("DiggerLevels", new() { { 0, new() }, { 1, new() }, { 2, new() } });
             set => Set("DiggerLevels", value);
+        }
+
+        internal static double LastRebirthTime
+        {
+            get => Get("LastRebirthTime", 0.0);
+            set => Set("LastRebirthTime", value);
         }
 
         // REMINDER: NO TYPES DEFINED IN MODS ELSE NOT LOADABLE IN VANILLA

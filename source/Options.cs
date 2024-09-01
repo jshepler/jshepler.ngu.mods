@@ -11,7 +11,6 @@ namespace jshepler.ngu.mods
             Options.Allocators.RatioSplitAllocatorEnabled = Config.Bind("Allocators", "RatioSplitAllocator.Enabled", false, "splits resource between bars, using their ratios, to keep even leveling speed");
 
             Options.AutoHarvest.Enabled = Config.Bind("AutoHarvest", "Enabled", false, "enable auto harvest/eat fruits when fully grown (max tier)");
-            Options.AutoQuesting.UseButter = Config.Bind("AutoQuesting", "UseButter", false, "if enabled, when automatically staring a manual major quest, use butter if available");
             Options.AutoSnipe.TargetZone = Config.Bind("AutoSnipe", "TargetZone", 0, "used to target specific enemy in specific zone, other zones always snipe bosses; enter zone number (from wiki: https://ngu-idle.fandom.com/wiki/Adventure_Mode#Zones)");
             Options.AutoSnipe.TargetEnemy = Config.Bind("AutoSnipe", "TargetEnemy", 0, "used to target specific enemy in specific zone; enter enemy number (from bestiary), 0 = bosses");
             Options.AutoMergeTransform.Enabled = Config.Bind("AutoMergeTransform", "Enabled", true, "enables/disables auto merging and transforming of pendants and looties");
@@ -34,6 +33,8 @@ namespace jshepler.ngu.mods
             Options.NotificationToasts.TopDown = Config.Bind("NotificationToasts", "TopDown", true, "if true, toasts are displayed top-right and go down; if false, toasts are displayed bottom-right and go up");
 
             Options.PruneSaves.DaysToKeep = Config.Bind("PruneSaves", "DaysToKeep", 0, "When quick/auto saving, will delete saves older than value; 0 = disabled");
+            Options.Questing.AlwaysRandom = Config.Bind("Questing", "AlwaysRandom", false, "If true, new quests will always be random instead of targeting current zone");
+            Options.Questing.AutoButter = Config.Bind("Questing", "AutoButter", false, "If true, will automatically use butter when starting a major quest");
 
             Options.RemoteTriggers.Enabled = Config.Bind("RemoteTriggers", "Enabled", false, "enables receiving of remote commands");
             Options.RemoteTriggers.UrlPrefix = Config.Bind("RemoteTriggers", "Prefix", "http://localhost:8088/ngu/", "urls must start with this prefix else will be ignored");
@@ -175,11 +176,6 @@ namespace jshepler.ngu.mods
             }
         }
 
-        internal static class AutoQuesting
-        {
-            internal static ConfigEntry<bool> UseButter;
-        }
-
         internal static class WisheQueue
         {
             internal static ConfigEntry<bool> Enabled;
@@ -209,6 +205,12 @@ namespace jshepler.ngu.mods
         internal static class DiggerUpggradeIndicator
         {
             internal static ConfigEntry<bool> Enabled;
+        }
+
+        internal static class Questing
+        {
+            internal static ConfigEntry<bool> AutoButter;
+            internal static ConfigEntry<bool> AlwaysRandom;
         }
     }
 }

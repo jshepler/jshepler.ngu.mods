@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 namespace jshepler.ngu.mods.ModSave
 {
     [Serializable]
-    internal class ModPlayerData : PlayerData, ISerializable
+    public class ModPlayerData : PlayerData, ISerializable
     {
         public Dictionary<string, object> Data = new();
 

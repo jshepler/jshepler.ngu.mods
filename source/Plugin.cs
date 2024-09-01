@@ -61,10 +61,6 @@ namespace jshepler.ngu.mods
                 return;
 
             OnUpdate?.Invoke(null, EventArgs.Empty);
-
-            // hidden "Krissmuss" screen from christmas 2020 event
-            if (Input.GetKeyDown(KeyCode.X) && Input.GetKey(KeyCode.LeftControl) && Input.GetKey(KeyCode.LeftShift))
-                Character.menuSwapper.swapMenu((int)Menu.Krissmuss);
         }
 
         private void FixedUpdate()
@@ -132,12 +128,9 @@ namespace jshepler.ngu.mods
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(Character), "addOfflineProgress")]
-        private static void Character_addOfflineProgress_postfix(Character __instance)
+        private static void Character_addOfflineProgress_postfix()
         {
             OnSaveLoaded?.Invoke(null, EventArgs.Empty);
-
-            // unlocks krissmuss ui theme from christmass 2019 event
-            __instance.settings.prizePicked = 6;
         }
 
         // when starting a new game, there is no offline progress and mods that rely on this event

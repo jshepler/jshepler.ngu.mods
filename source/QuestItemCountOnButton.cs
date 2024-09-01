@@ -34,8 +34,8 @@ namespace jshepler.ngu.mods
 
         private static bool _questItemDropped = false;
 
-        [HarmonyPostfix, HarmonyPatch(typeof(ItemNameDesc), "makeLoot", typeof(int))]
-        private static void ItemNameDesc_makeLoot_postfix(int id, ItemNameDesc __instance)
+        [HarmonyPrefix, HarmonyPatch(typeof(ItemNameDesc), "makeLoot", typeof(int))]
+        private static void ItemNameDesc_makeLoot_prefix(int id, ItemNameDesc __instance)
         {
             if (InManualQuest() && id == _character.beastQuest.questID)
             {

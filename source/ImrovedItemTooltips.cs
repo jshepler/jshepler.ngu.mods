@@ -78,7 +78,7 @@ namespace jshepler.ngu.mods
 
         // loadouts
         [HarmonyPrefix, HarmonyPatch(typeof(LoadoutDisplayController), "OnPointerEnter")]
-        private static bool LoadoutDisplayController_OnPointerEnter_prefix(LoadoutDisplayController __instance, string ___message)
+        private static bool LoadoutDisplayController_OnPointerEnter_prefix(LoadoutDisplayController __instance)
         {
             var item = __instance.GetItem();
             if (item == null)

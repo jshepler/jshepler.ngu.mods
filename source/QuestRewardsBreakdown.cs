@@ -26,6 +26,9 @@ namespace jshepler.ngu.mods
 
         private static void OnPointerEnter(PointerEventData e)
         {
+            if (!Plugin.Character.beastQuest.inQuest)
+                return;
+
             if (_coroutine != null)
                 Plugin.Character.StopCoroutine(_coroutine);
 

@@ -99,7 +99,7 @@ namespace jshepler.ngu.mods
                 _lastPPCount = _curPP;
             };
 
-            Plugin.OnUpdate += (o, e) =>
+            Plugin.OnLateUpdate += (o, e) =>
             {
                 var seeds = _curSeeds;
                 if (seeds > _lastSeedCount)

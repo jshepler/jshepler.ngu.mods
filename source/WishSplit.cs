@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
 
@@ -11,6 +12,7 @@ namespace jshepler.ngu.mods
     {
         private static HashSet<int> _selectedIds = new();
         private static int MaxWishes => Plugin.Character.wishesController.curWishSlots();
+        private static List<WishWrapper> _wishes;
 
         private static long IdleEnergy
         {
@@ -33,7 +35,6 @@ namespace jshepler.ngu.mods
         private static Func<int, long> wishR3Cap => wishId =>
         {
             var wc = Plugin.Character.wishesController;
-
             var cap = Mathf.Ceil(
                 Mathf.Pow(
                     wc.minimumWishTime()
@@ -47,13 +48,28 @@ namespace jshepler.ngu.mods
             if (cap >= long.MaxValue)
                 return long.MaxValue;
 
+            if (cap < 1)
+                return 1L;
+
             return (long)cap;
         };
+
+        [HarmonyPrepare]
+        private static void prep(MethodBase original)
+        {
+            if (original != null)
+                return;
+
+            Plugin.OnSaveLoaded += (o, e) =>
+            {
+                _wishes = Plugin.Character.wishes.wishes.Select((w, i) => new WishWrapper { id = i, wish = w }).ToList();
+            };
+        }
 
         [HarmonyPostfix, HarmonyPatch(typeof(WishPodUIController), "selectThisWish")]
         private static void WishPodUIController_selectThisWish_postfix(WishPodUIController __instance)
         {
-            if (Input.GetKey(KeyCode.LeftAlt))
+            if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
             {
                 var id = __instance.id;
                 if (_selectedIds.Contains(id))
@@ -88,7 +104,7 @@ namespace jshepler.ngu.mods
             , HarmonyPatch(typeof(WishesController), "addRes3", [])]
         private static bool WishesController_addResource_prefix(WishesController __instance)
         {
-            if (!Input.GetKey(KeyCode.LeftAlt))
+            if (!Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.RightAlt))
                 return true;
 
             var wishes = __instance.character.wishes.wishes;
@@ -158,9 +174,9 @@ namespace jshepler.ngu.mods
 
             var character = Plugin.Character;
 
-            var runningWishes = character.wishes.wishes
-                .Select((w, i) => new { wish = w, cap = wishR3Cap(i) })
+            var runningWishes = _wishes
                 .Where(w => w.wish.energy > 0 && w.wish.magic > 0 && w.wish.res3 > 0)
+                .Select(w => new { wish = w.wish, cap = wishR3Cap(w.id) })
                 .OrderBy(w => w.cap)
                 .ToList();
 
@@ -186,6 +202,12 @@ namespace jshepler.ngu.mods
         {
             _selectedIds.Clear();
             Plugin.Character.wishesController.updateAllPods();
+        }
+
+        class WishWrapper
+        {
+            internal int id;
+            internal Wish wish;
         }
     }
 }

@@ -148,7 +148,7 @@ namespace jshepler.ngu.mods
             internal Resource Energy;
             internal Resource Magic;
             internal Resource Res3;
-            internal long Total;
+            internal long Total = 0L;
 
             internal class Resource
             {

@@ -122,7 +122,7 @@ namespace jshepler.ngu.mods.GameData
                     return Plugin.Character.adventureController.lootDrop.higherVFactor(et);
 
                 case 23:
-                    et = Plugin.Character.adventure.titan6Version switch
+                    et = Plugin.Character.adventure.titan7Version switch
                     {
                         0 => enemyType.bigBoss7V1,
                         1 => enemyType.bigBoss7V2,
@@ -134,7 +134,7 @@ namespace jshepler.ngu.mods.GameData
                     return Plugin.Character.adventureController.lootDrop.higherVFactor(et);
 
                 case 26:
-                    et = Plugin.Character.adventure.titan6Version switch
+                    et = Plugin.Character.adventure.titan8Version switch
                     {
                         0 => enemyType.bigBoss8V1,
                         1 => enemyType.bigBoss8V2,
@@ -146,7 +146,7 @@ namespace jshepler.ngu.mods.GameData
                     return Plugin.Character.adventureController.lootDrop.higherVFactor(et);
 
                 case 30:
-                    et = Plugin.Character.adventure.titan6Version switch
+                    et = Plugin.Character.adventure.titan9Version switch
                     {
                         0 => enemyType.bigBoss9V1,
                         1 => enemyType.bigBoss9V2,
@@ -158,7 +158,7 @@ namespace jshepler.ngu.mods.GameData
                     return Plugin.Character.adventureController.lootDrop.higherVFactor(et);
 
                 case 34:
-                    et = Plugin.Character.adventure.titan6Version switch
+                    et = Plugin.Character.adventure.titan10Version switch
                     {
                         0 => enemyType.bigBoss10V1,
                         1 => enemyType.bigBoss10V2,
@@ -170,7 +170,7 @@ namespace jshepler.ngu.mods.GameData
                     return Plugin.Character.adventureController.lootDrop.higherVFactor(et);
 
                 case 38:
-                    et = Plugin.Character.adventure.titan6Version switch
+                    et = Plugin.Character.adventure.titan11Version switch
                     {
                         0 => enemyType.bigBoss11V1,
                         1 => enemyType.bigBoss11V2,
@@ -182,7 +182,7 @@ namespace jshepler.ngu.mods.GameData
                     return Plugin.Character.adventureController.lootDrop.higherVFactor(et);
 
                 case 42:
-                    et = Plugin.Character.adventure.titan6Version switch
+                    et = Plugin.Character.adventure.titan12Version switch
                     {
                         0 => enemyType.bigBoss12V1,
                         1 => enemyType.bigBoss12V2,

@@ -137,9 +137,6 @@ namespace jshepler.ngu.mods
                 _controller.toggleMajorQuestUse();
 
             _controller.startQuest();
-
-            if (!_character.beastQuest.usedButter && _character.arbitrary.beastButterCount > 0 && Options.AutoQuesting.UseButter.Value == true)
-                _controller.tryUseButter();
             
             _controller.refreshMenu();
         }

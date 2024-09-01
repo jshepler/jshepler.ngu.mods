@@ -789,7 +789,7 @@ namespace jshepler.ngu.mods.GameData
             {
                 TitanV1Drops = new DropGroup(1E+11f
                     , new DropItems(1.00f, 1500, Items.Exp)
-                    , new DropItems(1.00f, 250000, Items.PP)
+                    , new DropItems(1.00f, 300000, Items.PP)
                     , new DropItems(1.00f, 2, Items.QP) { Condition = WishDropCondition.T8QP }
                     , new DropItems(1.00f, Items.T8_SeveredUnicornsHead)
                     , new DropItems(0.0001f, 0.25f, Items.T8_MobsterHat)

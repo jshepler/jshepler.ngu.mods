@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using UnityEngine;
 using UnityEngine.TextCore;
 
 namespace jshepler.ngu.mods
@@ -50,8 +51,41 @@ namespace jshepler.ngu.mods
             var r = (double)__instance.daycareRate(item);
             var b = (double)character.allDiggers.totalDaycareBonus();
             var secondsPerLevel = r / b;
-            
-            __result += $"\n<b>Time Per Level:</b> {NumberOutput.timeOutput(secondsPerLevel)}";
+            var baseTime = character.itemInfo.daycareRate[item.id];
+
+            __result += $"\n<b>Time per level:</b> {NumberOutput.timeOutput(secondsPerLevel)}";
+
+            if(Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
+                __result += $"\n   base: {NumberOutput.timeOutput(baseTime)}"
+                    + $"\n   time modifier: x {timeModifier():#,##0.0###} ({NumberOutput.timeOutput(r)})"
+                    + $"\n   speed divider: / {b:#,##0.0###} ({NumberOutput.timeOutput(secondsPerLevel)})";
+        }
+
+        private static float timeModifier()
+        {
+            var character = Plugin.Character;
+            var totalModifier = 1f;
+
+            var blindCompletions = character.allChallenges.blindChallenge.completions();
+            if (blindCompletions > 0)
+            {
+                var blindModifier = 1f - 0.05f - blindCompletions * 0.01f;
+                totalModifier *= blindModifier;
+            }
+
+            var perk27 = character.adventure.itopod.perkLevel[27];
+            var perk28 = character.adventure.itopod.perkLevel[28];
+            if (perk27 > 0 || perk28 > 0)
+            {
+                var perkModifier = 1f - perk27 * character.adventureController.itopod.effectPerLevel[27];
+                perkModifier *= 1f - perk28 * character.adventureController.itopod.effectPerLevel[28];
+                totalModifier *= perkModifier;
+            }
+
+            if (character.arbitrary.hasDaycareSpeed)
+                totalModifier *= 0.9f;
+
+            return totalModifier;
         }
     }
 }

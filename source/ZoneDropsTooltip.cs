@@ -94,27 +94,6 @@ namespace jshepler.ngu.mods
 
             text += DropString(zone.MacGuffinDrop) + DropString(zone.QuestItemDrop);
 
-            //if (zone.MacGuffinDrop != null
-            //    && (!Options.DropTableTooltip.OnlyUnlocked.Value
-            //        || (EnemiesKilledDropCondition.Walerp5Killed.IsConditionMet()
-            //            && (zone.MacGuffinDrop.Condition == null || zone.MacGuffinDrop.Condition.IsConditionMet()))))
-            //{
-            //    var killsRemaining = 1000 - Plugin.Character.adventureController.globalKillCounter % 1000;
-            //    var name = _name((int)zone.MacGuffinDrop.MacGuffinItem);
-            //    text += $"\n\n<b>MacGuffin:</b> ({killsRemaining} kills remaining)\n<b><color=green>100%</color></b> for {name}";
-            //}
-
-            //if (zone.QuestItemDrop != null
-            //    && (!Options.DropTableTooltip.OnlyUnlocked.Value
-            //        || (Plugin.Character.settings.beastOn
-            //            && zone.QuestItemDrop.Condition.IsConditionMet())))
-            //{
-            //    var dc = Plugin.Character.beastQuestController.questDropChance();
-            //    var color = dc >= 1.0f ? "green" : "red";
-            //    var name = _name((int)zone.QuestItemDrop.QuestItem).Substring(40);
-            //    text += $"\n\n<b>Quest Item:</b>\n<b><color={color}>{_dcP(dc)}</color></b> for {name}";
-            //}
-
             // flubber has a custom DC that scales with highest boss killed in current rebirth and is not affected by DC modifiers
             if (_zoneId == 0
                 && (!Options.DropTableTooltip.OnlyUnlocked.Value || Plugin.Character.bossID > 58)

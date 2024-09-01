@@ -132,6 +132,68 @@ namespace jshepler.ngu.mods
             __instance.nextdishTimerText.text += $"\nReady {dayString} at: {readyAt:h:mm:ss tt}";
         }
 
+        [HarmonyPrefix, HarmonyPatch(typeof(CookingController), "showDishInfo")]
+        private static bool CookingController_showDishInfo_prefix(CookingController __instance)
+        {
+            var character = __instance.character;
+            if (!character.InMenu(Menu.Cooking))
+                return false;
+
+            var curDishIndex = character.cooking.curDishIndex;
+            var dishProperties = __instance.dishProperties;
+            if (curDishIndex < 0 || curDishIndex >= dishProperties.Count)
+                return false;
+
+            var props = dishProperties[curDishIndex];
+            var message = $"<b>{props.dishName}</b>\n\"{props.dishDesc}\"";
+
+            var cookingItemCount = GetCookingItemCount();
+            var cookingItemMulti = Mathf.Pow(1.03f, cookingItemCount);
+            message += $"\n\n   Cooking Items ({cookingItemCount}): x{cookingItemMulti}";
+
+            if (character.inventory.itemList.spaceComplete)
+                message += "\n   Space Set Completion: x1.1";
+
+            if (character.cooking.ingredients[6].unlocked)
+                message += "\n   Ingredient 7 Unlocked: x1.2";
+
+            if (character.cooking.ingredients[7].unlocked)
+                message += "\n   Ingredient 8 Unlocked: x1.2";
+
+            var totalCookingMulti = __instance.totalCookingBonuses();
+            message += $"\n<b>Total Cooking Multiplier:</b> x{totalCookingMulti}";
+
+            var curExpBonus = character.cooking.expBonus - 1f;
+            message += $"\n\n<b>Current Exp Bonus:</b> {curExpBonus}";
+
+            if (curExpBonus <= 0.8f)
+            {
+                var baseExpGain = 1f - Mathf.Pow(curExpBonus, 2);
+                message += "\n<b>Base Bonus Gain</b> (Total Exp Gain <= 180%)"
+                    + "\n   = 1 - ([exp bonus] ^ 2)"
+                    + $"\n   = {baseExpGain}";
+            }
+
+            else
+                message += "\n<b>Base Bonus Gain</b> (Total Exp Gain > 180%)\n   = 0.36";
+
+            var baseExpBonus = __instance.baseExpBonusPerDish();
+            message += "\n\n<b>Exp Bonus Gain</b> (before meal efficiency):"
+                + "\n   = 0.005 × [base gain] × [cooking multi]"
+                + $"\n   = {baseExpBonus}";
+
+            var max = totalCookingMulti * 0.005f;
+            var min = max * 0.36f;
+            message += $"\n(clamped: {min} to {max})";
+
+            var totalBonusGain = baseExpBonus * __instance.getCurPercentofMaxScore();
+            message += $"\n\n   ... × [efficiency] = {totalBonusGain} (additive)"
+                + $"\n<b>New Total Exp Gain:</b> {(curExpBonus + totalBonusGain + 1f) * 100f:###.##}%";
+            character.tooltip.showOverrideTooltip(message);
+
+            return false;
+        }
+
         [HarmonyPrefix, HarmonyPatch(typeof(IngredientPodUI), "raiseIngredient")]
         private static bool IngredientPodUI_raiseIngredient_prefix()
         {
@@ -154,6 +216,84 @@ namespace jshepler.ngu.mods
             Plugin.Character.cookingController.updateMenu();
 
             return false;
+        }
+
+        private static int GetCookingItemCount()
+        {
+            var character = Plugin.Character;
+            var count = 0;
+
+            if (character.inventory.head.spec1Type == specType.Cooking)
+                count++;
+
+            if (character.inventory.head.spec2Type == specType.Cooking)
+                count++;
+
+            if (character.inventory.head.spec3Type == specType.Cooking)
+                count++;
+
+            if (character.inventory.chest.spec1Type == specType.Cooking)
+                count++;
+
+            if (character.inventory.chest.spec2Type == specType.Cooking)
+                count++;
+
+            if (character.inventory.chest.spec3Type == specType.Cooking)
+                count++;
+
+            if (character.inventory.legs.spec1Type == specType.Cooking)
+                count++;
+
+            if (character.inventory.legs.spec2Type == specType.Cooking)
+                count++;
+
+            if (character.inventory.legs.spec3Type == specType.Cooking)
+                count++;
+
+            if (character.inventory.legs.spec1Type == specType.Cooking)
+                count++;
+
+            if (character.inventory.legs.spec2Type == specType.Cooking)
+                count++;
+
+            if (character.inventory.legs.spec3Type == specType.Cooking)
+                count++;
+
+            if (character.inventory.boots.spec1Type == specType.Cooking)
+                count++;
+
+            if (character.inventory.boots.spec2Type == specType.Cooking)
+                count++;
+
+            if (character.inventory.boots.spec3Type == specType.Cooking)
+                count++;
+
+            if (character.inventory.weapon.spec1Type == specType.Cooking)
+                count++;
+
+            if (character.inventory.weapon.spec2Type == specType.Cooking)
+                count++;
+
+            if (character.inventory.weapon.spec3Type == specType.Cooking)
+                count++;
+
+            for (int i = 0; i < character.inventory.accs.Count; i++)
+            {
+                if (character.inventory.accs[i] != null)
+                {
+                    if (character.inventory.accs[i].spec1Type == specType.Cooking)
+                        count++;
+
+                    if (character.inventory.accs[i].spec2Type == specType.Cooking)
+                        count++;
+
+                    if (character.inventory.accs[i].spec3Type == specType.Cooking)
+                        count++;
+
+                }
+            }
+
+            return count;
         }
 
         private static void ClearIngredientLevels()

@@ -51,6 +51,9 @@ namespace jshepler.ngu.mods
 
                 else if (Input.GetKeyDown(KeyCode.F6))
                     LoadLastQuicksave();
+
+                else if (Input.GetKeyDown(KeyCode.F7))
+                    System.Diagnostics.Process.Start(ModifiedPersistentDataPath());
             };
         }
 

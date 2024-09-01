@@ -625,3 +625,26 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 144. fixes game bug with walderp fight that if player survives the explosion from doing the wrong attack, walderp's next attack would be another explosion due to the code thinking the player didn't do any attack in time
 
 145. added the cube root of total drop chance modifier to Stats Breakdown | Misc Adventure
+
+146. added tracking infinity cube's power and toughness gained this/last rebirth, and estimates number of days until softcap and next tier (based on p/t gained last rebirth and last rebirth time)
+
+147. saves last rebirth time (for cube estimated days calc), shown on rebirth button tooltip
+
+148. option for quests to be always random and if disabled, alt-click the start quest button to get a random one
+
+149. keys for working with cards:
+  - enter (cast), delete (yeet), space (toggle protected)
+  - arrow keys to move selection around the page
+  - page up/down to change pages
+
+150. adds time per level breakdown to daycare items' tooltip (hold alt)
+
+151. adds daycare time modifier breakdown to stat breakdown - misc
+
+152. press F7 to open saves folder in windows explorer
+
+153. cooking math breakdown shown in meal tooltip
+
+154. achievement ids are shown on achievement tooltips
+
+155. T8 combat helper - the color of the warning text for the explosions attack is set to blue

@@ -1,13 +1,41 @@
-﻿using HarmonyLib;
+﻿using System.Linq.Expressions;
+using HarmonyLib;
+using UnityEngine;
+using UnityEngine.TextCore;
 
 namespace jshepler.ngu.mods
 {
     [HarmonyPatch]
     internal class StartQuestInCurrentZone
     {
+        private static bool _getRandomQuest = false;
+
+        [HarmonyPrefix, HarmonyPatch(typeof(BeastQuestController), "startQuest")]
+        private static void BeastQuestController_startQuest_prefix()
+        {
+            if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
+                _getRandomQuest = true;
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(BeastQuestController), "startQuest")]
+        private static void BeastQuestController_startQuest_postfix(BeastQuestController __instance)
+        {
+            _getRandomQuest = false;
+
+            if (!__instance.character.beastQuest.usedButter
+                && __instance.character.arbitrary.beastButterCount > 0
+                && Options.Questing.AutoButter.Value == true
+                && __instance.character.settings.useMajorQuests)
+
+                __instance.tryUseButter();
+        }
+
         [HarmonyPostfix, HarmonyPatch(typeof(BeastQuestController), "constructQuestList")]
         private static void BeastQuestController_constructQuestList_postfix(BeastQuestController __instance)
         {
+            if (Options.Questing.AlwaysRandom.Value == true || _getRandomQuest)
+                return;
+
             var character = __instance.character;
             if (character.beastQuest.idleMode)
                 return;

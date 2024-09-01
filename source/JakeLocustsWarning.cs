@@ -8,6 +8,8 @@ namespace jshepler.ngu.mods
     [HarmonyPatch]
     internal class JakeLocustsWarning
     {
+        // the code makes it look like the swarm attack is supposed to start the turn after the warning,
+        // but it's actually starting the next frame - this also fixes it so that it will start on the next attack
         [HarmonyTranspiler, HarmonyPatch(typeof(EnemyAI), "jakeAI")]
         private static IEnumerable<CodeInstruction> EnemyAI_jakeAI_transpiler(IEnumerable<CodeInstruction> instructinos)
         {
