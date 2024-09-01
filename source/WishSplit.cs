@@ -173,6 +173,8 @@ namespace jshepler.ngu.mods
                 return;
 
             var character = Plugin.Character;
+            if (_wishes == null)
+                _wishes = character.wishes.wishes.Select((w, i) => new WishWrapper { id = i, wish = w }).ToList();
 
             var runningWishes = _wishes
                 .Where(w => w.wish.energy > 0 && w.wish.magic > 0 && w.wish.res3 > 0)
