@@ -176,13 +176,13 @@ namespace jshepler.ngu.mods
             sb.Append($"\n<b>Total Multiplier:</b> x{totalMulti:#,##0.#####}");
             
             var subTotal = (long)(baseReward * totalMulti);
-            sb.Append($"\n\n<b>Sub-Total Reward:</b> {subTotal} QP (truncated)");
+            sb.Append($"\n\n<b>Sub-Total Reward:</b> {c.display(subTotal)} QP (truncated)");
 
             var activeModifier = q.allActive ? qc.allActiveModifier() : 1f;
             sb.Append($"\n\n{(q.allActive ? "Manual" : "Idle")}: x{activeModifier:0.#####}");
             
             var total = (long)(subTotal * activeModifier);
-            sb.Append($"\n<b>Total Quest Reward:</b> {total} QP (truncated)");
+            sb.Append($"\n<b>Total Quest Reward:</b> {c.display(total)} QP (truncated)");
 
             return sb.ToString();
         }

@@ -22,7 +22,7 @@ namespace jshepler.ngu.mods
             _popup.Closed += PopupClosed;
         }
 
-        [HarmonyPrefix, HarmonyPatch(typeof(BloodMagicController), "cap")]
+        [HarmonyPrefix, HarmonyPriority(1), HarmonyPatch(typeof(BloodMagicController), "cap")]
         private static bool BloodMagicController_cap_prefix(BloodMagicController __instance)
         {
             if (!Input.GetKey(KeyCode.LeftShift))

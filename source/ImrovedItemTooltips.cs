@@ -3,11 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
-using System.Text;
 using HarmonyLib;
 using jshepler.ngu.mods.GameData;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace jshepler.ngu.mods
 {
@@ -16,6 +15,8 @@ namespace jshepler.ngu.mods
     {
         private static bool _appendDaycareText = false;
         private static bool _appendDualWieldText = false;
+        private static Coroutine _cor;
+        private static FieldInfo _tooltipText = typeof(HoverTooltip).GetField("tooltipText", BindingFlags.Instance | BindingFlags.NonPublic);
 
         // prepends item id
         [HarmonyPostfix, HarmonyPatch(typeof(InventoryController), "itemTooltipText", [typeof(Equipment)])]
@@ -126,7 +127,31 @@ namespace jshepler.ngu.mods
             _appendDualWieldText = false;
         }
 
-        private static Coroutine _cor;
+        // item list
+        [HarmonyPostfix, HarmonyPatch(typeof(ItemListController), "OnPointerEnter")]
+        private static void ItemListController_OnPointerEnter_postfix(ItemListController __instance)
+        {
+            var character = __instance.character;
+            var id = __instance.id;
+            if (id > character.itemInfo.highestID()
+                || !character.inventory.itemList.itemDropped[id])
+                return;
+
+            var tt = _tooltipText.GetValue(__instance.tooltip) as Text;
+            var sources = BuildItemSourcesString(id);
+
+            if (_cor != null)
+                character.StopCoroutine(_cor);
+
+            _cor = character.StartCoroutine(ShowItemListItemTooltip(tt, tt.text, sources));
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(ItemListController), "OnPointerExit")]
+        private static void ItemListController_OnPointerExit_postfix()
+        {
+            StopShowTooltip();
+        }
+
         private static void StartShowTooltip(Equipment item, Action updateTooltipMessage, Func<string> getTooltipMessage)
         {
             StopShowTooltip();
@@ -163,6 +188,16 @@ namespace jshepler.ngu.mods
             }
         }
 
+        private static IEnumerator ShowItemListItemTooltip(Text tooltipText, string baseText, string sources)
+        {
+            while (true)
+            {
+                var isAlt = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+                tooltipText.text = baseText + (isAlt ? sources : string.Empty);
+                yield return _waiter;
+            }
+        }
+
         private static string BuildDaycareString(Equipment item)
         {
             var daycare = Plugin.Character.inventory.daycare;
@@ -182,6 +217,11 @@ namespace jshepler.ngu.mods
 
         private static string BuildItemSourcesString(Equipment item)
         {
+            return BuildItemSourcesString(item.id);
+        }
+
+        private static string BuildItemSourcesString(int itemId)
+        {
             var sources = new List<string>();
 
             for (var zoneId = 0; zoneId < DropTable.Zones.Count; zoneId++)
@@ -189,42 +229,42 @@ namespace jshepler.ngu.mods
                 var zone = DropTable.Zones[zoneId];
                 var zName = Plugin.Character.adventureController.zoneName(zoneId);
 
-                if (zone.NormalDrops != null && zone.NormalDrops.Items.Any(di => di.ItemIds.Contains(item.id)))
+                if (zone.NormalDrops != null && zone.NormalDrops.Items.Any(di => di.ItemIds.Contains(itemId)))
                     sources.Add($"<b>{zName}:</b> normal drops");
 
-                if (zone.BossDrops != null && zone.BossDrops.Items.Any(di => di.ItemIds.Contains(item.id)))
+                if (zone.BossDrops != null && zone.BossDrops.Items.Any(di => di.ItemIds.Contains(itemId)))
                     sources.Add($"<b>{zName}:</b> boss drops");
 
                 if (zone.TitanV1Drops != null)
                 {
-                    if (zone.TitanV2Drops == null && zone.TitanV1Drops.Items.Any(di => di.ItemIds.Contains(item.id)))
+                    if (zone.TitanV2Drops == null && zone.TitanV1Drops.Items.Any(di => di.ItemIds.Contains(itemId)))
                         sources.Add($"<b>{zName}:</b> titan drops");
 
                     else if (zone.TitanV2Drops != null)
                     {
-                        if (zone.TitanV1Drops.Items.Any(di => di.ItemIds.Contains(item.id)))
+                        if (zone.TitanV1Drops.Items.Any(di => di.ItemIds.Contains(itemId)))
                             sources.Add($"<b>{zName}:</b> V1 drops");
 
-                        if (zone.TitanV2Drops.Items.Any(di => di.ItemIds.Contains(item.id)))
+                        if (zone.TitanV2Drops.Items.Any(di => di.ItemIds.Contains(itemId)))
                             sources.Add($"<b>{zName}:</b> V2 drops");
 
-                        if (zone.TitanV3Drops.Items.Any(di => di.ItemIds.Contains(item.id)))
+                        if (zone.TitanV3Drops.Items.Any(di => di.ItemIds.Contains(itemId)))
                             sources.Add($"<b>{zName}:</b> V3 drops");
 
-                        if (zone.TitanV4Drops.Items.Any(di => di.ItemIds.Contains(item.id)))
+                        if (zone.TitanV4Drops.Items.Any(di => di.ItemIds.Contains(itemId)))
                             sources.Add($"<b>{zName}:</b> V4 drops");
                     }
                 }
 
                 if (zone.EnemyDrops != null)
                     foreach (var enemy in zone.EnemyDrops)
-                        if (enemy.Items.Any(di => di.ItemIds.Contains(item.id)))
+                        if (enemy.Items.Any(di => di.ItemIds.Contains(itemId)))
                             sources.Add($"<b>{zName}:</b> {Plugin.Character.adventureController.fetchEnemyNamebySpriteID(enemy.EnemyId)}");
 
-                if (zone.MacGuffinDrop != null && (int)zone.MacGuffinDrop.MacGuffinItem == item.id)
+                if (zone.MacGuffinDrop != null && (int)zone.MacGuffinDrop.MacGuffinItem == itemId)
                     sources.Add($"<b>{zName}:</b> MacGuffin");
 
-                if (zone.QuestItemDrop != null && (int)zone.QuestItemDrop.QuestItem == item.id)
+                if (zone.QuestItemDrop != null && (int)zone.QuestItemDrop.QuestItem == itemId)
                     sources.Add($"<b>{zName}:</b> Quest Item");
             }
 
@@ -252,96 +292,6 @@ namespace jshepler.ngu.mods
                 -69 => inventory.trash,
                 _ => inventory.inventory[slotId]
             };
-        }
-
-        //[HarmonyTranspiler, HarmonyPatch(typeof(InventoryController), "itemTooltipText", [typeof(Equipment)])]
-        private static IEnumerable<CodeInstruction> InventoryController_itemTooltipText_transpiler(IEnumerable<CodeInstruction> instructions)
-        {
-            var isEquipment = typeof(Equipment).GetMethod(nameof(Equipment.isEquipment));
-            var cm = new CodeMatcher(instructions);
-
-            var start = cm
-                .MatchForward(false, new CodeMatch(OpCodes.Callvirt, isEquipment))
-                .Advance(2)
-                .Pos;
-
-            var end = cm
-                .MatchForward(false, new CodeMatch(OpCodes.Ldloc_0))
-                .Pos;
-
-            cm.Advance(start - end)
-                .RemoveInstructions(end - start)
-                .Advance(1)
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldarg_1))
-                .SetInstruction(Transpilers.EmitDelegate(EquipInfo));
-
-            return cm.InstructionEnumeration();//.DumpToLog();
-        }
-
-        private static MethodInfo _effectNameMethod = typeof(InventoryController).GetMethod("effectName", BindingFlags.Instance | BindingFlags.NonPublic);
-        private static Func<specType, string> _effectName = st => (string)_effectNameMethod.Invoke(Plugin.Character.inventoryController, [st]);
-
-        private static MethodInfo _effectBonusMethod = typeof(InventoryController).GetMethod("effectBonus", BindingFlags.Instance | BindingFlags.NonPublic);
-        private static Func<float, specType, float> _effectBonus = (f, st) => (float)_effectBonusMethod.Invoke(Plugin.Character.inventoryController, [f, st]);
-
-        private static string EquipInfo(Equipment item)
-        {
-            var effectiveModifier = Mathf.Min((float)Plugin.Character.effectiveBossID() / item.bossRequired, 1f);
-            var levelModifier = 1f + item.level / 100f;
-
-            var appendStat = (StringBuilder sb, string name, float curValue, float capValue, specType st = specType.None) =>
-            {
-                var effValue = Mathf.Floor(curValue * effectiveModifier);
-                var maxValue = Mathf.Floor(capValue * levelModifier);
-                var effMaxValue = maxValue * effectiveModifier;
-                var color = curValue >= maxValue ? "green" : "black";
-                var specBonus = _effectBonus(curValue, st);
-                var effSpecBonus = _effectBonus(effValue, st);
-
-                sb.Append($"\n<color={color}><b>{name}:</b> {effValue:#,##0}/{effMaxValue:#,##0}");
-
-                if (st != specType.None)
-                    sb.Append($" ({effSpecBonus:#,##0.##}%)");
-
-                if (effectiveModifier < 1f)
-                {
-                    sb.Append($" [{curValue:#,##0}/{maxValue:#,##0}]");
-
-                    if (st != specType.None)
-                        sb.Append($" ({specBonus:#,##0.##}%)");
-                }
-
-                sb.Append("</color>");
-            };
-
-            var sb = new StringBuilder();
-
-            if (item.capAttack > 0 || item.capDefense > 0)
-            {
-                sb.Append($"\n\n<b>Stats</b>");
-
-                if (item.capAttack > 0)
-                    appendStat(sb, "Power", item.curAttack, item.capAttack);
-
-                if (item.capDefense > 0)
-                    appendStat(sb, "Defense", item.curDefense, item.capDefense);
-            }
-
-            if (item.spec1Type != specType.None || item.spec2Type != specType.None || item.spec3Type != specType.None)
-            {
-                sb.Append($"\n\n<b>Special Bonuses</b>");
-
-                if (item.spec1Type != specType.None)
-                    appendStat(sb, _effectName(item.spec1Type), item.spec1Cur, item.spec1Cap, item.spec1Type);
-
-                if (item.spec2Type != specType.None)
-                    appendStat(sb, _effectName(item.spec2Type), item.spec2Cur, item.spec2Cap, item.spec2Type);
-
-                if (item.spec3Type != specType.None)
-                    appendStat(sb, _effectName(item.spec3Type), item.spec1Cur, item.spec3Cap, item.spec3Type);
-            }
-
-            return sb.ToString();
         }
     }
 }

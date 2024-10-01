@@ -32,9 +32,12 @@ namespace jshepler.ngu.mods
         {
             var perkLevel = __instance.character.adventure.itopod.perkLevel[94];
             var color = (int i) => perkLevel < i ? "red" : "green";
+            var name = (int i) => perkLevel < i
+                && Options.DropTableTooltip.UnknownItems.Value != Options.DropTableTooltip.UnknownItemDisplay.Show
+                ? "????" : _unlocks[i];
 
             __result = "\n\n<b>Fibonacci Perk Unlocks:</b>\n"
-                + _unlocks.Join(kv => $"<b>Level {kv.Key}:</b> <color={color(kv.Key)}>{kv.Value}</color>", "\n");
+                + _unlocks.Join(kv => $"<b>Level {kv.Key}:</b> <color={color(kv.Key)}>{name(kv.Key)}</color>", "\n");
         }
     }
 }

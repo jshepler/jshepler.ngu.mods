@@ -32,7 +32,7 @@ There are only a few config options at the moment. I'll probably add options in 
 # GO integration bookmarklets
 ***NOTE (unrelated to bookmarklets): importing saves from modded NGU into GO won't work unless you import a clean save - see mods 57 and 139 below.***
 
-Bookarmklets are bookmarks that execute javascript instead of taking you to a specified URL. They run in the active browser tab as part of the site being viewed.
+Bookmarklets are bookmarks that execute javascript instead of taking you to a specified URL. They run in the active browser tab as part of the site being viewed.
 
 The bookmarklets below are used in the [Gear Optimizer](https://gmiclotte.github.io/gear-optimizer) site to talk to NGU. They require you to use GO v0.9.2 or higher - check the [About](https://gmiclotte.github.io/gear-optimizer/#/about/) tab in GO. **You must be on GO when using these bookmarklets or they won't work.**
 
@@ -207,7 +207,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
     doesn't automatically switch adventure zone - assumes already in quest zone and the above mod that uses current zone when starting quest
 
-    when run out of major quests, will start minor idle quest
+    when run out of major quests, will start minor idle quest and change zone to ITOPOD
 
 35. left-alt-click + button to split resources into all runnable bars (i.e. target = 0 or level < target), such that bar speeds are equal
 
@@ -277,7 +277,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
     patched: all harvested fruits, eaten fruits: FoG, FoPa, FoA
 
-56. replaced hacks' tooltip to include more data related to milestone bonuses and benefits from milestone reducers
+56. replaced hacks' tooltip to include more data related to milestone bonuses and benefits from milestone reducers (hold alt to see the bonuses per reducer)
 
 57. implemented framework to persist additional data to save file, done in a way that allows such a save to be loadable in vanilla game
 
@@ -329,6 +329,8 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
     - the queue window has a toggle to enable/disable the queue (setting saved in cfg file)
     
     - if queue is empty, next available wish (by current filter/order) will start
+
+    - when loading a save, after offline progression finishes and any wishes have completed, if queue is enabled, will start next wish
 
 68. added number of clicks remaining before button swap on small troll's "click ok 50 times" popup
 
@@ -527,6 +529,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 - suffixes ingredient names with targets (`ingred target`:`pair target`)
 - shift-click the `-` button to reset all ingredients to 0
 - shift-click the `+` button to set optimal levels to all ingredients to give 100% meal efficiency
+- hold alt to highlight ingredient pairs that are at optimal values
 
   *the ingredient text will auto-resize to fit (thanks Ms. Rager)*
 
@@ -648,3 +651,25 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 154. achievement ids are shown on achievement tooltips
 
 155. T8 combat helper - the color of the warning text for the explosions attack is set to blue
+
+156. the stat breakdown pages auto refresh every 0.5 seconds
+
+157. when a troll resets energy and you have the `Instant Training Cap` AP purchase, 12 energy will auto allocate to BT (just like it does when swapping loadouts and have the `Unassign E/M on Loadout Swap` setting enabled)
+
+158. options to auto yeet/sort cards, sorts by: rarity > bonus type > bonus amount
+  - cfg file option to enable/disable auto yeet/sort
+  - cfg file option to set max rarirty to yeet
+  - cfg file option to sort ascending or descending
+  - enabled or not, can press the s/y keys to sort/yeet cards
+
+159. blood gain modifiers breakdown to `Stats Breakdown - Misc`
+
+160. breakdown of resource gain sources to their tooltips (hold alt):
+  - EXP sources on the `Spend EXP` button tooltip
+  - PP sources on the PP gained this/last rebirth tooltip, on the Perks page over the PP icon top-right
+  - QP sources on the QP gained this/last rebirth tooltip, on the Quirks page over the QP icon top-right
+
+161. LSC reminder - under certain conditions, the `Challenges` button on the `Rebirth` screen will highlight yellow:
+  - Laser Sword Challenge is unlocked
+  - < 20 completions in the current difficulty
+  - the total time to completion of both `Laser Sword` and `Quadruple Laser Sword` from 0 to current challenge target level is less than the configured amount (in cfg file), default is 5 minutes

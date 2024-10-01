@@ -7,19 +7,19 @@ namespace jshepler.ngu.mods.GameData
     {
         internal static List<ZoneDrops> Zones;
 
-        private static Items[] _boosts1 = new[] { Items.PowerBoost_1, Items.ToughnessBoost_1, Items.SpecialBoost_1 };
-        private static Items[] _boosts2 = new[] { Items.PowerBoost_2, Items.ToughnessBoost_2, Items.SpecialBoost_2 };
-        private static Items[] _boosts5 = new[] { Items.PowerBoost_5, Items.ToughnessBoost_5, Items.SpecialBoost_5 };
-        private static Items[] _boosts10 = new[] { Items.PowerBoost_10, Items.ToughnessBoost_10, Items.SpecialBoost_10 };
-        private static Items[] _boosts20 = new[] { Items.PowerBoost_20, Items.ToughnessBoost_20, Items.SpecialBoost_20 };
-        private static Items[] _boosts50 = new[] { Items.PowerBoost_50, Items.ToughnessBoost_50, Items.SpecialBoost_50 };
-        private static Items[] _boosts100 = new[] { Items.PowerBoost_100, Items.ToughnessBoost_100, Items.SpecialBoost_100 };
-        private static Items[] _boosts200 = new[] { Items.PowerBoost_200, Items.ToughnessBoost_200, Items.SpecialBoost_200 };
-        private static Items[] _boosts500 = new[] { Items.PowerBoost_500, Items.ToughnessBoost_500, Items.SpecialBoost_500 };
-        private static Items[] _boosts1k = new[] { Items.PowerBoost_1k, Items.ToughnessBoost_1k, Items.SpecialBoost_1k };
-        private static Items[] _boosts2k = new[] { Items.PowerBoost_2k, Items.ToughnessBoost_2k, Items.SpecialBoost_2k };
-        private static Items[] _boosts5k = new[] { Items.PowerBoost_5k, Items.ToughnessBoost_5k, Items.SpecialBoost_5k };
-        private static Items[] _boosts10k = new[] { Items.PowerBoost_10k, Items.ToughnessBoost_10k, Items.SpecialBoost_10k };
+        private static Items[] _boosts1 = [ Items.PowerBoost_1, Items.ToughnessBoost_1, Items.SpecialBoost_1 ];
+        private static Items[] _boosts2 = [ Items.PowerBoost_2, Items.ToughnessBoost_2, Items.SpecialBoost_2 ];
+        private static Items[] _boosts5 = [ Items.PowerBoost_5, Items.ToughnessBoost_5, Items.SpecialBoost_5 ];
+        private static Items[] _boosts10 = [ Items.PowerBoost_10, Items.ToughnessBoost_10, Items.SpecialBoost_10 ];
+        private static Items[] _boosts20 = [ Items.PowerBoost_20, Items.ToughnessBoost_20, Items.SpecialBoost_20 ];
+        private static Items[] _boosts50 = [ Items.PowerBoost_50, Items.ToughnessBoost_50, Items.SpecialBoost_50 ];
+        private static Items[] _boosts100 = [ Items.PowerBoost_100, Items.ToughnessBoost_100, Items.SpecialBoost_100 ];
+        private static Items[] _boosts200 = [ Items.PowerBoost_200, Items.ToughnessBoost_200, Items.SpecialBoost_200 ];
+        private static Items[] _boosts500 = [ Items.PowerBoost_500, Items.ToughnessBoost_500, Items.SpecialBoost_500 ];
+        private static Items[] _boosts1k = [ Items.PowerBoost_1k, Items.ToughnessBoost_1k, Items.SpecialBoost_1k ];
+        private static Items[] _boosts2k = [ Items.PowerBoost_2k, Items.ToughnessBoost_2k, Items.SpecialBoost_2k ];
+        private static Items[] _boosts5k = [ Items.PowerBoost_5k, Items.ToughnessBoost_5k, Items.SpecialBoost_5k ];
+        private static Items[] _boosts10k = [ Items.PowerBoost_10k, Items.ToughnessBoost_10k, Items.SpecialBoost_10k ];
 
         //internal ZoneDrops this[int zoneId] => Zones[zoneId];
         //internal int Count => Zones.Count;

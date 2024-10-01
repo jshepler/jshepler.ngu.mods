@@ -10,6 +10,11 @@ namespace jshepler.ngu.mods
             Options.Allocators.OverCapAllocatorEnabled = Config.Bind("Allocators", "OverCapAllocator.Enabled", false, "allocates enough of a resource to keep BB until target level or RB time");
             Options.Allocators.RatioSplitAllocatorEnabled = Config.Bind("Allocators", "RatioSplitAllocator.Enabled", false, "splits resource between bars, using their ratios, to keep even leveling speed");
 
+            Options.AutoCards.AutoSortEnabled = Config.Bind("AutoCards", "AutoSort.Enabled", true, "if enabled, sorts cards as they are added");
+            Options.AutoCards.AutoSortDirection = Config.Bind("AutoCards", "AutoSort.Direction", CardSortDirection.Ascending, "the order cards are sorted");
+            Options.AutoCards.AutoYeetEnabled = Config.Bind("AutoCards", "AutoYeet.Enabled", false, "if enabled, will yeet cards as they are added, at or below the configured max rarity");
+            Options.AutoCards.MaxYeetRarity = Config.Bind("AutoCards", "AutoYeet.MaxYeetRarity", rarity.Crappy, "if AutoYeet is enabled, this is the max rarity that will get yeeted");
+
             Options.AutoHarvest.Enabled = Config.Bind("AutoHarvest", "Enabled", false, "enable auto harvest/eat fruits when fully grown (max tier)");
             Options.AutoSnipe.TargetZone = Config.Bind("AutoSnipe", "TargetZone", 0, "used to target specific enemy in specific zone, other zones always snipe bosses; enter zone number (from wiki: https://ngu-idle.fandom.com/wiki/Adventure_Mode#Zones)");
             Options.AutoSnipe.TargetEnemy = Config.Bind("AutoSnipe", "TargetEnemy", 0, "used to target specific enemy in specific zone; enter enemy number (from bestiary), 0 = bosses");
@@ -63,6 +68,7 @@ namespace jshepler.ngu.mods
             Options.WishR3Cap.Enabled = Config.Bind("WishR3Cap", "Enabled", true, "when auto-allocating resources or when a wish completes a level, will (re)distribute R3 amongst running wishes to not be more than is needed for min wish time");
 
             Options.FruitActivationIndicator.Enabled = Config.Bind("FruitActivationIndicator", "Enabled", false, "when enabled, the Yggdrasil button will light up red if any fruit needs activation");
+            Options.LSCreminder.MaxMinutesToTarget = Config.Bind("LSCreminder", "MaxMinutesToTarget", 5, "max time to target for both laser sword and quadruple laser sword together, will light up Challenges button on Rebirth screen; 0 = disabled");
         }
 
         internal static class RemoteTriggers
@@ -211,6 +217,19 @@ namespace jshepler.ngu.mods
         {
             internal static ConfigEntry<bool> AutoButter;
             internal static ConfigEntry<bool> AlwaysRandom;
+        }
+
+        internal static class AutoCards
+        {
+            internal static ConfigEntry<bool> AutoSortEnabled;
+            internal static ConfigEntry<CardSortDirection> AutoSortDirection;
+            internal static ConfigEntry<bool> AutoYeetEnabled;
+            internal static ConfigEntry<rarity> MaxYeetRarity;
+        }
+
+        internal static class LSCreminder
+        {
+            internal static ConfigEntry<int> MaxMinutesToTarget;
         }
     }
 }

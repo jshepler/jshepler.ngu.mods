@@ -31,7 +31,7 @@ namespace jshepler.ngu.mods
             if (original != null)
                 return;
 
-            Plugin.OnSaveLoaded += (o, e) =>
+            Plugin.OnOfflineProgressionComplete += (o, e) =>
             {
                 _pairs = null;
                 _firstLoad = true;
@@ -69,6 +69,17 @@ namespace jshepler.ngu.mods
                 __instance.updateDishUI();
             }
 
+            if (Input.GetKeyDown(KeyCode.LeftAlt) || Input.GetKeyDown(KeyCode.RightAlt))
+            {
+                _altIsDown = true;
+                __instance.updateIngredientPods();
+            }
+            else if (Input.GetKeyUp(KeyCode.LeftAlt) || Input.GetKeyUp(KeyCode.RightAlt))
+            {
+                _altIsDown = false;
+                __instance.updateIngredientPods();
+            }
+
             return false;
         }
 
@@ -87,6 +98,8 @@ namespace jshepler.ngu.mods
                 ? DateTime.UtcNow + TimeSpan.FromSeconds(eatRate - cookTimer)
                 : DateTime.UtcNow - TimeSpan.FromSeconds(cookTimer - eatRate);
 
+            //Plugin.LogInfo($"eatRate: {eatRate}, cookTimer: {cookTimer}, currentReadyTime: {currentReadyTime}");
+
             return currentReadyTime;
         }
 
@@ -98,19 +111,32 @@ namespace jshepler.ngu.mods
             __instance.updateMenu();
         }
 
+        private static bool _altIsDown = false;
+
         [HarmonyPostfix, HarmonyPatch(typeof(IngredientPodUI), "updatePod")]
         private static void IngredientPodUI_updatePod_postfix(IngredientPodUI __instance)
         {
+            var cooking = Plugin.Character.cooking;
+
             if (!_firstLoad)
                 return;
 
             var index = __instance.ingredientDataIndex;
             var pairIndex = pairs.FindIndex(p => p.i1Index == index || p.i2Index == index);
-            var iTarget = Plugin.Character.cooking.ingredients[index].targetLevel;
-            var pTarget = pairs[pairIndex].pairTarget;
+            var pair = pairs[pairIndex];
+
+            var iTarget = cooking.ingredients[index].targetLevel;
+            var pTarget = pair.pairTarget;
 
             __instance.nameText.text = $"P{pairIndex + 1}: {__instance.nameText.text} ({iTarget}:{pTarget})";
             __instance.nameText.resizeTextForBestFit = true;
+
+            var i1Level = cooking.ingredients[pair.i1Index].curLevel;
+            var i2Level = cooking.ingredients[pair.i2Index].curLevel;
+            var curScore = pair.GetPairScore(i1Level, i2Level);
+            var isMaxScore = curScore == pair.maxScore;
+
+            __instance.nameText.color = _altIsDown && isMaxScore ? Plugin.ButtonColor_Green : Color.black;
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(CookingController), "updateDishUI")]
@@ -327,15 +353,21 @@ namespace jshepler.ngu.mods
 
             internal int i1OptimalLevel = 0;
             internal int i2OptimalLevel = 0;
+            internal float maxScore = 0f;
 
             internal int pairTarget;
 
+            private Cooking cooking;
+            private CookingController controller;
+            private int pairNumber;
+
             internal IngredientPair(int pair)
             {
-                var cooking = Plugin.Character.cooking;
-                var controller = Plugin.Character.cookingController;
+                pairNumber = pair;
+                cooking = Plugin.Character.cooking;
+                controller = Plugin.Character.cookingController;
 
-                switch (pair)
+                switch (pairNumber)
                 {
                     case 1:
                         i1Index = cooking.pair1[0];
@@ -362,25 +394,12 @@ namespace jshepler.ngu.mods
                         break;
                 }
 
-                var i1Unlocked = controller.ingredientUnlocked(i1Index);
-                var i2Unlocked = controller.ingredientUnlocked(i2Index);
-
-                var maxScore = 0f;
+                //var maxScore = 0f;
                 for (var i1Level = 0; i1Level <= INGREDIENT_MAX_LEVEL; i1Level++)
                 {
                     for (var i2Level = 0; i2Level <= INGREDIENT_MAX_LEVEL; i2Level++)
                     {
-                        var score = 0f;
-
-                        if (i1Unlocked)
-                            score += controller.getLocalScore(i1Index, i1Level) + controller.getLocalScore(i2Index, i1Level);
-
-                        if (i2Unlocked)
-                            score += controller.getLocalScore(i1Index, i2Level) + controller.getLocalScore(i2Index, i2Level);
-
-                        if (i1Unlocked && i2Unlocked)
-                            score += controller.getPairedScore(pair, i1Level + i2Level);
-
+                        var score = GetPairScore(i1Level, i2Level);
                         if (score > maxScore)
                         {
                             maxScore = score;
@@ -389,6 +408,25 @@ namespace jshepler.ngu.mods
                         }
                     }
                 }
+            }
+
+            internal float GetPairScore(int i1Level, int i2Level)
+            {
+                var score = 0f;
+
+                var i1Unlocked = controller.ingredientUnlocked(i1Index);
+                var i2Unlocked = controller.ingredientUnlocked(i2Index);
+
+                if (i1Unlocked)
+                    score += controller.getLocalScore(i1Index, i1Level) + controller.getLocalScore(i2Index, i1Level);
+
+                if (i2Unlocked)
+                    score += controller.getLocalScore(i1Index, i2Level) + controller.getLocalScore(i2Index, i2Level);
+
+                if (i1Unlocked && i2Unlocked)
+                    score += controller.getPairedScore(pairNumber, i1Level + i2Level);
+
+                return score;
             }
         }
     }

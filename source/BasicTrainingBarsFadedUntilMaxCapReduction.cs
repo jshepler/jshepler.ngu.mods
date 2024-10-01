@@ -32,7 +32,7 @@ namespace jshepler.ngu.mods
             var curLevel = training.attackTraining[id];
             var curCap = training.attackCaps[id];
             var maxReduction = curCap / 10 + 1;
-            var maxReductionLevel = maxReduction < 1 ? 0L : (long)(Mathf.Pow((maxReduction - 1f) / (curCap / 1000f) * 500f, 1f / 1.2f) + (500f * id));
+            var maxReductionLevel = maxReduction <= 1 ? 0L : (long)(Mathf.Pow((maxReduction - 1f) / (curCap / 1000f) * 500f, 1f / 1.2f) + (500f * id));
 
             var color = _offenseFills[id].color;
             color.a = curLevel < maxReductionLevel ? FADED : 1.0f;
@@ -48,7 +48,7 @@ namespace jshepler.ngu.mods
             var curLevel = training.defenseTraining[id];
             var curCap = training.defenseCaps[id];
             var maxReduction = curCap / 10 + 1;
-            var maxReductionLevel = maxReduction < 1 ? 0L : (long)(Mathf.Pow((maxReduction - 1f) / (curCap / 1000f) * 500f, 1f / 1.2f) + (500f * id));
+            var maxReductionLevel = maxReduction <= 1 ? 0L : (long)(Mathf.Pow((maxReduction - 1f) / (curCap / 1000f) * 500f, 1f / 1.2f) + (500f * id));
 
             var color = _defenseFills[id].color;
             color.a = curLevel < maxReductionLevel ? FADED : 1.0f;

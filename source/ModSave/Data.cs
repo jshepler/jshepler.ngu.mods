@@ -214,6 +214,42 @@ namespace jshepler.ngu.mods.ModSave
             set => Set("LastRebirthTime", value);
         }
 
+        internal static long[] ExpSourcesThisRB
+        {
+            get => Get<long[]>("ExpSourcesThisRB", [0L, 0L, 0L, 0L]);
+            set => Set("ExpSourcesThisRB", value);
+        }
+
+        internal static long[] ExpSourcesLastRB
+        {
+            get => Get<long[]>("ExpSourcesLastRB", [0L, 0L, 0L, 0L]);
+            set => Set("ExpSourcesLastRB", value);
+        }
+
+        internal static long[] PPSourcesThisRB
+        {
+            get => Get<long[]>("PPSourcesThisRB", [0L, 0L, 0L]);
+            set => Set("PPSourcesThisRB", value);
+        }
+
+        internal static long[] PPSourcesLastRB
+        {
+            get => Get<long[]>("PPSourcesLastRB", [0L, 0L, 0L]);
+            set => Set("PPSourcesLastRB", value);
+        }
+
+        internal static long[] QPSourcesThisRB
+        {
+            get => Get<long[]>("QPSourcesThisRB", [0L, 0L, 0L]);
+            set => Set("QPSourcesThisRB", value);
+        }
+
+        internal static long[] QPSourcesLastRB
+        {
+            get => Get<long[]>("QPSourcesLastRB", [0L, 0L, 0L]);
+            set => Set("QPSourcesLastRB", value);
+        }
+
         // REMINDER: NO TYPES DEFINED IN MODS ELSE NOT LOADABLE IN VANILLA
     }
 }

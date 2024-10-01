@@ -28,7 +28,7 @@ namespace jshepler.ngu.mods
                 return;
 
             Plugin.OnUpdate += Update;
-            Plugin.OnSaveLoaded += (o, e) => Rebirth_engage_bool_prefix();
+            Plugin.OnOfflineProgressionComplete += (o, e) => Rebirth_engage_bool_prefix();
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(AdventureController), "Start")]

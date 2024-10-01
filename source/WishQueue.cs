@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection.Emit;
 using HarmonyLib;
 using jshepler.ngu.mods.Popups;
@@ -21,6 +23,9 @@ namespace jshepler.ngu.mods
 
             Plugin.OnSaveLoaded += (o, e) => Queue = ModSave.Data.WishQueue ?? new();
             Plugin.OnPreSave += (o, e) => ModSave.Data.WishQueue = Queue;
+
+            Plugin.OnOfflineProgressionComplete += OnOfflineProgressionComplete;
+
             Plugin.OnUpdate += (o, e) =>
             {
                 if (Plugin.Character.InMenu(Menu.Wishes) && Input.GetKeyDown(KeyCode.Q))
@@ -82,6 +87,30 @@ namespace jshepler.ngu.mods
                 .SetInstruction(Transpilers.EmitDelegate(StartNextWish));
 
             return cm.InstructionEnumeration();//.DumpToLog();
+        }
+
+        private static void OnOfflineProgressionComplete(object sender, EventArgs e)
+        {
+            if (Options.WisheQueue.Enabled.Value == false || Queue.Count == 0)
+                return;
+
+            var wishes = Plugin.Character.wishes.wishes;
+            var runningWishes = wishes.Where(w => w.energy > 0 && w.magic > 0 && w.res3 > 0).ToList();
+            var maxWishes = Plugin.Character.wishesController.curWishSlots();
+
+            if (runningWishes.Count >= maxWishes)
+                return;
+
+            while (runningWishes.Count < maxWishes)
+            {
+                var nextWishId = GetNextWishId();
+                if (nextWishId == -1)
+                    break;
+
+                runningWishes.Add(wishes[nextWishId]);
+            }
+
+            WishSplit.SplitResources(runningWishes);
         }
 
         private static void StartNextWish(int wishId)

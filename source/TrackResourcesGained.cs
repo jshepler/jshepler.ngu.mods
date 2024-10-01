@@ -2,6 +2,7 @@
 using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace jshepler.ngu.mods
@@ -45,41 +46,13 @@ namespace jshepler.ngu.mods
             set => ModSave.Data.APGainedThisRB = value;
         }
 
-        private static long _qpLastRB
-        {
-            get => ModSave.Data.QPGainedLastRB;
-            set => ModSave.Data.QPGainedLastRB = value;
-        }
-
-        private static long _qpThisRB
-        {
-            get => ModSave.Data.QPGainedThisRB;
-            set => ModSave.Data.QPGainedThisRB = value;
-        }
-
-        private static long _ppLastRB
-        {
-            get => ModSave.Data.PPGainedLastRB;
-            set => ModSave.Data.PPGainedLastRB = value;
-        }
-
-        private static long _ppThisRB
-        {
-            get => ModSave.Data.PPGainedThisRB;
-            set => ModSave.Data.PPGainedThisRB = value;
-        }
-
         private static long _curSeeds => Plugin.Character.yggdrasil.seeds;
         private static long _curPoop => Plugin.Character.arbitrary.poop1Count;
         private static long _curAP => Plugin.Character.arbitrary.curArbitraryPoints;
-        private static long _curQP => Plugin.Character.beastQuest.quirkPoints;
-        private static long _curPP => Plugin.Character.adventure.itopod.perkPoints;
 
         private static long _lastSeedCount;
         private static long _lastPoopCount;
         private static long _lastAPCount;
-        private static long _lastQPCount;
-        private static long _lastPPCount;
 
         private static FieldInfo _tooltipText = typeof(HoverTooltip).GetField("tooltipText", BindingFlags.Instance | BindingFlags.NonPublic);
 
@@ -95,8 +68,6 @@ namespace jshepler.ngu.mods
                 _lastSeedCount = _curSeeds;
                 _lastPoopCount = _curPoop;
                 _lastAPCount = _curAP;
-                _lastQPCount = _curQP;
-                _lastPPCount = _curPP;
             };
 
             Plugin.OnLateUpdate += (o, e) =>
@@ -113,25 +84,10 @@ namespace jshepler.ngu.mods
                 if (ap > _lastAPCount)
                     _apThisRB += (ap - _lastAPCount);
 
-                var qp = _curQP;
-                if (qp > _lastQPCount)
-                    _qpThisRB += (qp - _lastQPCount);
-
-                var pp = _curPP;
-                if (pp > _lastPPCount)
-                    _ppThisRB += (pp - _lastPPCount);
-
                 _lastSeedCount = seeds;
                 _lastPoopCount = poop;
                 _lastAPCount = ap;
-                _lastQPCount = qp;
-                _lastPPCount = pp;
             };
-
-            var go = GameObject.Find("Canvas/Adventure Menu Canvas/Adventure Menu/ITOPOD Perks")
-                .AddComponent<PointerHandlerComponent>()
-                .OnPointerEnter(e => StartPerksTooltip())
-                .OnPointerExit(e => StopPerksTooltip());
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(Rebirth), "engage", typeof(bool))]
@@ -145,12 +101,6 @@ namespace jshepler.ngu.mods
 
             _apLastRB = _apThisRB;
             _apThisRB = 0L;
-
-            _qpLastRB = _qpThisRB;
-            _qpThisRB = 0L;
-
-            _ppLastRB = _ppThisRB;
-            _ppThisRB = 0L;
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(SeedIconHover), "seedInfo")]
@@ -159,7 +109,8 @@ namespace jshepler.ngu.mods
             var character = Plugin.Character;
             var tooltipText = _tooltipText.GetValue(__instance.tooltip) as Text;
 
-            tooltipText.text += $"\n\nSeeds gained this rebirth: {character.display(_seedsThisRB)}\nSeeds gained last rebirth: {character.display(_seedsLastRB)}";
+            tooltipText.text += $"\n\n<b>Seeds gained this rebirth:</b> {character.display(_seedsThisRB)}"
+                + $"\n<b>Seeds gained last rebirth:</b> {character.display(_seedsLastRB)}";
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(SeedIconHover), "poopInfo")]
@@ -168,7 +119,8 @@ namespace jshepler.ngu.mods
             var character = Plugin.Character;
             var tooltipText = _tooltipText.GetValue(__instance.tooltip) as Text;
 
-            tooltipText.text += $"\n\nPoop gained this rebirth: {character.display(_poopThisRB)}\nPoop gained last rebirth: {character.display(_poopLastRB)}";
+            tooltipText.text += $"\n\n<b>Poop gained this rebirth:</b> {character.display(_poopThisRB)}"
+                + $"\n<b>Poop gained last rebirth:</b> {character.display(_poopLastRB)}";
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(ButtonShower), "showPotionTimer")]
@@ -176,68 +128,24 @@ namespace jshepler.ngu.mods
         {
             var character = Plugin.Character;
 
-            ___message += $"\n\nAP gained this rebirth: {character.display(_apThisRB)}\nAP gained last rebirth: {character.display(_apLastRB)}";
+            ___message += $"\n\n<b>AP gained this rebirth:</b> {character.display(_apThisRB)}"
+                + $"\n<b>AP gained last rebirth:</b> {character.display(_apLastRB)}";
+
             __instance.tooltip.showTooltip(___message);
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(ButtonShower), "showQuestStatus")]
-        private static void ButtonShower_showQuestStatus_postfix(ButtonShower __instance)
-        {
-            if (!__instance.beast.interactable)
-                return;
+        //private static Coroutine _crTooltip;
+        //private static WaitForSeconds _wait1 = new WaitForSeconds(1f);
 
-            var character = Plugin.Character;
-            var tooltipText = _tooltipText.GetValue(__instance.tooltip) as Text;
+        //private static void StopTooltip(PointerEventData e)
+        //{
+        //    if (_crTooltip != null)
+        //    {
+        //        Plugin.Character.StopCoroutine(_crTooltip);
+        //        _crTooltip = null;
+        //    }
 
-            tooltipText.text += $"\n\nQP gained this rebirth: {character.display(_qpThisRB)}\nQP gained last rebirth: {character.display(_qpLastRB)}";
-        }
-
-        //[HarmonyPostfix, HarmonyPatch(typeof(ButtonShower), "showTitanTimer"), HarmonyPriority(1)]
-        private static void ButtonShower_showTitanTimer_postfix(ButtonShower __instance)
-        {
-            if (!__instance.adventure.interactable)
-                return;
-
-            var character = Plugin.Character;
-            var tooltipText = _tooltipText.GetValue(__instance.tooltip) as Text;
-
-            tooltipText.text += $"\n\nPP gained this rebirth: {character.display(_ppThisRB)}\nPP gained last rebirth: {character.display(_ppLastRB)}";
-        }
-
-        private static Coroutine _crPerks;
-        private static WaitForSeconds _wait1 = new WaitForSeconds(1f);
-
-        private static void StartPerksTooltip()
-        {
-            if (_crPerks != null)
-                Plugin.Character.StopCoroutine(_crPerks);
-
-            _crPerks = Plugin.Character.StartCoroutine(ShowPerksTooltip());
-        }
-
-        private static void StopPerksTooltip()
-        {
-            if (_crPerks != null)
-            {
-                Plugin.Character.StopCoroutine(_crPerks);
-                _crPerks = null;
-            }
-
-            Plugin.Character.adventureController.tooltip.hideTooltip();
-        }
-
-        private static IEnumerator ShowPerksTooltip()
-        {
-            var character = Plugin.Character;
-            var tt = character.adventureController.tooltip;
-
-            while (true)
-            {
-                var text = $"PP gained this rebirth: {character.display(_ppThisRB)}\nPP gained last rebirth: {character.display(_ppLastRB)}";
-                tt.showTooltip(text);
-
-                yield return _wait1;
-            }
-        }
+        //    Plugin.Character.adventureController.tooltip.hideTooltip();
+        //}
     }
 }

@@ -13,11 +13,11 @@ namespace jshepler.ngu.mods
         private static Coroutine _coroutine;
 
         [HarmonyPostfix, HarmonyPatch(typeof(ButtonShower), "Start")]
-        private static void OffenseTraining_levelUp_postfix(ButtonShower __instance)
+        private static void ButtonShower_Start_postfix(ButtonShower __instance)
         {
             _button = __instance.basicTraining;
 
-            Plugin.OnSaveLoaded += (o, e) =>
+            Plugin.OnOfflineProgressionComplete += (o, e) =>
             {
                 _autoAdvanceToggle = Plugin.Character.allOffenseController.autoAdvance;
 

@@ -39,7 +39,7 @@ namespace jshepler.ngu.mods
             _protText = GameObject.Find("Canvas/Cards Canvas/Cards Menu/Protect Card button/Text").GetComponent<Text>();
             _yeetText = GameObject.Find("Canvas/Cards Canvas/Cards Menu/Trash Card Button/Text").GetComponent<Text>();
 
-            Plugin.OnSaveLoaded += (o, e) => AllocateGenerators();
+            Plugin.OnOfflineProgressionComplete += (o, e) => AllocateGenerators();
 
             Plugin.OnUpdate += (o, e) =>
             {

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
+using jshepler.ngu.mods.CapCalculators;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,7 +11,8 @@ namespace jshepler.ngu.mods
     [HarmonyPatch]
     internal class RebirthWarnThingsTodo
     {
-        private static Button _button;
+        private static Button _rbButton;
+        private static Button _challButton;
 
         [HarmonyPrepare]
         private static void prep(MethodInfo method)
@@ -20,19 +22,22 @@ namespace jshepler.ngu.mods
 
             Plugin.OnGameStart += (o, e) =>
             {
-                _button = GameObject.Find("Canvas/Rebirth Canvas/Rebirth Menu/Rebirth Button").GetComponent<Button>();
-                Plugin.Character.StartCoroutine(SetRebirthColor());
+                _rbButton = GameObject.Find("Canvas/Rebirth Canvas/Rebirth Menu/Rebirth Button").GetComponent<Button>();
+                _challButton = GameObject.Find("Canvas/Rebirth Canvas/Rebirth Menu/Challenge Button").GetComponent<Button>();
+
+                Plugin.BeginCoroutine(SetButtonColors());
             };
         }
 
-        private static IEnumerator SetRebirthColor()
+        private static IEnumerator SetButtonColors()
         {
             var wait1 = new WaitForSeconds(1);
             while (true)
             {
                 yield return wait1;
 
-                _button.image.color = HaveThingsTodo() ? Plugin.ButtonColor_Red : Color.white;
+                _rbButton.image.color = HaveThingsTodo() ? Plugin.ButtonColor_Red : Color.white;
+                _challButton.image.color = CanDoLSC() ? Plugin.ButtonColor_Yellow : Color.white;
             }
         }
 
@@ -62,6 +67,26 @@ namespace jshepler.ngu.mods
                 return true;
 
             return false;
+        }
+
+        private static bool CanDoLSC()
+        {
+            var maxSecondsToTarget = Options.LSCreminder.MaxMinutesToTarget.Value * 60;
+            if (maxSecondsToTarget == 0)
+                return false;
+
+            var character = Plugin.Character;
+            var chall = character.allChallenges.laserSwordChallenge;
+            if (!chall.unlocked() || chall.currentCompletions() >= 20)
+                return false;
+
+            var challTarget = chall.laserSwordTarget();
+            var totalEnergy = character.totalCapEnergy();
+
+            var augSeconds = Calculators.AugCalculators[6].TimeToTarget(0, challTarget, totalEnergy, 0f);
+            var upgSeconds = Calculators.AugUpgradeCalculators[6].TimeToTarget(0, challTarget, totalEnergy, 0f);
+
+            return (augSeconds + upgSeconds) <= maxSecondsToTarget;
         }
     }
 }

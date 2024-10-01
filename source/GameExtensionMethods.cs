@@ -368,11 +368,7 @@ namespace jshepler.ngu.mods
             if (number >= 1000000.0 || (minDecimalPlaces < 1 && maxDecimalPlaces < 1))
                 return character.display(rounded);
 
-            var hasDecimals = Math.Truncate(rounded) == rounded;
-            var format = "#,##0";
-
-            if (minDecimalPlaces > 0 || hasDecimals)
-                format += ".";
+            var format = "#,##0.";
 
             if(minDecimalPlaces > 0)
                 format += new string('0', minDecimalPlaces);

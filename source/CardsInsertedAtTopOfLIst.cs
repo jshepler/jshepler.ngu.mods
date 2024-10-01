@@ -4,7 +4,8 @@ using HarmonyLib;
 
 namespace jshepler.ngu.mods
 {
-    [HarmonyPatch]
+    // this mod is replaced by AutoCards mod - comment that mod out to use this mod instead
+    //[HarmonyPatch]
     internal class CardsInsertedAtTopOfLIst
     {
         [HarmonyTranspiler, HarmonyPatch(typeof(CardsController), "addCard")]

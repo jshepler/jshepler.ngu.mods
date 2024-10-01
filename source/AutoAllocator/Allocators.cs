@@ -32,7 +32,7 @@ namespace jshepler.ngu.mods.AutoAllocator
                 ModSave.Data.EnabledRes3IDs = Res3.Where(kv => kv.Value.EnabledIDs.Any()).ToDictionary(kv => (int)kv.Key, kv => kv.Value.EnabledIDs.ToArray());
             };
 
-            Plugin.OnSaveLoaded += (o, e) =>
+            Plugin.OnOfflineProgressionComplete += (o, e) =>
             {
                 ModSave.Data.EnabledEnergyIDs.Do(kv => Energy[(Feature)kv.Key].SetEnabled(kv.Value));
                 ModSave.Data.EnabledMagicIDs.Do(kv => Magic[(Feature)kv.Key].SetEnabled(kv.Value));

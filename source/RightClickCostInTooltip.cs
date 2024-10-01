@@ -33,13 +33,12 @@ namespace jshepler.ngu.mods
             if (perkLevel >= __instance.maxLevel[FIB_PERK_ID])
                 return true;
 
-            var pp = character.adventure.itopod.perkPoints;
-            var cost = __instance.cost[FIB_PERK_ID];
-            if (pp < cost)
-                return true;
-
             var nextBonus = _fibPerkBonusLevels.First(i => i > perkLevel);
             var buyLevels = nextBonus - perkLevel;
+            var pp = character.adventure.itopod.perkPoints;
+            var cost = __instance.cost[FIB_PERK_ID];
+            if (pp < cost * buyLevels)
+                return true;
 
             for (var x = 0; x < buyLevels; x++)
             {
@@ -76,40 +75,57 @@ namespace jshepler.ngu.mods
                 , new CodeInstruction(OpCodes.Ldarg_0)
                 , new CodeInstruction(OpCodes.Ldfld, messageField)
                 , new CodeInstruction(OpCodes.Ldarg_1)
-                , Transpilers.EmitDelegate(AddRightClickCost)
+                , Transpilers.EmitDelegate(AddRightClickPPCost)
                 , new CodeInstruction(OpCodes.Call, concat2strings)
                 , new CodeInstruction(OpCodes.Stfld, messageField));
 
             return cm.InstructionEnumeration();
         }
 
-        private static string AddRightClickCost(int perkId)
+        private static string AddRightClickPPCost(int perkId)
         {
-            var perkLevel = _controller.character.adventure.itopod.perkLevel[perkId];
+            var display = (double d) => Plugin.Character.display(d);
+            var currentLevel = _controller.character.adventure.itopod.perkLevel[perkId];
             var maxLevel = _controller.maxLevel[perkId];
-            if (perkLevel >= maxLevel || (maxLevel - perkLevel) < 2)
+            if (currentLevel >= maxLevel)
                 return string.Empty;
 
             var pp = _controller.character.adventure.itopod.perkPoints;
-            var cost = _controller.cost[perkId];
-            if (pp < cost * 2)
-                return string.Empty;
+            var costPerLevel = _controller.cost[perkId];
+            var maxLevelsCanBuy = pp / costPerLevel;
+            var text = string.Empty;
 
-            var maxLevelsCanBuy = pp / cost;
-            var buyLevels = Math.Min(maxLevelsCanBuy, maxLevel - perkLevel);
-            var buyCost = buyLevels * cost;
+            if (pp < costPerLevel)
+                text = $"\n\nPP to next level: <b>{display(costPerLevel - pp)}</b>";
 
-            var text = $"\n\nRight-Click: <b>{buyCost} PP, +{buyLevels} Level{(buyLevels > 1 ? "s" : "")} = Level {perkLevel + buyLevels}</b>";
+            else
+            {
+                var buyLevels = Math.Min(maxLevelsCanBuy, maxLevel - currentLevel);
+                var buyCost = buyLevels * costPerLevel;
+                var newLevel = currentLevel + buyLevels;
+
+                text = $"\n\n({display(pp)} / {display(costPerLevel)} = {maxLevelsCanBuy} level{(maxLevelsCanBuy > 1 ? "s" : string.Empty)})"
+                    + $"\nRight-Click:"
+                    + $"\n   PP: <b>{display(buyCost)}</b>"
+                    + $"\n   Levels: <b>+{buyLevels}</b>"
+                    + $"\n   New Level: <b>{(newLevel == maxLevel ? "<color=green>MAX</color>" : newLevel)}</b>";
+            }
 
             if (perkId == FIB_PERK_ID)
             {
-                var nextBonus = _fibPerkBonusLevels.First(i => i > perkLevel);
-                var levelsToNextUnlock = nextBonus - perkLevel;
-                maxLevelsCanBuy = pp / cost;
-                buyLevels = Math.Min(maxLevelsCanBuy, levelsToNextUnlock);
-                buyCost = buyLevels * cost;
+                var nextBonusLevel = _fibPerkBonusLevels.First(i => i > currentLevel);
+                var levelsNeeded = nextBonusLevel - currentLevel;
+                var ppNeeded = levelsNeeded * costPerLevel;
 
-                text += $"\n\nShift-Right-Click (stops at next bonus):\n  <b>{buyCost} PP, +{buyLevels} Level{(buyLevels > 1 ? "s" : "")} = Level {perkLevel + buyLevels}</b>";
+                if (ppNeeded > pp)
+                    text += $"\n\nPP to next bonus: <b>{display(ppNeeded - pp)}</b>";
+
+                else
+                {
+                    text += "\n\nShift-Right-Click to buy up to next bonus:"
+                        + $"\n   PP: <b>{display(ppNeeded)}</b>"
+                        + $"\n   Levels: <b>+{levelsNeeded}</b>";
+                }
             }
 
             return text;
@@ -122,21 +138,32 @@ namespace jshepler.ngu.mods
             if (!character.InMenu(Menu.Quirks) || id < 0 || id > character.beastQuest.quirkLevel.Count)
                 return;
 
-            var quirkLevel = character.beastQuest.quirkLevel[id];
+            var display = (double d) => Plugin.Character.display(d);
+            var currentLevel = character.beastQuest.quirkLevel[id];
             var maxLevel = __instance.maxLevel[id];
-            if (quirkLevel >= maxLevel || (maxLevel - quirkLevel) < 2)
+            if (currentLevel >= maxLevel)
                 return;
 
             var qp = character.beastQuest.quirkPoints;
-            var cost = __instance.cost[id];
-            if (qp < cost * 2)
-                return;
+            var costPerLevel = __instance.cost[id];
+            var maxLevelsCanBuy = qp / costPerLevel;
 
-            var maxLevelsCanBuy = qp / cost;
-            var buyLevels = Math.Min(maxLevelsCanBuy, maxLevel - quirkLevel);
-            var buyCost = buyLevels * cost;
+            if (qp < costPerLevel)
+                ___message += $"\n\nQP to next level: <b>{display(costPerLevel - qp)}</b>";
 
-            ___message += $"\n\nRight-Click: <b>{buyCost} QP, +{buyLevels} Level{(buyLevels > 1 ? "s" : "")} = Level {quirkLevel + buyLevels}</b>";
+            else
+            {
+                var buyLevels = Math.Min(maxLevelsCanBuy, maxLevel - currentLevel);
+                var buyCost = buyLevels * costPerLevel;
+                var newLevel = currentLevel + buyLevels;
+
+                ___message += $"\n\n({display(qp)} / {display(costPerLevel)} = {maxLevelsCanBuy} level{(maxLevelsCanBuy > 1 ? "s" : string.Empty)})"
+                    + $"\nRight-Click:"
+                    + $"\n   QP: <b>{display(buyCost)}</b>"
+                    + $"\n   Levels: <b>+{buyLevels}</b>"
+                    + $"\n   New Level: <b>{(newLevel == maxLevel ? "<color=green>MAX</color>" : newLevel)}</b>";
+            }
+
             __instance.tooltip.showTooltip(___message);
         }
     }

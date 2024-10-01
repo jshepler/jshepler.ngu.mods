@@ -29,7 +29,8 @@ namespace jshepler.ngu.mods.WebService.GO
             var weapon = new JSONArray();
             root.Add("weapon", weapon);
             weapon.Add(new JSONNumber(GOID(inventory.weapon, 10000)));
-            weapon.Add(new JSONNumber(GOID(inventory.weapon2, 10000)));
+            if (Plugin.Character.inventoryController.weapon2Unlocked())
+                weapon.Add(new JSONNumber(GOID(inventory.weapon2, 10000)));
 
             var head = new JSONArray();
             root.Add("head", head);

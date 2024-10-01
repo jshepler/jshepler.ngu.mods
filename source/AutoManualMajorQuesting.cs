@@ -123,6 +123,8 @@ namespace jshepler.ngu.mods
                 if (!quest.idleMode)
                     _controller.toggleIdleMode();
 
+                _character.adventureController.zoneSelector.changeZone(1000);
+
                 _enabled = false;
                 return;
             }

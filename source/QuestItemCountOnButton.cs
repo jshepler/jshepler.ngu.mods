@@ -18,7 +18,7 @@ namespace jshepler.ngu.mods
         {
             if (original != null) return;
 
-            Plugin.OnSaveLoaded += (o, e) =>
+            Plugin.OnOfflineProgressionComplete += (o, e) =>
             {
                 if (InManualQuest())
                     SetInvItemCount();

@@ -222,7 +222,7 @@ namespace jshepler.ngu.mods
                 capReduction = maxReduction;
 
             // L = ((((r-1)/(c/1000))*500)^(1/1.2))+(500*i), thanks JC
-            var maxReductionLevel = maxReduction < 1 ? 0L : (long)(Mathf.Pow((maxReduction - 1f) / (curCap / 1000f) * 500f, 1f / 1.2f) + (500f * id));
+            var maxReductionLevel = maxReduction <= 1 ? 0L : (long)(Mathf.Pow((maxReduction - 1f) / (curCap / 1000f) * 500f, 1f / 1.2f) + (500f * id));
             var levelsLeft = curLevel >= maxReductionLevel ? 0 : maxReductionLevel - curLevel;
             
             var attackEnergy = character.training.attackEnergy[id];
@@ -264,7 +264,7 @@ namespace jshepler.ngu.mods
             if (capReduction > maxReduction)
                 capReduction = maxReduction;
 
-            var maxReductionLevel = maxReduction < 1 ? 0L : (long)(Mathf.Pow((maxReduction - 1f) / (curCap / 1000f) * 500f, 1f / 1.2f) + (500f * id));
+            var maxReductionLevel = maxReduction <= 1 ? 0L : (long)(Mathf.Pow((maxReduction - 1f) / (curCap / 1000f) * 500f, 1f / 1.2f) + (500f * id));
             var levelsLeft = curLevel >= maxReductionLevel ? 0 : maxReductionLevel - curLevel;
 
             var defenseEnergy = character.training.defenseEnergy[id];

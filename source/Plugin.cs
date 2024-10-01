@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 using BepInEx;
@@ -33,6 +34,7 @@ namespace jshepler.ngu.mods
         internal static event EventHandler onGUI; // have to use onGUI instead of OnGUI because OnGUI is the method unity calls
 
         internal static event EventHandler OnSaveLoaded;
+        internal static event EventHandler OnOfflineProgressionComplete;
         internal static event EventHandler OnPreSave;
         internal static event EventHandler OnGameStart;
         internal static event EventHandler<FocusEventArgs> OnGameFocus;
@@ -127,10 +129,16 @@ namespace jshepler.ngu.mods
             OnPreSave?.Invoke(null, EventArgs.Empty);
         }
 
+        [HarmonyPrefix, HarmonyPatch(typeof(Character), "addOfflineProgress")]
+        private static void Character_addOfflineProgress_prefix()
+        {
+            OnSaveLoaded?.Invoke(null, EventArgs.Empty);
+        }
+
         [HarmonyPostfix, HarmonyPatch(typeof(Character), "addOfflineProgress")]
         private static void Character_addOfflineProgress_postfix()
         {
-            OnSaveLoaded?.Invoke(null, EventArgs.Empty);
+            OnOfflineProgressionComplete?.Invoke(null, EventArgs.Empty);
         }
 
         // when starting a new game, there is no offline progress and mods that rely on this event
@@ -139,6 +147,7 @@ namespace jshepler.ngu.mods
         private static void MainMenuController_startNewGame_postfix()
         {
             OnSaveLoaded?.Invoke(null, EventArgs.Empty);
+            OnOfflineProgressionComplete?.Invoke(null, EventArgs.Empty);
         }
 
         [HarmonyFinalizer, HarmonyPatch(typeof(Character), "addOfflineProgress")]
@@ -199,6 +208,31 @@ namespace jshepler.ngu.mods
         internal static void ShowOverrideNotification(string text, float seconds = 3f)
         {
             Character?.tooltip.showOverrideTooltip(text, seconds);
+        }
+
+        internal static void ShowTooltip(string message)
+        {
+            Character?.tooltip.showTooltip(message);
+        }
+
+        internal static void ShowOverrideTooltip(string message)
+        {
+            Character?.tooltip.showOverrideTooltip(message);
+        }
+
+        internal static void HideTooltip()
+        {
+            Character?.tooltip.hideTooltip();
+        }
+
+        internal static Coroutine BeginCoroutine(IEnumerator routine)
+        {
+            return Character?.StartCoroutine(routine);
+        }
+
+        internal static void EndCoroutine(Coroutine routine)
+        {
+            Character?.StopCoroutine(routine);
         }
 
         internal class FocusEventArgs : EventArgs

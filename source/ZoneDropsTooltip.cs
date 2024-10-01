@@ -133,7 +133,8 @@ namespace jshepler.ngu.mods
                     return null;
             }
 
-            var killsRemaining = 1000 - Plugin.Character.adventureController.globalKillCounter % 1000;
+            var killsPerGuff = Plugin.Character.adventureController.lootDrop.macGuffinThreshold(0);
+            var killsRemaining = killsPerGuff - Plugin.Character.adventureController.globalKillCounter % killsPerGuff;
             var name = _name((int)drop.MacGuffinItem);
             return $"\n\n<b>MacGuffin:</b> ({killsRemaining} kills remaining)\n<b><color=green>100%</color></b> for {name}";
         }

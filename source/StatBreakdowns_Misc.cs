@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace jshepler.ngu.mods
 {
     [HarmonyPatch]
-    internal class BoostBonusStats
+    internal class StatBreakdowns_Misc
     {
         [HarmonyTranspiler, HarmonyPatch(typeof(StatsDisplay), "displayMisc")]
         private static IEnumerable<CodeInstruction> StatsDisplay_displayMisc_Transpiler(IEnumerable<CodeInstruction> instructions)
@@ -31,20 +31,21 @@ namespace jshepler.ngu.mods
                     , new CodeMatch(OpCodes.Callvirt, setTextMethod))
                 .Advance(1) // leave the first Ldarg_0 to pass as argument to delegate below
                 .RemoveInstructions(7)
-                .Insert(Transpilers.EmitDelegate(BoostBonusStatsText))
+                .Insert(Transpilers.EmitDelegate(PrependMiscStats))
                 .InstructionEnumeration();
 
             return newInstructions;
         }
 
-        private static void BoostBonusStatsText(StatsDisplay __instance)
+        private static void PrependMiscStats(StatsDisplay __instance)
         {
-            var completedBoostsCount = __instance.character.inventory.itemList.itemMaxxed.Take(39).Count(b => b);
+            var character = __instance.character;
+            var completedBoostsCount = character.inventory.itemList.itemMaxxed.Take(39).Count(b => b);
             var completedBoostsBonus = (completedBoostsCount * .02f) + 1f;
-            var bdwCompleteBonus = __instance.character.inventory.itemList.badlyDrawnComplete ? 1.2f : 1f;
-            var constructionCompleteBonus = __instance.character.inventory.itemList.constructionComplete ? 1.2f : 1f;
-            var perksBonus = __instance.character.adventureController.itopod.totalBoostBonus();
-            var quirksBonus = __instance.character.beastQuestPerkController.totalBoostBonus();
+            var bdwCompleteBonus = character.inventory.itemList.badlyDrawnComplete ? 1.2f : 1f;
+            var constructionCompleteBonus = character.inventory.itemList.constructionComplete ? 1.2f : 1f;
+            var perksBonus = character.adventureController.itopod.totalBoostBonus();
+            var quirksBonus = character.beastQuestPerkController.totalBoostBonus();
 
             var totalBonus = completedBoostsBonus * bdwCompleteBonus * constructionCompleteBonus * perksBonus * quirksBonus;
 
@@ -55,16 +56,61 @@ namespace jshepler.ngu.mods
                 + (constructionCompleteBonus == 1f ? string.Empty : $"\n<b>Completed Construction Set:</b> ")
                 + (perksBonus == 1f ? string.Empty : $"\n<b>Perks Modifier:</b> ")
                 + (quirksBonus == 1f ? string.Empty : $"\n<b>Quirks Modifier:</b> ")
-                + $"\n<b>Total Modifier:</b> ";
+                + $"\n<b>Total Boost Modifier:</b> ";
 
             __instance.statValue.text =
                 $"\n  100%"
                 + $"\nx {completedBoostsBonus * 100f}%"
                 + (bdwCompleteBonus == 1f ? string.Empty : $"\nx {bdwCompleteBonus * 100f}%")
                 + (constructionCompleteBonus == 1f ? string.Empty : $"\nx {constructionCompleteBonus * 100f}%")
-                + (perksBonus == 1f ? string.Empty : $"\nx {perksBonus * 100f}%")
-                + (quirksBonus == 1f ? string.Empty : $"\nx {quirksBonus * 100f}%")
-                + $"\n  {totalBonus * 100f}%";
+                + (perksBonus == 1f ? string.Empty : $"\nx {perksBonus * 100f:#,##0.##}%")
+                + (quirksBonus == 1f ? string.Empty : $"\nx {quirksBonus * 100f:#,##0.##}%")
+                + $"\n  {totalBonus * 100f:#,##0.##}%";
+
+            if (character.bossID < 37)
+                return;
+
+            var diggerBloodGainMulti = character.allDiggers.totalBloodBonus();
+            var guffBloodGainMulti = character.inventory.macguffinBonuses[18];
+            var quirkBloodGainMulti = character.beastQuestPerkController.quirkEffect(91);
+            var hacksBloodGainMulti = character.hacksController.totalBloodGainBonus();
+            var totalBloogGainMulti = diggerBloodGainMulti * quirkBloodGainMulti * guffBloodGainMulti * hacksBloodGainMulti;
+
+            if (totalBloogGainMulti == 1f)
+                return;
+
+            var statText = "\n\n<b>Base Blood Gain Modifier:</b> ";
+            var valueText = "\n\n  100%";
+
+            if (diggerBloodGainMulti > 1f)
+            {
+                statText += "\n<b>Blood Digger:</b> ";
+                valueText += $"\nx {character.display(diggerBloodGainMulti * 100.0, 0, 2)}%";
+            }
+
+            if (guffBloodGainMulti > 1f)
+            {
+                statText += "\n<b>Blood MacGuffin:</b> ";
+                valueText += $"\nx {character.display(guffBloodGainMulti * 100.0, 0, 2)}%";
+            }
+
+            if (quirkBloodGainMulti > 1f)
+            {
+                statText += "\n<b>Better Blood Magic (quirk):</b> ";
+                valueText += $"\nx {character.display(quirkBloodGainMulti * 100.0, 0, 2)}%";
+            }
+
+            if (hacksBloodGainMulti > 1f)
+            {
+                statText += "\n<b>Blood Gain Hack:</b> ";
+                valueText += $"\nx {character.display(hacksBloodGainMulti * 100.0, 0, 2)}%";
+            }
+
+            statText += "\n<b>Total Blood Gain Modifier:</b> ";
+            valueText += $"\n  {character.display(totalBloogGainMulti * 100.0, 0, 2)}%";
+
+            __instance.statsBreakdown.text += statText;
+            __instance.statValue.text += valueText;
         }
     }
 }

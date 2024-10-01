@@ -161,7 +161,7 @@ namespace jshepler.ngu.mods
             return false;
         }
 
-        [HarmonyPrefix, HarmonyPatch(typeof(HoverTooltip), "showTooltip", typeof(string), typeof(float))]
+        [HarmonyPrefix, HarmonyPriority(1), HarmonyPatch(typeof(HoverTooltip), "showTooltip", typeof(string), typeof(float))]
         private static bool HoverTooltip_showTooltip_prefix(string message, float seconds, HoverTooltip __instance)
         {
             if (!_enabled || __instance.character.settings.tutorialState >= 0)

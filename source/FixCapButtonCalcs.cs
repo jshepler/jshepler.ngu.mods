@@ -1,6 +1,7 @@
 ﻿using System;
 using HarmonyLib;
 using jshepler.ngu.mods.CapCalculators;
+using UnityEngine;
 
 namespace jshepler.ngu.mods
 {
@@ -103,9 +104,13 @@ namespace jshepler.ngu.mods
         }
 
         // blood rituals
-        [HarmonyPrefix, HarmonyPatch(typeof(BloodMagicController), "cap")]
+        [HarmonyPrefix, HarmonyPriority(2), HarmonyPatch(typeof(BloodMagicController), "cap")]
         private static bool BloodMagicController_capValue_prefix(BloodMagicController __instance)
         {
+            // PartialCaps mod handles this
+            if (Input.GetKey(KeyCode.LeftShift))
+                return true;
+
             var id = __instance.id;
             var character = __instance.character;
             var controller = character.bloodMagicController;
