@@ -104,12 +104,22 @@ namespace jshepler.ngu.mods
             , HarmonyPatch(typeof(WishesController), "addRes3", [])]
         private static bool WishesController_addResource_prefix(WishesController __instance)
         {
-            if (!Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.RightAlt))
-                return true;
-
             var wishes = __instance.character.wishes.wishes;
-            var selected = _selectedIds.Select(i => wishes[i]).ToList();
 
+            if (!Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.RightAlt))
+            {
+                var wishId = __instance.curSelectedWish;
+                var wish = wishes[wishId];
+                if (wish.level >= __instance.properties[wishId].maxLevel)
+                {
+                    Plugin.ShowNotification("Wish is at max level, why are you allocating resources?");
+                    return false;
+                }
+
+                return true;
+            }
+
+            var selected = _selectedIds.Select(i => wishes[i]).ToList();
             if (selected.Count == 0)
                 selected = wishes.Where(w => w.energy > 0 || w.magic > 0 || w.res3 > 0).ToList();
 

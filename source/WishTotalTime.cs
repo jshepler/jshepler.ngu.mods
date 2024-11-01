@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection.Emit;
 using HarmonyLib;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace jshepler.ngu.mods
 {

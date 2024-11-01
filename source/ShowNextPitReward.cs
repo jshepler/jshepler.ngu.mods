@@ -43,28 +43,41 @@ namespace jshepler.ngu.mods
         {
             while (_showTooltip)
             {
-                var nextReward = GetNextPitReward();
                 var secondsRemaining = _character.pitController.currentPitTime() - _character.pit.pitTime.totalseconds;
                 if (secondsRemaining < 0)
                     secondsRemaining = 0;
 
-                _tooltip.showTooltip($"<b>Next Pit Reward in:</b> {NumberOutput.timeOutput(secondsRemaining)}\n  {nextReward}");
+                var log10 = (int)Math.Log10(_character.realGold);
+                var nextReward = GetNextPitReward(log10);
+                var ap = _character.checkAPAdded(log10);
+
+                var text = $"<b>Next Pit Reward in:</b> {NumberOutput.timeOutput(secondsRemaining)}"
+                    + $"\n  {nextReward}"
+                    + $"\n  and {ap} AP";
+
+                _tooltip.showTooltip(text);
                 yield return _wait1;
             }
             
             _tooltip.hideTooltip();
         }
 
-        private static string GetNextPitReward()
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Method Declaration", "Harmony003:Harmony non-ref patch parameters modified", Justification = "not a patch method")]
+        private static string GetNextPitReward(int log10)
         {
-            var log = (int)Math.Log10(_character.realGold);
-            if (log > 30 && _character.wishes.wishes[4].level < 1)
-                log = 30;
+            if (log10 > 30 && _character.wishes.wishes[4].level < 1)
+                log10 = 30;
 
             foreach (var tier in GameData.MoneyPit.TierRewards)
             {
-                if (log < tier.Key)
-                    return SelectRandomString(tier.Value);
+                if (log10 >= tier.Key)
+                    continue;
+
+                var tossFactor = _character.pitController.tossFactor();
+                var reward = SelectRandomString(tier.Value)
+                    .Replace("x?", tossFactor == 1 ? string.Empty : $"x{tossFactor}");
+
+                return reward;
             }
 
             return null;

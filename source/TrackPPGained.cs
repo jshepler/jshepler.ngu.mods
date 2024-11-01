@@ -78,7 +78,7 @@ namespace jshepler.ngu.mods
         private static void ItopodPerkController_awardHighestLevelPP_postfix()
         {
             var gained = _curPP - _ppBefore;
-            _sourcesLastRB[PPSource.ITOPOD] += gained;
+            _sourcesThisRB[PPSource.ITOPOD] += gained;
             _ppThisRB += gained;
         }
 

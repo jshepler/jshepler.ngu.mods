@@ -80,10 +80,10 @@ namespace jshepler.ngu.mods.GameData
 
             // tier 12-16
             { int.MaxValue, new() {
-                "Small Iron Pill (adv stats)"
+                "Small Iron Pill (adv stats) x?"
                 , "ALL Equipped Items LevelUp"
-                , "Exp"
-                , "Small Pomegranate (seeds)"
+                , "Exp x?"
+                , "Small Pomegranate (seeds) x?"
                 , "ALL Daycare Items LevelUp"
             } },
         };

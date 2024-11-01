@@ -1,8 +1,10 @@
 ﻿using HarmonyLib;
+using jshepler.ngu.mods.Popups;
 using UnityEngine;
 
 namespace jshepler.ngu.mods
 {
+    internal enum CardSortBy { RarityFirst, TypeFirst, Efficiency, Variance }
     internal enum CardSortDirection { Descending = -1, Ascending = 1 }
 
     [HarmonyPatch]
@@ -12,10 +14,14 @@ namespace jshepler.ngu.mods
         private static bool _autoYeetInProgress = false;
         private static Card _autoYeetedCard = null;
 
-        private static bool _autoSortEnabled = Options.AutoCards.AutoSortEnabled.Value;
-        private static int _sortDirection = (int)Options.AutoCards.AutoSortDirection.Value;
-        private static bool _autoYeetEnabled = Options.AutoCards.AutoYeetEnabled.Value;
-        private static rarity _maxYeetRarity = Options.AutoCards.MaxYeetRarity.Value;
+        private static bool _autoSortEnabled => Options.AutoCards.AutoSortEnabled.Value;
+        private static CardSortBy _autoSortBy => Options.AutoCards.AutoSortBy.Value;
+        private static int _sortDirection => (int)Options.AutoCards.AutoSortDirection.Value;
+        private static bool _autoYeetEnabled => Options.AutoCards.AutoYeetEnabled.Value;
+        private static rarity _maxYeetRarity => Options.AutoCards.MaxYeetRarity.Value;
+        private static float _maxYeetEfficiency => Options.AutoCards.MaxYeetEfficiency.Value;
+
+        private static AutoCardsPopup _popup;
 
         [HarmonyPostfix
             , HarmonyPatch(typeof(CardsController), "addCard")
@@ -33,7 +39,7 @@ namespace jshepler.ngu.mods
             }
 
             if (_autoSortEnabled)
-                sortCards();
+                SortCards();
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(CardsController), "Update")]
@@ -50,7 +56,15 @@ namespace jshepler.ngu.mods
             }
 
             if (Input.GetKeyDown(KeyCode.S))
-                sortCards();
+                SortCards();
+
+            if (Input.GetKeyDown(KeyCode.F1))
+            {
+                if (_popup == null)
+                    _popup = new AutoCardsPopup();
+
+                _popup.Toggle();
+            }
         }
 
         // uses a higher priority than ToastNotifications.cs to make sure the message is changed before the toast mod grabs it
@@ -72,16 +86,25 @@ namespace jshepler.ngu.mods
             while (index > 0)
             {
                 var card = cards[--index];
-                if (card.cardRarity <= _maxYeetRarity && card.type != cardType.end)
+                if (card.type == cardType.end)
+                    continue;
+
+                _autoYeetedCard = card;
+
+                if (_maxYeetEfficiency > 0f)
                 {
-                    _autoYeetedCard = card;
-                    character.cardsController.trashCard(index);
-                    _autoYeetedCard = null;
+                    if (CardTooltip.GetCardEfficiency(card) <= _maxYeetEfficiency)
+                        character.cardsController.trashCard(index);
                 }
+
+                else if (card.cardRarity <= _maxYeetRarity)
+                    character.cardsController.trashCard(index);
+
+                _autoYeetedCard = null;
             }
         }
 
-        private static void sortCards()
+        internal static void SortCards()
         {
             var character = Plugin.Character;
 
@@ -92,13 +115,35 @@ namespace jshepler.ngu.mods
 
         private static int cardComparer(Card a, Card b)
         {
-            if (a.cardRarity != b.cardRarity)
-                return a.cardRarity.CompareTo(b.cardRarity) * _sortDirection;
+            switch (_autoSortBy)
+            {
+                case CardSortBy.RarityFirst:
+                    if (a.cardRarity != b.cardRarity)
+                        return a.cardRarity.CompareTo(b.cardRarity) * _sortDirection;
 
-            if (a.bonusType != b.bonusType)
-                return a.bonusType.CompareTo(b.bonusType) * _sortDirection;
+                    if (a.bonusType != b.bonusType)
+                        return a.bonusType.CompareTo(b.bonusType) * _sortDirection;
 
-            return a.effectAmount.CompareTo(b.effectAmount) * _sortDirection;
+                    return a.effectAmount.CompareTo(b.effectAmount) * _sortDirection;
+
+                case CardSortBy.TypeFirst:
+                    if (a.bonusType != b.bonusType)
+                        return a.bonusType.CompareTo(b.bonusType) * _sortDirection;
+
+                    if (a.cardRarity != b.cardRarity)
+                        return a.cardRarity.CompareTo(b.cardRarity) * _sortDirection;
+
+                    return a.effectAmount.CompareTo(b.effectAmount) * _sortDirection;
+
+                case CardSortBy.Efficiency:
+                    return CardTooltip.GetCardEfficiency(a).CompareTo(CardTooltip.GetCardEfficiency(b)) * _sortDirection;
+
+                case CardSortBy.Variance:
+                    return CardTooltip.GetCardVariance(a).CompareTo(CardTooltip.GetCardVariance(b)) * _sortDirection;
+
+                default:
+                    return CardTooltip.GetCardEfficiency(a).CompareTo(CardTooltip.GetCardEfficiency(b)) * _sortDirection;
+            }
         }
     }
 }

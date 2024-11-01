@@ -12,6 +12,10 @@ namespace jshepler.ngu.mods
         [HarmonyPrefix, HarmonyPatch(typeof(NGUController), "cap")]
         private static bool NGUController_cap_prefix(NGUController __instance)
         {
+            // ctrl-click handled in TimeTargets_NGU.cs
+            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+                return false;
+
             var id = __instance.id;
             var character = __instance.character;
             
@@ -37,6 +41,10 @@ namespace jshepler.ngu.mods
         [HarmonyPrefix, HarmonyPatch(typeof(NGUMagicController), "cap")]
         private static bool NGUMagicController_cap_prefix(NGUMagicController __instance)
         {
+            // ctrl-click handled in TimeTargets_NGU.cs
+            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+                return false;
+
             var id = __instance.id;
             var character = __instance.character;
 

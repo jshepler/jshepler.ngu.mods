@@ -39,8 +39,25 @@ namespace jshepler.ngu.mods.CapCalculators
             return GetLevel(resource);
         }
 
+        internal long TicksToLevel(long resource, long level)
+        {
+            if (_dirty)
+            {
+                UpdateModifier();
+                _dirty = false;
+            }
+
+            return (long)Math.Ceiling(1.0 / GetProgressPerTick(resource, level));
+        }
+
         internal double TimeToTarget(long currentLevel, long targetLevel, long resource, double progressToNextLevel = 0.0)
         {
+            if (_dirty)
+            {
+                UpdateModifier();
+                _dirty = false;
+            }
+
             if (targetLevel <= currentLevel)
                 return 0.0;
 

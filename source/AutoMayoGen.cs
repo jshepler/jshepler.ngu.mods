@@ -46,25 +46,12 @@ namespace jshepler.ngu.mods
                 if (Plugin.Character.InMenu(Menu.Cards) == false)
                     return;
 
-                if (Input.GetKeyDown(KeyCode.LeftAlt))
-                {
-                    _castText.text = "OFF";
-                    _protText.text = "LOW";
-                    _yeetText.text = "ALL";
-                    _altIsDown = true;
+                _altIsDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+                _castText.text = _altIsDown ? "OFF" : "Cast";
+                _protText.text = _altIsDown ? "LOW" : "Protect";
+                _yeetText.text = _altIsDown ? "ALL" : "Yeet";
 
-                    SetButtonColors();
-                }
-
-                else if (Input.GetKeyUp(KeyCode.LeftAlt))
-                {
-                    _castText.text = "Cast";
-                    _protText.text = "Protect";
-                    _yeetText.text = "Yeet";
-                    _altIsDown = false;
-
-                    SetButtonColors();
-                }
+                SetButtonColors();
             };
         }
 

@@ -91,42 +91,48 @@ namespace jshepler.ngu.mods
 
         private static void OnOfflineProgressionComplete(object sender, EventArgs e)
         {
-            if (Options.WisheQueue.Enabled.Value == false || Queue.Count == 0)
+            // select first visible wish when loading a save
+            _controller.constructList();
+            _controller.changePage(0);
+            _controller.selectNewWish(_controller.curValidUpgradesList[0]);
+
+            if (Options.WisheQueue.Enabled.Value == false)
                 return;
 
             var wishes = Plugin.Character.wishes.wishes;
-            var runningWishes = wishes.Where(w => w.energy > 0 && w.magic > 0 && w.res3 > 0).ToList();
+            var runningWishes = wishes.Where(w => w.energy > 0 || w.magic > 0 || w.res3 > 0).ToList();
             var maxWishes = Plugin.Character.wishesController.curWishSlots();
 
             if (runningWishes.Count >= maxWishes)
                 return;
 
-            while (runningWishes.Count < maxWishes)
-            {
-                var nextWishId = GetNextWishId();
-                if (nextWishId == -1)
-                    break;
-
-                runningWishes.Add(wishes[nextWishId]);
-            }
+            var nextWishes = GetNextWishes(maxWishes - runningWishes.Count);
+            runningWishes.AddRange(nextWishes.Select(i => wishes[i]));
 
             WishSplit.SplitResources(runningWishes);
         }
 
-        private static void StartNextWish(int wishId)
+        private static void StartNextWish(int completedWishId)
         {
-            var nextWishId = Options.WisheQueue.Enabled.Value ? GetNextWishId() : -1;
+            var nextWishId = -1;
+
+            if (Options.WisheQueue.Enabled.Value == true)
+            {
+                var nextWishes = GetNextWishes(1);
+                if (nextWishes.Count == 1)
+                    nextWishId = nextWishes[0];
+            }
 
             if (nextWishId == -1)
             {
-                _controller.removeAllResources(wishId);
+                _controller.removeAllResources(completedWishId);
                 WishSplit.SplitResources();
                 _controller.updateText();
 
                 return;
             }
 
-            var current = _controller.character.wishes.wishes[wishId];
+            var current = _controller.character.wishes.wishes[completedWishId];
             var next = _controller.character.wishes.wishes[nextWishId];
 
             next.energy += current.energy;
@@ -143,40 +149,41 @@ namespace jshepler.ngu.mods
             _controller.updatebyID(nextWishId);
         }
 
-        private static int GetNextWishId()
+        private static List<int> GetNextWishes(int numberToGet = 1)
         {
             var wishes = _controller.character.wishes.wishes;
             var props = _controller.properties;
-            var nextWishId = -1;
+            var nextWishes = new List<int>();
 
-            while (Queue.Count > 0)
+            while (Queue.Count > 0 && nextWishes.Count < numberToGet)
             {
-                var index = Queue[0];
+                var wishId = Queue[0];
                 Queue.RemoveAt(0);
 
-                if (wishes[index].level < props[index].maxLevel)
-                {
-                    nextWishId = index;
-                    break;
-                }
+                if (wishes[wishId].level < props[wishId].maxLevel)
+                    nextWishes.Add(wishId);
             }
 
-            if (nextWishId == -1)
+            if (nextWishes.Count == numberToGet)
+                return nextWishes;
+
+            _controller.constructList();
+            if (_controller.curValidUpgradesList.Count == 0)
+                return nextWishes;
+
+            for (var x = 0; x < _controller.curValidUpgradesList.Count; x++)
             {
-                _controller.constructList();
-                for (var x = 0; x < _controller.curValidUpgradesList.Count; x++)
-                {
-                    var index = _controller.curValidUpgradesList[x];
-                    var wish = wishes[index];
-                    if (wish.level < props[index].maxLevel && wish.energy == 0 && wish.magic == 0 && wish.res3 == 0)
-                    {
-                        nextWishId = index;
-                        break;
-                    }
-                }
+                var wishId = _controller.curValidUpgradesList[x];
+                var wish = wishes[wishId];
+
+                if (wish.level < props[wishId].maxLevel && wish.energy == 0 && wish.magic == 0 && wish.res3 == 0)
+                    nextWishes.Add(wishId);
+
+                if (nextWishes.Count == numberToGet)
+                    break;
             }
 
-            return nextWishId;
+            return nextWishes;
         }
     }
 }

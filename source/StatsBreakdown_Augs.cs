@@ -2,11 +2,12 @@
 using System.Linq;
 using System.Reflection.Emit;
 using HarmonyLib;
+using UnityEngine.UI;
 
 namespace jshepler.ngu.mods
 {
     [HarmonyPatch]
-    internal class AugmentStatsBreakdown
+    internal class StatsBreakdown_Augs
     {
         [HarmonyTranspiler, HarmonyPatch(typeof(StatsDisplay), "displayAugments")]
         private static IEnumerable<CodeInstruction> StatsDisplay_displayAugments_transpiler(IEnumerable<CodeInstruction> instructions)
@@ -14,10 +15,43 @@ namespace jshepler.ngu.mods
             var oldString = "Augment Speed Breakdown";
             var newString = "Augment Stats Breakdown";
 
-            return new CodeMatcher(instructions)
+            var statsBreakdown = typeof(StatsDisplay).GetField("statsBreakdown");
+            var statValue = typeof(StatsDisplay).GetField("statValue");
+
+            var cm = new CodeMatcher(instructions)
                 .MatchForward(false, new CodeMatch(OpCodes.Ldstr, oldString))
                 .SetOperandAndAdvance(newString)
-                .InstructionEnumeration();
+
+                // fixes bug where "Welcome to Sadistic" perk isn't included
+                .MatchForward(false, new CodeMatch(OpCodes.Ldstr, "\n<b>Total Augment Speed Factor:</b> "))
+                .Advance(-1)
+                .InsertAndAdvance(
+                    new CodeInstruction(OpCodes.Dup),
+                    new CodeInstruction(OpCodes.Ldarg_0),
+                    new CodeInstruction(OpCodes.Ldfld, statValue),
+                    new CodeInstruction(Transpilers.EmitDelegate(addSadPerk)));
+
+            return cm.InstructionEnumeration();//.DumpToLog();
+        }
+
+        private static void addSadPerk(Text statText, Text valueText)
+        {
+            if (Plugin.Character.settings.rebirthDifficulty >= difficulty.sadistic
+                && Plugin.Character.adventure.itopod.perkLevel[144] >= 1)
+            {
+                statText.text += "\n<b>Welcome to Sadistic Perk</b> ";
+                valueText.text += "\nx 120%";
+            }
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(AllAugsController), "getTotalSpeedFactor")]
+        private static void AllAugsController_getTotalSpeedFactor_postfix(ref float __result)
+        {
+            if (Plugin.Character.settings.rebirthDifficulty >= difficulty.sadistic
+                && Plugin.Character.adventure.itopod.perkLevel[144] >= 1)
+            {
+                __result *= 1.2f;
+            }
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(StatsDisplay), "displayAugments")]

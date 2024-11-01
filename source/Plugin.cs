@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Reflection.Emit;
 using BepInEx;
 using BepInEx.Logging;
@@ -19,10 +20,10 @@ namespace jshepler.ngu.mods
         //internal static Color ButtonColor_LightBlue = new Color32(127, 208, 255, 255);
 
         // https://www.schemecolor.com/blue-red-yellow-green.php
-        internal static Color ButtonColor_Green = new Color32(40, 204, 45, 255);
-        internal static Color ButtonColor_Yellow = new Color32(255, 244, 79, 255);
-        internal static Color ButtonColor_Red = new Color32(216, 46, 63, 255);
-        internal static Color ButtonColor_LightBlue = new Color32(99, 202, 216, 255);
+        internal static Color ButtonColor_Green = new Color32(40, 204, 45, 255); // #28cc2d
+        internal static Color ButtonColor_Yellow = new Color32(255, 244, 79, 255); // #fff44f
+        internal static Color ButtonColor_Red = new Color32(216, 46, 63, 255); // #d82e3f
+        internal static Color ButtonColor_LightBlue = new Color32(99, 202, 216, 255); // #63cad8
 
         private readonly Harmony harmony = new Harmony(PluginInfo.PLUGIN_GUID);
         private static ManualLogSource Log;
@@ -119,6 +120,17 @@ namespace jshepler.ngu.mods
             var height = Options.CustomResolution.Height.Value;
             if (width > 0 && height > 0)
                 Screen.SetResolution(width, height, false);
+
+            if (Options.OverrideCulture.Enabled.Value == true)
+            {
+                var localString = Options.OverrideCulture.Locale.Value;
+                try
+                {
+                    CultureInfo.CurrentCulture = new CultureInfo(localString, false);
+                }
+
+                catch { }
+            }
 
             OnGameStart?.Invoke(null, EventArgs.Empty);
         }

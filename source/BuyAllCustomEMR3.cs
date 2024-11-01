@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Reflection;
+using System.Collections;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -44,17 +44,20 @@ namespace jshepler.ngu.mods
                     _energyPurchases.refresh();
             };
 
-            var buyCustomAllMethod = typeof(EnergyPurchases).GetMethod("buyCustomAll", BindingFlags.Instance | BindingFlags.NonPublic);
-            var buyCustomAll = () => buyCustomAllMethod.Invoke(__instance, []);
+            //var buyCustomAllMethod = typeof(EnergyPurchases).GetMethod("buyCustomAll", BindingFlags.Instance | BindingFlags.NonPublic);
+            //var buyCustomAll = () => { buyCustomAllMethod.Invoke(__instance, []); };
 
             GameObject.Find("Canvas/Exp Energy Canvas /Exp Menu 1/Scroll Rect/Content/Custom All Button")
                 .AddComponent<ClickHandlerComponent>()
                 .OnRightClick(e =>
                 {
-                    var cost = _shiftDown ? _customAllAllCost : __instance.customAllCost();
+                    //var cost = _shiftDown ? _customAllAllCost : __instance.customAllCost();
 
-                    while (Plugin.Character.realExp >= cost)
-                        buyCustomAll();
+                    //while (Plugin.Character.realExp >= cost)
+                    //    buyCustomAll();
+
+                    if(_shiftDown)
+                        Plugin.BeginCoroutine(RepeatBuyAllEMR());
                 });
         }
 
@@ -88,9 +91,32 @@ namespace jshepler.ngu.mods
         [HarmonyPrefix, HarmonyPatch(typeof(EnergyPurchases), "buyCustomAll")]
         private static bool EnergyPurchases_buyCustomAll_prefix(EnergyPurchases __instance)
         {
-            var character = __instance.character;
-            if (!character.InMenu(Menu.EXP_Energy) || !_shiftDown) return true;
-            if (character.realExp < _customAllAllCost) return false;
+            if (!_shiftDown)
+                return true;
+
+            return BuyAllEMR();
+        }
+
+        private static IEnumerator RepeatBuyAllEMR()
+        {
+            var character = Plugin.Character;
+            var numberOfBuys = Mathf.FloorToInt(character.realExp / _customAllAllCost);
+            var buysPerFrame = Mathf.FloorToInt(numberOfBuys / 30);
+
+            while (character.realExp >= _customAllAllCost)
+            {
+                for(var x = 0; x < buysPerFrame; x++)
+                    BuyAllEMR();
+
+                yield return null; // continues on next frame
+            }
+        }
+
+        private static bool BuyAllEMR()
+        {
+            var character = Plugin.Character;
+            if (character.realExp < _customAllAllCost)
+                return false;
 
             var customEnergyPowerAmount = character.settings.customPowerAmount;
             var customEnergyCapAmount = character.settings.customCapAmount;
@@ -137,8 +163,9 @@ namespace jshepler.ngu.mods
                 character.res3.res3PerBar = Math.Min(character.res3.res3PerBar + customRes3BarAmount, hardCapPowBar);
             }
 
-            __instance.refresh();
-            EnergyPurchases_updateEnergyPurchases_postfix(__instance);
+            var ep = character.energyPurchases;
+            ep.refresh();
+            EnergyPurchases_updateEnergyPurchases_postfix(ep);
 
             return false;
         }

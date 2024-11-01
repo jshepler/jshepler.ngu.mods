@@ -1,5 +1,6 @@
 ﻿using System;
 using HarmonyLib;
+using UnityEngine;
 
 namespace jshepler.ngu.mods
 {
@@ -8,7 +9,7 @@ namespace jshepler.ngu.mods
     {
         // from NGUController.cap(), basically copy everything except using double for cap, which isn't clipped to hard cap;
         // the check for if > idle energy, idle energy would never be > hard cap, so that clips it implicitly
-        [HarmonyPrefix, HarmonyPatch(typeof(NGUController), "cap")]
+        //[HarmonyPrefix, HarmonyPatch(typeof(NGUController), "cap")]
         private static bool NGUController_cap_prefix(NGUController __instance)
         {
             var character = __instance.character;

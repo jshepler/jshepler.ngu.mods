@@ -32,12 +32,17 @@ namespace jshepler.ngu.mods
         private static IEnumerator SetButtonColors()
         {
             var wait1 = new WaitForSeconds(1);
+            var lscButton = Plugin.Character.allChallenges.laserSwordChallenge.challengeButton;
+
             while (true)
             {
                 yield return wait1;
 
                 _rbButton.image.color = HaveThingsTodo() ? Plugin.ButtonColor_Red : Color.white;
-                _challButton.image.color = CanDoLSC() ? Plugin.ButtonColor_Yellow : Color.white;
+
+                var canDoLSC = CanDoLSC();
+                _challButton.image.color = canDoLSC ? Plugin.ButtonColor_Yellow : Color.white;
+                lscButton.image.color = canDoLSC ? Plugin.ButtonColor_Yellow : Color.white;
             }
         }
 

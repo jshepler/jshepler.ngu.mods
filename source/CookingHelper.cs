@@ -14,6 +14,8 @@ namespace jshepler.ngu.mods
         private static bool _firstLoad = false;
 
         private static DateTime CookingReadyAtUtc;
+        private static bool _altIsDown = false;
+        private static bool _lastAltIsDown = false;
 
         private static List<IngredientPair> _pairs;
         private static List<IngredientPair> pairs
@@ -69,14 +71,10 @@ namespace jshepler.ngu.mods
                 __instance.updateDishUI();
             }
 
-            if (Input.GetKeyDown(KeyCode.LeftAlt) || Input.GetKeyDown(KeyCode.RightAlt))
+            _altIsDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+            if (_altIsDown != _lastAltIsDown)
             {
-                _altIsDown = true;
-                __instance.updateIngredientPods();
-            }
-            else if (Input.GetKeyUp(KeyCode.LeftAlt) || Input.GetKeyUp(KeyCode.RightAlt))
-            {
-                _altIsDown = false;
+                _lastAltIsDown = _altIsDown;
                 __instance.updateIngredientPods();
             }
 
@@ -111,8 +109,6 @@ namespace jshepler.ngu.mods
             __instance.updateMenu();
         }
 
-        private static bool _altIsDown = false;
-
         [HarmonyPostfix, HarmonyPatch(typeof(IngredientPodUI), "updatePod")]
         private static void IngredientPodUI_updatePod_postfix(IngredientPodUI __instance)
         {
@@ -134,7 +130,11 @@ namespace jshepler.ngu.mods
             var i1Level = cooking.ingredients[pair.i1Index].curLevel;
             var i2Level = cooking.ingredients[pair.i2Index].curLevel;
             var curScore = pair.GetPairScore(i1Level, i2Level);
-            var isMaxScore = curScore == pair.maxScore;
+            //var isMaxScore = curScore == pair.maxScore;
+            //var isMaxScore = Mathf.Abs(curScore - pair.maxScore) <= float.Epsilon;
+            var isMaxScore = curScore.ToString() == pair.maxScore.ToString();
+
+            //Plugin.LogInfo($"[{index}] P{pairIndex}, PS: {curScore}, MS: {pair.maxScore}");
 
             __instance.nameText.color = _altIsDown && isMaxScore ? Plugin.ButtonColor_Green : Color.black;
         }

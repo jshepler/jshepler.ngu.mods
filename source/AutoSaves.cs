@@ -120,7 +120,10 @@ namespace jshepler.ngu.mods
             if (!folder.Exists)
                 return;
 
-            var quickSaves = folder.GetFiles("QuickSave*").OrderByDescending(f => f.LastWriteTimeUtc).ToArray();
+            var quickSaves = folder.GetFiles("QuickSave*")
+                .Where(f => !f.Name.Contains("(CLEAN)"))
+                .OrderByDescending(f => f.LastWriteTimeUtc)
+                .ToArray();
             if (quickSaves.Length == 0 || quickSaves[0] == null)
                 return;
 

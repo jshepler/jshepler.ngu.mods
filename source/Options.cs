@@ -11,14 +11,16 @@ namespace jshepler.ngu.mods
             Options.Allocators.RatioSplitAllocatorEnabled = Config.Bind("Allocators", "RatioSplitAllocator.Enabled", false, "splits resource between bars, using their ratios, to keep even leveling speed");
 
             Options.AutoCards.AutoSortEnabled = Config.Bind("AutoCards", "AutoSort.Enabled", true, "if enabled, sorts cards as they are added");
+            Options.AutoCards.AutoSortBy = Config.Bind("AutoCards", "AutoSort.By", CardSortBy.RarityFirst, "RarityFirst: rarity, type, bonus; TypeFirst: type, rarity, bonus; Efficency: based on bonus/mayo");
             Options.AutoCards.AutoSortDirection = Config.Bind("AutoCards", "AutoSort.Direction", CardSortDirection.Ascending, "the order cards are sorted");
             Options.AutoCards.AutoYeetEnabled = Config.Bind("AutoCards", "AutoYeet.Enabled", false, "if enabled, will yeet cards as they are added, at or below the configured max rarity");
             Options.AutoCards.MaxYeetRarity = Config.Bind("AutoCards", "AutoYeet.MaxYeetRarity", rarity.Crappy, "if AutoYeet is enabled, this is the max rarity that will get yeeted");
+            Options.AutoCards.MaxYeetEfficiency = Config.Bind("AutoCards", "AutoYeet.MaxYeetEfficiency", 0f, "if set, overrides MaxYeetRarity and will yeet cards up to specified efficency, 0.0 to 1.0 (100%), 0 = disabled");
 
             Options.AutoHarvest.Enabled = Config.Bind("AutoHarvest", "Enabled", false, "enable auto harvest/eat fruits when fully grown (max tier)");
             Options.AutoSnipe.TargetZone = Config.Bind("AutoSnipe", "TargetZone", 0, "used to target specific enemy in specific zone, other zones always snipe bosses; enter zone number (from wiki: https://ngu-idle.fandom.com/wiki/Adventure_Mode#Zones)");
             Options.AutoSnipe.TargetEnemy = Config.Bind("AutoSnipe", "TargetEnemy", 0, "used to target specific enemy in specific zone; enter enemy number (from bestiary), 0 = bosses");
-            Options.AutoMergeTransform.Enabled = Config.Bind("AutoMergeTransform", "Enabled", true, "enables/disables auto merging and transforming of pendants and looties");
+            Options.AutoMergeTransform.Enabled = Config.Bind("AutoMergeTransform", "Enabled", false, "enables/disables auto merging and transforming of pendants and looties");
 
             Options.CheckForNewVersion.Enabled = Config.Bind("CheckForNewVersion", "Enabled", true, "checks for new version when loading a save and every hour after");
             Options.CustomResolution.Width = Config.Bind("CustomResolution", "Width", 0, "custom resolution width, 0 = disabled");
@@ -37,6 +39,8 @@ namespace jshepler.ngu.mods
             Options.NotificationToasts.Enabled = Config.Bind("NotificationToasts", "Enabled", true, "enable to separate \"timed tooltips\" into separate notifications as toasts");
             Options.NotificationToasts.TopDown = Config.Bind("NotificationToasts", "TopDown", true, "if true, toasts are displayed top-right and go down; if false, toasts are displayed bottom-right and go up");
 
+            Options.OverrideCulture.Enabled = Config.Bind("OverrideCulture", "Enabled", false, "if enabled, uses the specified locale string to override your system's current culture for the game - ONLY AFFECTS NUMBER FORMATTING");
+            Options.OverrideCulture.Locale = Config.Bind("OverrideCulture", "Locale", "en-US", "locale string used if OverrideCulture.Enabled is true; examples: de-DE, fr-FR");
             Options.PruneSaves.DaysToKeep = Config.Bind("PruneSaves", "DaysToKeep", 0, "When quick/auto saving, will delete saves older than value; 0 = disabled");
             Options.Questing.AlwaysRandom = Config.Bind("Questing", "AlwaysRandom", false, "If true, new quests will always be random instead of targeting current zone");
             Options.Questing.AutoButter = Config.Bind("Questing", "AutoButter", false, "If true, will automatically use butter when starting a major quest");
@@ -64,7 +68,7 @@ namespace jshepler.ngu.mods
             Options.Twitch.RewardTriggers.TossGold = Config.Bind("Twitch.RewardTriggers", "TossGold", "", "Custom reward name to toss gold into money pit");
             Options.Twitch.RewardTriggers.Kitty = Config.Bind("Twitch.RewardTriggers", "Kitty", "", "Custom reward name to trigger troll kitty event");
 
-            Options.WisheQueue.Enabled = Config.Bind("WisheQueue", "Enabled", true, "enables the wish queue");
+            Options.WisheQueue.Enabled = Config.Bind("WisheQueue", "Enabled", false, "enables the wish queue");
             Options.WishR3Cap.Enabled = Config.Bind("WishR3Cap", "Enabled", true, "when auto-allocating resources or when a wish completes a level, will (re)distribute R3 amongst running wishes to not be more than is needed for min wish time");
 
             Options.FruitActivationIndicator.Enabled = Config.Bind("FruitActivationIndicator", "Enabled", false, "when enabled, the Yggdrasil button will light up red if any fruit needs activation");
@@ -222,14 +226,22 @@ namespace jshepler.ngu.mods
         internal static class AutoCards
         {
             internal static ConfigEntry<bool> AutoSortEnabled;
+            internal static ConfigEntry<CardSortBy> AutoSortBy;
             internal static ConfigEntry<CardSortDirection> AutoSortDirection;
             internal static ConfigEntry<bool> AutoYeetEnabled;
             internal static ConfigEntry<rarity> MaxYeetRarity;
+            internal static ConfigEntry<float> MaxYeetEfficiency;
         }
 
         internal static class LSCreminder
         {
             internal static ConfigEntry<int> MaxMinutesToTarget;
+        }
+
+        internal static class OverrideCulture
+        {
+            internal static ConfigEntry<bool> Enabled;
+            internal static ConfigEntry<string> Locale;
         }
     }
 }

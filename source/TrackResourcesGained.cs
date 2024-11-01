@@ -1,8 +1,5 @@
-﻿using System.Collections;
-using System.Reflection;
+﻿using System.Reflection;
 using HarmonyLib;
-using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace jshepler.ngu.mods
@@ -34,25 +31,11 @@ namespace jshepler.ngu.mods
             set => ModSave.Data.PoopGainedThisRB = value;
         }
 
-        private static long _apLastRB
-        {
-            get => ModSave.Data.APGainedLastRB;
-            set => ModSave.Data.APGainedLastRB = value;
-        }
-
-        private static long _apThisRB
-        {
-            get => ModSave.Data.APGainedThisRB;
-            set => ModSave.Data.APGainedThisRB = value;
-        }
-
         private static long _curSeeds => Plugin.Character.yggdrasil.seeds;
         private static long _curPoop => Plugin.Character.arbitrary.poop1Count;
-        private static long _curAP => Plugin.Character.arbitrary.curArbitraryPoints;
 
         private static long _lastSeedCount;
         private static long _lastPoopCount;
-        private static long _lastAPCount;
 
         private static FieldInfo _tooltipText = typeof(HoverTooltip).GetField("tooltipText", BindingFlags.Instance | BindingFlags.NonPublic);
 
@@ -67,7 +50,6 @@ namespace jshepler.ngu.mods
             {
                 _lastSeedCount = _curSeeds;
                 _lastPoopCount = _curPoop;
-                _lastAPCount = _curAP;
             };
 
             Plugin.OnLateUpdate += (o, e) =>
@@ -80,13 +62,8 @@ namespace jshepler.ngu.mods
                 if (poop > _lastPoopCount)
                     _poopThisRB += (poop - _lastPoopCount);
 
-                var ap = _curAP;
-                if (ap > _lastAPCount)
-                    _apThisRB += (ap - _lastAPCount);
-
                 _lastSeedCount = seeds;
                 _lastPoopCount = poop;
-                _lastAPCount = ap;
             };
         }
 
@@ -98,9 +75,6 @@ namespace jshepler.ngu.mods
 
             _poopLastRB = _poopThisRB;
             _poopThisRB = 0L;
-
-            _apLastRB = _apThisRB;
-            _apThisRB = 0L;
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(SeedIconHover), "seedInfo")]
@@ -122,30 +96,5 @@ namespace jshepler.ngu.mods
             tooltipText.text += $"\n\n<b>Poop gained this rebirth:</b> {character.display(_poopThisRB)}"
                 + $"\n<b>Poop gained last rebirth:</b> {character.display(_poopLastRB)}";
         }
-
-        [HarmonyPostfix, HarmonyPatch(typeof(ButtonShower), "showPotionTimer")]
-        private static void ButtonShower_showPotionTimer_postfix(ButtonShower __instance, ref string ___message)
-        {
-            var character = Plugin.Character;
-
-            ___message += $"\n\n<b>AP gained this rebirth:</b> {character.display(_apThisRB)}"
-                + $"\n<b>AP gained last rebirth:</b> {character.display(_apLastRB)}";
-
-            __instance.tooltip.showTooltip(___message);
-        }
-
-        //private static Coroutine _crTooltip;
-        //private static WaitForSeconds _wait1 = new WaitForSeconds(1f);
-
-        //private static void StopTooltip(PointerEventData e)
-        //{
-        //    if (_crTooltip != null)
-        //    {
-        //        Plugin.Character.StopCoroutine(_crTooltip);
-        //        _crTooltip = null;
-        //    }
-
-        //    Plugin.Character.adventureController.tooltip.hideTooltip();
-        //}
     }
 }

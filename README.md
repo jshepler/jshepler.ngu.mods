@@ -114,7 +114,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 5. auto-save on rebirth, challenge, pit throw, changing wandoos OS
 
-6. press F5 to do quicksave, F6 to load latest quicksave
+6. press F5 to do quicksave, F6 to load latest quicksave, ignores clean quicksaves, those that have "(CLEAN)" in the name
 
 7. the lazy ITOPOD shifter can raise max floor
 
@@ -267,7 +267,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
     currently: blood rituals
 
-52. added tooltip to Money Pit button that shows what the next reward will be as well as the time remaining
+52. added tooltip to Money Pit button that shows what the next reward will be as well as the time remaining, AP gained, and toss multiplier (for rewards that get it)
 
 53. press control-shift-x to open the hidden krissmuss 2020 event screen
 
@@ -656,10 +656,12 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 157. when a troll resets energy and you have the `Instant Training Cap` AP purchase, 12 energy will auto allocate to BT (just like it does when swapping loadouts and have the `Unassign E/M on Loadout Swap` setting enabled)
 
-158. options to auto yeet/sort cards, sorts by: rarity > bonus type > bonus amount
+158. options to auto sort/yeet cards, sorts by: rarity > bonus type > bonus amount
   - cfg file option to enable/disable auto yeet/sort
+  - cfg file option to set sort by: rarity first, bonus type first, mayo efficiency, bonus variance
+  - cfg file option to set sort direction
   - cfg file option to set max rarirty to yeet
-  - cfg file option to sort ascending or descending
+  - cfg file option to set max efficiency to yeet (overrides max rarity)
   - enabled or not, can press the s/y keys to sort/yeet cards
 
 159. blood gain modifiers breakdown to `Stats Breakdown - Misc`
@@ -672,4 +674,44 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 161. LSC reminder - under certain conditions, the `Challenges` button on the `Rebirth` screen will highlight yellow:
   - Laser Sword Challenge is unlocked
   - < 20 completions in the current difficulty
-  - the total time to completion of both `Laser Sword` and `Quadruple Laser Sword` from 0 to current challenge target level is less than the configured amount (in cfg file), default is 5 minutes
+  - the total time to target of both `Laser Sword` and `Quadruple Laser Sword` from 0 to current challenge target level is less than the configured amount (in cfg file), default is 5 minutes
+
+162. hides EMR3 speed purchase buttons when base hits 50
+
+163. AP gain to rebirth screen, quest reward text, and next pit reward tooltip
+
+164. additional info to idle progress bar tooltip: time per drop, total quest time, average quests per day, time remaining to complete quest
+
+165. TM speed modifiers to stat breakdowns - misc
+
+166. addtional info to mayo generator tooltips: time per mayo and mayo generated per day
+
+167. mayo generation speed modifiers to stats breakdown - misc
+
+168. option in config file to override the computer's current culture - used when formatting numbers
+
+169. total spin count to daily spin rewards table tooltip after reaching max tier - vanilla stops showing the spin count
+
+170. new wish order, TTL (time to level), orders by the time remaining to wish's next level - added after TOTAL COST
+
+171. tooltip added to cards to show mayo efficiency and bonus variance, hold alt to see more info
+
+172. in-game config panel for card auto sort/yeet - press F1 on cards screen, no longer need to exit game and edit cfg file for these options
+
+173. combat helper for the traitor (T14) - shows IC (invincible counter), GR (growth rate), GC (grow count)
+
+174. shows time per major quest generated and number per day on the quests screen, under the current timer for next major quest
+
+175. on the cards screen, replaces the mayo generator number running/max with total mayo generated per day
+
+176. time targets for NGUs - calculates and sets target level for that NGU to run for x minutes
+  1. set number of minutes in the resource input box at the top of the screen
+  2. ctrl-click the cap button next to desired NGU or ctrl-click the cap all button to set targets for all
+
+177. help to prevent accidentally allocating resources to hidden wishes - by default, when the game is launched, wish 0 is pre-selected and is probably being filtered out
+  - when loading a save, the first visible wish will be pre-selected
+  - prevents allocating resources to a maxed wish
+
+178. fixes game bug that would start showing T10's spawn timer after beating boss 125 instead of 175
+
+179. fixes game bug where "Welcome to Sadistic Difficulty" perk wasn't included in stats breakdown for augs and NGUs

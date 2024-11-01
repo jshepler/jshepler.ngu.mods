@@ -211,8 +211,15 @@ namespace jshepler.ngu.mods
                 return null;
 
             var dcLevel = daycare[dcId].level + Plugin.Character.inventoryController.daycares[dcId].levelsAdded();
-            var afterMerge = Math.Min(100, dcLevel + item.level + 1);
-            return $"\n\n<b>Item level in Daycare:</b> {dcLevel} ({afterMerge} after merge)";
+            var text = $"\n\n<b>Item level in Daycare:</b> {dcLevel}";
+
+            if (item.type != part.MacGuffin)
+            {
+                var afterMerge = Math.Min(100, dcLevel + item.level + 1);
+                text += $" ({afterMerge} after merge)";
+            }
+
+            return text;
         }
 
         private static string BuildItemSourcesString(Equipment item)

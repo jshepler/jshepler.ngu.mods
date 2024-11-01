@@ -20,6 +20,7 @@ namespace jshepler.ngu.mods.CapCalculators
         private double b; // sad tc1
         private double s; // sad divider
         private double modifier;
+        private double pptModifier;
 
         internal NGU_MagicCalculator(NGUMagicController controller)
         {
@@ -34,8 +35,8 @@ namespace jshepler.ngu.mods.CapCalculators
 
         protected override double GetProgressPerTick(long r, long L)
         {
-            var ppt = p / d * r / L * e * k * m * n * g * h * q * w * c * b / s;
-            return ppt;
+            //return p / d * r / L * e * k * m * n * g * h * q * w * c * b / s;
+            return r / L * pptModifier;
         }
 
         protected override double GetResource(long L)
@@ -62,6 +63,7 @@ namespace jshepler.ngu.mods.CapCalculators
             s = character.settings.nguLevelTrack >= difficulty.sadistic ? _controller.sadisticDivider() : 1.0d;
 
             modifier = d * s / (p * e * k * m * n * g * h * q * w * c * b);
+            pptModifier = p / d * e * k * m * n * g * h * q * w * c * b / s;
         }
     }
 }
@@ -80,7 +82,7 @@ namespace jshepler.ngu.mods.CapCalculators
  * q = quirks
  * w = wishes
  * c = cards
- * b = sad tc1
+ * b = normal tc1
  * s = sad divider
  * 
  *  from NGUController.progressPerTick()
