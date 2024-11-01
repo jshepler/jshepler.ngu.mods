@@ -705,8 +705,8 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 175. on the cards screen, replaces the mayo generator number running/max with total mayo generated per day
 
 176. time targets for NGUs - calculates and sets target level for that NGU to run for x minutes
-  1. set number of minutes in the resource input box at the top of the screen
-  2. ctrl-click the cap button next to desired NGU or ctrl-click the cap all button to set targets for all
+  - set number of minutes in the resource input box at the top of the screen
+  - ctrl-click the cap button next to desired NGU or ctrl-click the cap all button to set targets for all
 
 177. help to prevent accidentally allocating resources to hidden wishes - by default, when the game is launched, wish 0 is pre-selected and is probably being filtered out
   - when loading a save, the first visible wish will be pre-selected

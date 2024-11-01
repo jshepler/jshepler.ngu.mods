@@ -93,8 +93,11 @@ namespace jshepler.ngu.mods
         {
             // select first visible wish when loading a save
             _controller.constructList();
-            _controller.changePage(0);
-            _controller.selectNewWish(_controller.curValidUpgradesList[0]);
+            if (_controller.curValidUpgradesList.Count > 0)
+            {
+                _controller.changePage(0);
+                _controller.selectNewWish(_controller.curValidUpgradesList[0]);
+            }
 
             if (Options.WisheQueue.Enabled.Value == false)
                 return;
