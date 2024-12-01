@@ -1,4 +1,7 @@
-﻿using HarmonyLib;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Reflection.Emit;
+using HarmonyLib;
 using jshepler.ngu.mods.CapCalculators;
 
 namespace jshepler.ngu.mods.BarTooltips
@@ -76,6 +79,25 @@ namespace jshepler.ngu.mods.BarTooltips
             ___message += $"\n\n{capMessage}";
 
             __instance.tooltip.showTooltip(___message);
+        }
+
+        [HarmonyTranspiler, HarmonyPatch(typeof(NGUController), "displayTooltip")]
+        private static IEnumerable<CodeInstruction> NGUController_displayTooltip_transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var respawnBonusNormal = typeof(AllNGUController).GetMethod("respawnBonusNormal");
+
+            var cm = new CodeMatcher(instructions)
+                .MatchForward(false, new CodeMatch(OpCodes.Callvirt, respawnBonusNormal))
+                .MatchForward(false, new CodeMatch(OpCodes.Ldstr, "###,##0.##"))
+                .SetOperandAndAdvance("r")
+                .MatchForward(false, new CodeMatch(OpCodes.Ldstr, "###,##0.##"))
+                .SetOperandAndAdvance("r")
+                .MatchForward(false, new CodeMatch(OpCodes.Ldstr, "###,##0.##"))
+                .SetOperandAndAdvance("r")
+                .MatchForward(false, new CodeMatch(OpCodes.Ldstr, "###,##0.##"))
+                .SetOperandAndAdvance("r");
+
+            return cm.InstructionEnumeration();
         }
     }
 }

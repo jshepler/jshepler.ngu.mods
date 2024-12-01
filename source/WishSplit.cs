@@ -12,7 +12,11 @@ namespace jshepler.ngu.mods
     {
         private static HashSet<int> _selectedIds = new();
         private static int MaxWishes => Plugin.Character.wishesController.curWishSlots();
-        private static List<WishWrapper> _wishes;
+        private static bool _offlineInProgress = false;
+
+        private static bool _wishListEnabled => Options.WishList.Enabled.Value;
+        private static bool _wishListSingleLevelMode => Options.WishList.SingleLevelMode.Value;
+        private static bool _wishR3CapEnabled => Options.WishR3Cap.Enabled.Value;
 
         private static long IdleEnergy
         {
@@ -60,27 +64,28 @@ namespace jshepler.ngu.mods
             if (original != null)
                 return;
 
-            Plugin.OnSaveLoaded += (o, e) =>
-            {
-                _wishes = Plugin.Character.wishes.wishes.Select((w, i) => new WishWrapper { id = i, wish = w }).ToList();
-            };
+            Plugin.OnSaveLoaded += (o, e) => _offlineInProgress = true;
+            Plugin.OnOfflineProgressionComplete += (o, e) => _offlineInProgress = false;
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(WishPodUIController), "selectThisWish")]
         private static void WishPodUIController_selectThisWish_postfix(WishPodUIController __instance)
         {
-            if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
+            if (!Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.RightAlt))
             {
-                var id = __instance.id;
-                if (_selectedIds.Contains(id))
-                    _selectedIds.Remove(id);
-                else if (_selectedIds.Count < MaxWishes)
-                    _selectedIds.Add(id);
-
-                __instance.updateIcon();
-            }
-            else
                 ClearSelected();
+                return;
+            }
+
+            var id = __instance.id;
+
+            if (_selectedIds.Contains(id))
+                _selectedIds.Remove(id);
+
+            else if (_selectedIds.Count < MaxWishes)
+                _selectedIds.Add(id);
+
+            __instance.updateIcon();
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(WishPodUIController), "updateIcon")]
@@ -94,6 +99,7 @@ namespace jshepler.ngu.mods
 
             if(_selectedIds.Contains(id))
                 __instance.wishIcon.color = Color.yellow;
+
             else if (wish.level == 0 && wish.progress > 0)
                 __instance.wishIcon.color = Color.white;
         }
@@ -104,13 +110,10 @@ namespace jshepler.ngu.mods
             , HarmonyPatch(typeof(WishesController), "addRes3", [])]
         private static bool WishesController_addResource_prefix(WishesController __instance)
         {
-            var wishes = __instance.character.wishes.wishes;
-
             if (!Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.RightAlt))
             {
-                var wishId = __instance.curSelectedWish;
-                var wish = wishes[wishId];
-                if (wish.level >= __instance.properties[wishId].maxLevel)
+                var wish = Wishes.AllWishes[__instance.curSelectedWish];
+                if (wish.Level >= wish.MaxLevel)
                 {
                     Plugin.ShowNotification("Wish is at max level, why are you allocating resources?");
                     return false;
@@ -119,11 +122,14 @@ namespace jshepler.ngu.mods
                 return true;
             }
 
-            var selected = _selectedIds.Select(i => wishes[i]).ToList();
-            if (selected.Count == 0)
-                selected = wishes.Where(w => w.energy > 0 || w.magic > 0 || w.res3 > 0).ToList();
+            IEnumerable<WishWrapper> wishes;
 
-            SplitResources(selected);
+            if (_selectedIds.Count > 0)
+                wishes = _selectedIds.Select(id => Wishes.AllWishes[id]);
+            else
+                wishes = Wishes.PartiallyRunningWishes;
+
+            SplitResources(wishes.ToList());
 
             ClearSelected();
             __instance.updateText();
@@ -134,8 +140,14 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(WishesController), "doLevelupEffect")]
         private static void WishesController_doLevelupEffect_postfix(int id, int level, WishesController __instance)
         {
-            if (level >= __instance.maxWishLevel(id))
-                return; // the code that starts the next wish will handle it
+            if (_offlineInProgress || level >= __instance.maxWishLevel(id)) // code in wishlist handles max level
+                return;
+
+            if (_wishListEnabled && (_wishListSingleLevelMode || WishList.WishTargetReached(id, level)))
+            {
+                WishList.ClearAndStartNextWish(id);
+                return;
+            }
 
             RedistributeR3();
             __instance.updateText();
@@ -143,21 +155,16 @@ namespace jshepler.ngu.mods
 
         internal static void SplitResources()
         {
-            var runningWishes = Plugin.Character.wishes.wishes
-                .Where(w => w.energy > 0 && w.magic > 0 && w.res3 > 0)
-                .ToList();
-
-            SplitResources(runningWishes);
+            SplitResources(Wishes.RunningWishes.ToList());
         }
 
-        internal static void SplitResources(List<Wish> wishes)
+        internal static void SplitResources(List<WishWrapper> wishes)
         {
-            var count = wishes.Count;
+            var count = wishes.Count();
             if (count == 0)
                 return;
 
-            var controller = Plugin.Character.wishesController;
-            controller.removeAllResources();
+            Plugin.Character.wishesController.removeAllResources();
 
             var eSplit = IdleEnergy / count;
             var mSplit = IdleMagic / count;
@@ -165,9 +172,9 @@ namespace jshepler.ngu.mods
 
             foreach (var wish in wishes)
             {
-                wish.energy = eSplit;
-                wish.magic = mSplit;
-                wish.res3 = r3Split;
+                wish.Energy = eSplit;
+                wish.Magic = mSplit;
+                wish.Res3 = r3Split;
 
                 IdleEnergy -= eSplit;
                 IdleMagic -= mSplit;
@@ -179,19 +186,15 @@ namespace jshepler.ngu.mods
 
         internal static void RedistributeR3()
         {
-            if (!Options.WishR3Cap.Enabled.Value)
+            if (!_wishR3CapEnabled)
                 return;
 
-            var character = Plugin.Character;
-            //if (_wishes == null)
-            //    _wishes = character.wishes.wishes.Select((w, i) => new WishWrapper { id = i, wish = w }).ToList();
-
-            var runningWishes = _wishes
-                .Where(w => w.wish.energy > 0 && w.wish.magic > 0 && w.wish.res3 > 0)
-                .Select(w => new { wish = w.wish, cap = wishR3Cap(w.id) })
+            var runningWishes = Wishes.RunningWishes
+                .Select(w => new { w, cap = wishR3Cap(w.Id) })
                 .OrderBy(w => w.cap)
                 .ToList();
 
+            var character = Plugin.Character;
             character.wishesController.removeAllRes3();
             var amountLeft = character.res3.idleRes3;
 
@@ -202,7 +205,7 @@ namespace jshepler.ngu.mods
                 if (amount > amountLeft)
                     amount = amountLeft;
 
-                rw.wish.res3 += amount;
+                rw.w.Res3 += amount;
                 amountLeft -= amount;
                 runningWishes.RemoveAt(0);
             }
@@ -214,12 +217,6 @@ namespace jshepler.ngu.mods
         {
             _selectedIds.Clear();
             Plugin.Character.wishesController.updateAllPods();
-        }
-
-        class WishWrapper
-        {
-            internal int id;
-            internal Wish wish;
         }
     }
 }

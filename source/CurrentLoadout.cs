@@ -41,16 +41,17 @@ namespace jshepler.ngu.mods
                 return false;
 
             var l = Plugin.Character.inventory.loadouts[loadoutId];
-
             if (l.IsEmpty())
                 return false;
+
+            var weap2Unlocked = Plugin.Character.inventoryController.weapon2Unlocked();
 
             return (l.head == -1 || l.head == -1000)
                 && (l.chest == -2 || l.chest == -1000)
                 && (l.legs == -3 || l.legs == -1000)
                 && (l.boots == -4 || l.boots == -1000)
                 && (l.weapon == -5 || l.weapon == -1000)
-                && (l.weapon2 == -6 || l.weapon2 == -1000)
+                && ((weap2Unlocked && l.weapon2 == -6) || l.weapon2 == -1000)
                 && l.accessories.All(a => a == -1000 || a >= 10000);
         }
     }

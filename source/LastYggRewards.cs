@@ -1,4 +1,7 @@
-﻿using HarmonyLib;
+﻿using System.Collections.Generic;
+using System.Reflection.Emit;
+using HarmonyLib;
+using jshepler.ngu.mods.GameData;
 
 namespace jshepler.ngu.mods
 {
@@ -33,10 +36,37 @@ namespace jshepler.ngu.mods
             var fruitId = __instance.id;
             var text = _texts[fruitId];
 
-            if (!__instance.validID(fruitId) || string.IsNullOrEmpty(text)) return;
+            if (!__instance.validID(fruitId) || string.IsNullOrEmpty(text))
+                return;
 
             ___message += $"\n\n<b>Last Gained:</b>\n{text}";
             __instance.tooltip.showTooltip(___message);
+        }
+
+        // appends [NGU YIELD FH] to the fruit name in the tooltip
+        // NGU = ngu yield, YIELD = ygg yield from equipment (and quirk 92), FH = first harvest perk
+        [HarmonyTranspiler, HarmonyPatch(typeof(FruitController), "showTooltip")]
+        private static IEnumerable<CodeInstruction> FruitController_showTooltip_transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var cm = new CodeMatcher(instructions)
+                .MatchForward(false, new CodeMatch(OpCodes.Ldstr, "<b>"))
+                .Advance(1)
+                .RemoveInstructions(4)
+                .Advance(2)
+                .SetInstruction(Transpilers.EmitDelegate(AppendFruitModifiers));
+
+            return cm.InstructionEnumeration();
+        }
+
+        private static string AppendFruitModifiers(int fruitId)
+        {
+            var name = Plugin.Character.yggdrasilController.fruitName[fruitId];
+            var mod = Fruits.ModifedBy[(FruitId)fruitId];
+            var ngu = mod.NGU ? Plugin.TEXT_GREEN : Plugin.TEXT_RED;
+            var yield = mod.YIELD ? Plugin.TEXT_GREEN : Plugin.TEXT_RED;
+            var fh = mod.FH ? Plugin.TEXT_GREEN : Plugin.TEXT_RED;
+
+            return $"{name} [<color={ngu}>NGU</color> <color={yield}>YIELD</color> <color={fh}>FH</color>]";
         }
     }
 }

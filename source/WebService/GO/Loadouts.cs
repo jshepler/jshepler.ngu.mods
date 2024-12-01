@@ -29,6 +29,7 @@ namespace jshepler.ngu.mods.WebService.GO
             var weapon = new JSONArray();
             root.Add("weapon", weapon);
             weapon.Add(new JSONNumber(GOID(inventory.weapon, 10000)));
+
             if (Plugin.Character.inventoryController.weapon2Unlocked())
                 weapon.Add(new JSONNumber(GOID(inventory.weapon2, 10000)));
 
@@ -79,7 +80,7 @@ namespace jshepler.ngu.mods.WebService.GO
                 loadout.legs = FindSlotId(slot.pants);
                 loadout.boots = FindSlotId(slot.boots);
                 loadout.weapon = FindSlotId(slot.weapon1);
-                loadout.weapon2 = FindSlotId(slot.weapon2);
+                loadout.weapon2 = Plugin.Character.inventoryController.weapon2Unlocked() ? FindSlotId(slot.weapon2) : -1000;
 
                 for (var x = 0; x < loadout.accessories.Count; x++)
                     if (x < slot.accs.Length)

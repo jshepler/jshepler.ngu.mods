@@ -227,7 +227,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 39. LeftShift-R, LeftShift-T, LeftShift-F removes all of the respective resource from the currently viewed feature (instead of all features)
 
-    currently implemented: basic training, augs, adv training, time machine, blood magic rituals, wandoos, ngu, hacks
+    currently implemented: basic training, augs, adv training, time machine, blood magic rituals, wandoos, ngu, hacks, wishes
 
 40. Upgrade All Diggers by right-clicking the "Gold Digger" button; will upgrade all diggers in order of cost, repeating until not enough gold for any upgrade
 
@@ -321,16 +321,31 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
     (temp placement, plan to move this info somewhere else)
 
-67. added wish queue
-    - shift-click a wish to add/remove to/from the queue
-    
-    - press q to toggle the queue window where can delete a wish, re-order wishes, and clear the queue
-    
-    - the queue window has a toggle to enable/disable the queue (setting saved in cfg file)
-    
-    - if queue is empty, next available wish (by current filter/order) will start
+67. wish list (previously wish queue) that let's you specify which wishes to run and in what order, with various options:
+    - shift-click a wish to add/remove to/from the list
+    - press F1 to toggle the list/config popup
+    - disabled by default - enable either in cfg file or in F1 popup
+    - auto advance (enabled by default) - if enabled, will start the next wish when a wish stops
+    - single level (disabled by default) - if enabled, a wish will stop after gaining a single level
+    - blacklist (disabled by default) - if enabled, wishes in the list are ignored (see below)
+    - "start" will start running as many wishes as it can
+    - "resume" will attempt to start wishes that were last running
+    - "clear" clears the list
+    - the text box after wish's current/max level is used to set the target for that wish
+    - only wishes in the list have targets, blacklist mode disables targets
+    - when a wish hits its target or max level, it is removed from the list
+    - in single level mode, when a wish in the list levels but has not reached target/max level, it gets moved to bottom of the list
+    - if auto advance is enabled and blacklist is disabled and list is empty - will start first runnable wish going by current filter/order
+    - if auto advance is enabled and blacklist is enabled - will start first runnable wish going by current filter/order, ignoring wishes in the list
+    - blacklisted wishes are shaded red
 
-    - when loading a save, after offline progression finishes and any wishes have completed, if queue is enabled, will start next wish
+    lazy mode = auto advance, single level, empty list, TTL order - will always run fastest wish levels; use blacklist to skip unwanted wishes
+
+    there is no support for offline progress, targets are ignored, will not start up new wishes "in the middle" of offline progression
+
+    after offline progression completes, new wishes will get started for each wish that finished
+
+    there may still be bugs, testing wishes is slow, so I added an auto save when a wish is about to level... if you encounter any issues, please send me that save so I can use it for testing
 
 68. added number of clicks remaining before button swap on small troll's "click ok 50 times" popup
 
@@ -340,11 +355,8 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 70. the Cap Saved Diggers button uses alternate method
     - sets saved diggers to level 0
-
     - finds saved digger with lowest drain increase for next level that doesn't go over gross gps
-
     - increase its level by 1
-
     - do again until none found
 
     (hold alt when clicking to use original method)
@@ -424,11 +436,12 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
     - cleaned up the text
     - seconds per kill
     - kills per PP (if less than 1 PP per kill) or PP per kill (if 1 or more PP per kill)
-    - PP per day
+    - PP per hour and day
     - kills per EXP drop
     - EXP per drop
     - EXP per day
     - the optimal floor even if > max floor
+    - AT power needed for optimal floors: next, next 50th (next exp increase), next boost (e.g. when boost drops change from 1k to 2k)
 
     time to next PP uses 2 calcs: one for when floor \<= optimal floor and another > optimal floor
 
@@ -451,11 +464,11 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
     if installing mod into an existing game that's no longer in normal, there's no way to know how much of the existing playtime is normal, so it assigns all of it to normal
 
 91. modified manual combat moves to be colored based on state:
-    - disabled/paralyzed (red)
-    - buff running (blue)
-    - on cooldown (yellow)
-    - on GCD (grey)
-    - ready (green)
+     - disabled/paralyzed (red)
+     - buff running (blue)
+     - on cooldown (yellow)
+     - on GCD (grey)
+     - ready (green)
 
 92. fixed zone dropdown bug that prevented selecting safe zone
 
@@ -496,21 +509,21 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 107. adds support for my [ratio tool](https://jshepler.github.io/) to import base EMR3 directly from NGU
 
 108. GO ([gear optimizer](https://gmiclotte.github.io/gear-optimizer)) integration:
-- transfer loadouts from GO to NGU
-- transfer current equipped gear from NGU to GO a save slot that's named "current"
-- transfer aug stats from NGU to GO's augments tab (ecap, aug speed, net gps, normal LAC, and normal LSC)
-- transfer ngu stats from NGU to GO's NGUs tab (em cap, em ngu speed, quirks, blue heart, and current levels for all NGUs)
-- transfer hack stats from NGU to GO's hacks tab (rpower, rcap, hack speed, current level and reducer counts for all hacks)
-- transfer hack goals from GO's hacks tab to NGU hacks' targets
+     - transfer loadouts from GO to NGU
+     - transfer current equipped gear from NGU to GO a save slot that's named "current"
+     - transfer aug stats from NGU to GO's augments tab (ecap, aug speed, net gps, normal LAC, and normal LSC)
+     - transfer ngu stats from NGU to GO's NGUs tab (em cap, em ngu speed, quirks, blue heart, and current levels for all NGUs)
+     - transfer hack stats from NGU to GO's hacks tab (rpower, rcap, hack speed, current level and reducer counts for all hacks)
+     - transfer hack goals from GO's hacks tab to NGU hacks' targets
 
     **requires adding bookmarklets to your browser - see [GO integration bookmarklets](https://github.com/jshepler/jshepler.ngu.mods?tab=readme-ov-file#go-integration-bookmarklets) above**
 
 109. adds dual-wield effectiveness to the second weaopon slot's item tooltip
 
 110. auto-allocation of mayo generators - hold alt key when on cards screen to change the "CAST", "PROTECT", "YEET" buttons to:
-  - OFF: disable auto-allocation of mayo generators
-  - LOW: runs 1 or more generators only on lowest mayo amounts
-  - ALL: runs all generators in order of lowest to highest mayo amounts
+      - OFF: disable auto-allocation of mayo generators
+      - LOW: runs 1 or more generators only on lowest mayo amounts
+      - ALL: runs all generators in order of lowest to highest mayo amounts
 
 111. options to replace the images for: default player portrait, default daycare kitty, troll kitty
 
@@ -525,13 +538,11 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 116. twitch integration to map custom rewards to remote triggers, read [Twitch Integration](https://github.com/jshepler/jshepler.ngu.mods?tab=readme-ov-file#twitch-integration) above for setup
 
 117. cooking helper:
-- prefixes ingredient names with pair number to see which ingredients are paired
-- suffixes ingredient names with targets (`ingred target`:`pair target`)
-- shift-click the `-` button to reset all ingredients to 0
-- shift-click the `+` button to set optimal levels to all ingredients to give 100% meal efficiency
-- hold alt to highlight ingredient pairs that are at optimal values
-
-  *the ingredient text will auto-resize to fit (thanks Ms. Rager)*
+      - prefixes ingredient names with pair number to see which ingredients are paired
+      - suffixes ingredient names with targets (`ingred target`:`pair target`)
+      - shift-click the `-` button to reset all ingredients to 0
+      - shift-click the `+` button to set optimal levels to all ingredients to give 100% meal efficiency
+      - hold alt to highlight ingredient pairs that are at optimal values
 
 118. can name games by putting `-game "game name"` in Steam's launch options (right-click game, properties, general tab)
 
@@ -556,12 +567,12 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
      ***this is an alternative to using the launch options* `-screen-width 1280 -screen-height 800`**
 
 126. tracks some resources gained this/last rebirth:
-  - EXP shown on `Spend EXP` button tooltip
-  - AP shown on `4G's SELLOUT SHOP` button tooltip
-  - PP shown on `I.T.O.P.O.D PERKS` button tooltip (adventure screen)
-  - QP shown on `Questing` button tooltip
-  - seeds shown on seeds icon tooltip (ygg screen)
-  - poop shown on poop icon tooltip (ygg screen)
+      - EXP shown on `Spend EXP` button tooltip
+      - AP shown on `4G's SELLOUT SHOP` button tooltip
+      - PP shown on `I.T.O.P.O.D PERKS` button tooltip (adventure screen)
+      - QP shown on `Questing` button tooltip
+      - seeds shown on seeds icon tooltip (ygg screen)
+      - poop shown on poop icon tooltip (ygg screen)
 
 127. shift-click equipped items or items in daycare to toggle PROTECTED (like it does when shift-clicking items in inventory)
 
@@ -585,24 +596,24 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
      TLDR; the cap buttons allocate based on the cap that's clamped to hardcap, but the progress a bar gains per tick uses the real cap that can be higher than hardcap
 
 132. cube boosting info:
-  - cube tooltip shows current boost divider
-  - boost tooltips show how much will be added to cube
+      - cube tooltip shows current boost divider
+      - boost tooltips show how much will be added to cube
 
 133. prepends item id to item name on item tooltips
 
 134. digger loadouts
-  - the save and load diggers button text changed to show which loadout will be saved/loaded
-  - holding alt changes the digger page buttons to digger loadout buttons and highlights current loadout
-  - while holding alt, click the loadout buttons to change loadouts (can also just press alt-1, alt-2, or alt-3)
-  - when saving a digger loadout, the current levels will be saved and used as soft-caps when loading a loadout using alt-click or alt-#
+      - the save and load diggers button text changed to show which loadout will be saved/loaded
+      - holding alt changes the digger page buttons to digger loadout buttons and highlights current loadout
+      - while holding alt, click the loadout buttons to change loadouts (can also just press alt-1, alt-2, or alt-3)
+      - when saving a digger loadout, the current levels will be saved and used as soft-caps when loading a loadout using alt-click or alt-#
 
 135. added indicator for when any fruit needs manual activation - Yggdrasil button turns red (option in cfg to enable, defaults to false)
 
 136. added indicator for when any digger can be upgraded - Gold Diggers button turns yellow (option in cfg to enable, defaults to false)
 
 137. shift-click the "Use" button on some consumables to convert them to another consumable:
-  - 24 EMR3 potion alphas to 1 potion delta
-  - 24 lucky charms to 1 super lucky charm
+      - 24 EMR3 potion alphas to 1 potion delta
+      - 24 lucky charms to 1 super lucky charm
 
 138. shift-click the + button next to a hack's target to set that hack's hard cap
 
@@ -611,15 +622,15 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 140. when in a challenge and not at max zone, adventure button lights up yellow (except when in ITOPOD)
 
 141. ~~shift-click the buy button on SOME consumables to sell them back. I tried to make sure nothing could be cheesed to make more AP (e.g. selling 24 epot1 and buying 1 epot3 results in gaining 20 AP).~~ ***DISABLED***
-  - energy potions beta and delta (not alpha)
-  - magic potions beta and delta (not alpha)
-  - res3 potions beta and delta (not alpha)
-  - energy bar bars
-  - magic bar bars
-  - super lucky charms
-  - muffins
-  - infusers
-  - pens
+      - energy potions beta and delta (not alpha)
+      - magic potions beta and delta (not alpha)
+      - res3 potions beta and delta (not alpha)
+      - energy bar bars
+      - magic bar bars
+      - super lucky charms
+      - muffins
+      - infusers
+      - pens
 
 142. tooltip to quest description text that shows breakdown of qp reward
 
@@ -636,9 +647,9 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 148. option for quests to be always random and if disabled, alt-click the start quest button to get a random one
 
 149. keys for working with cards:
-  - enter (cast), delete (yeet), space (toggle protected)
-  - arrow keys to move selection around the page
-  - page up/down to change pages
+      - enter (cast), delete (yeet), space (toggle protected)
+      - arrow keys to move selection around the page
+      - page up/down to change pages
 
 150. adds time per level breakdown to daycare items' tooltip (hold alt)
 
@@ -657,24 +668,24 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 157. when a troll resets energy and you have the `Instant Training Cap` AP purchase, 12 energy will auto allocate to BT (just like it does when swapping loadouts and have the `Unassign E/M on Loadout Swap` setting enabled)
 
 158. options to auto sort/yeet cards, sorts by: rarity > bonus type > bonus amount
-  - cfg file option to enable/disable auto yeet/sort
-  - cfg file option to set sort by: rarity first, bonus type first, mayo efficiency, bonus variance
-  - cfg file option to set sort direction
-  - cfg file option to set max rarirty to yeet
-  - cfg file option to set max efficiency to yeet (overrides max rarity)
-  - enabled or not, can press the s/y keys to sort/yeet cards
+      - cfg file option to enable/disable auto yeet/sort
+      - cfg file option to set sort by: rarity first, bonus type first, mayo efficiency, bonus variance
+      - cfg file option to set sort direction
+      - cfg file option to set max rarirty to yeet
+      - cfg file option to set max efficiency to yeet (overrides max rarity)
+      - enabled or not, can press the s/y keys to sort/yeet cards
 
 159. blood gain modifiers breakdown to `Stats Breakdown - Misc`
 
 160. breakdown of resource gain sources to their tooltips (hold alt):
-  - EXP sources on the `Spend EXP` button tooltip
-  - PP sources on the PP gained this/last rebirth tooltip, on the Perks page over the PP icon top-right
-  - QP sources on the QP gained this/last rebirth tooltip, on the Quirks page over the QP icon top-right
+     - EXP sources on the `Spend EXP` button tooltip
+     - PP sources on the PP gained this/last rebirth tooltip, on the Perks page over the PP icon top-right
+     - QP sources on the QP gained this/last rebirth tooltip, on the Quirks page over the QP icon top-right
 
 161. LSC reminder - under certain conditions, the `Challenges` button on the `Rebirth` screen will highlight yellow:
-  - Laser Sword Challenge is unlocked
-  - < 20 completions in the current difficulty
-  - the total time to target of both `Laser Sword` and `Quadruple Laser Sword` from 0 to current challenge target level is less than the configured amount (in cfg file), default is 5 minutes
+      - Laser Sword Challenge is unlocked
+      - < 20 completions in the current difficulty
+      - the total time to target of both `Laser Sword` and `Quadruple Laser Sword` from 0 to current challenge target level is less than the configured amount (in cfg file), default is 5 minutes
 
 162. hides EMR3 speed purchase buttons when base hits 50
 
@@ -692,7 +703,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 169. total spin count to daily spin rewards table tooltip after reaching max tier - vanilla stops showing the spin count
 
-170. new wish order, TTL (time to level), orders by the time remaining to wish's next level - added after TOTAL COST
+170. new wish order, TTL (time to level), orders by the time remaining to wish's next level (based on max resources, ignores min time) - added after TOTAL COST
 
 171. tooltip added to cards to show mayo efficiency and bonus variance, hold alt to see more info
 
@@ -705,13 +716,65 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 175. on the cards screen, replaces the mayo generator number running/max with total mayo generated per day
 
 176. time targets for NGUs - calculates and sets target level for that NGU to run for x minutes
-  - set number of minutes in the resource input box at the top of the screen
-  - ctrl-click the cap button next to desired NGU or ctrl-click the cap all button to set targets for all
+      - set number of minutes in the resource input box at the top of the screen
+      - ctrl-click the cap button next to desired NGU or ctrl-click the cap all button to set targets for all
 
 177. help to prevent accidentally allocating resources to hidden wishes - by default, when the game is launched, wish 0 is pre-selected and is probably being filtered out
-  - when loading a save, the first visible wish will be pre-selected
-  - prevents allocating resources to a maxed wish
+      - when loading a save, the first visible wish will be pre-selected
+      - prevents allocating resources to a maxed wish
 
 178. fixes game bug that would start showing T10's spawn timer after beating boss 125 instead of 175
 
 179. fixes game bug where "Welcome to Sadistic Difficulty" perk wasn't included in stats breakdown for augs and NGUs
+
+180. adds [NGU YIELD FH] to fruit tooltips to as a reminder of which bonuses affect that fruit
+      - NGU = NGU YGGDRASIL
+      - YIELD = Yggdrasil Yield bonus from equipment + quirk 92
+      - FH = First Harvest, perk 51
+
+181. right-clicking the E/M/R3 stats (upper-left of game screen) does the same as pressing the r, t, and f keys
+
+182. when clicking `On To The Game` from the offline progression summary screen, will change to inventory screen (if unlocked) instead of basic training screen
+
+183. exploder helper - gives 2 second warning when about to explode
+
+     ***this may get removed if makes the fight way too easy***
+
+184. tooltip to base adventure power (in spend exp menu) that shows total base power gained and sources - this is for all time, not this/last rebirth
+
+185. in addition to the shift-right-click and ctrl-shift-right-click in mod 18, right-cicking (no shift or ctrl-shift) the buy all custom energy, maigc, resource 3 buttons will repeat buying until not enough exp
+
+186. shift-click the `Clear Wish` button on the wishes screen to clear all resources from all wishes
+
+187. removed name restrictions for res3 name - any character allowed, not just letters and spaces
+
+188. highlights the page button for current page in various menus
+
+189. idle quest speed breakdown in the idle quest progress bar tooltip - hold alt
+
+190. hardcore (HC) game mode
+     - one life
+     - local saves disabled - only steam cloud allowed
+     - if die in fight boss or adventure zone (including itopod), game over and steam cloud save deleted
+     - enabled in cfg file and must start new game
+     - can disable to revert to normal game, but then it's no longer a hardcore save and will not be loadable if hardcore is re-enabled
+     - not fully tested, please let me know of any issues or if you find where game is softlocked because a death is required to progress
+     - **T4 and T10 DO NOT require player death to progress**
+     - various aspects are open to change based on feedback
+     - *can be enabled at the same time as the PermaTC mod below*
+
+191. permanent troll challenge (PermaTC)
+     - trolls constantly spawn every 2 minutes, every 5th a big troll, just like regular troll challenge
+     - since it's not the actual challenge, you will get these trolls during regular challenges
+     - yes, that means 2x trolls in regular troll challenges
+     - yes, that means getting trolls in NORB challenges
+     - enabled in cfg file and must start a new game - will not work for an existing non-permaTC save
+     - can disable to revert to normal game, but then it's no longer a permaTC save and will not work after re-enabling the option
+     - not fully tested, please let me know of any issues or if you find where this mod softlocks progression
+     - various aspects are open to change based on feedback
+     - *can be enabled at the same time as the HC mod above*
+
+192. support for command-line arguments (aka launch options in steam) for framerate control:
+     - `-targetFrameRate [rate]` limits FPS to specified limit (disables vsync), ex: `-targetFrameRate 60` to limit to 60 FPS
+     - `-vSyncCount [count]` sets how many frames to sync at, ex: `-vSyncCount 1` (this is game's default setting)
+     - if vSyncCount is set and is > 0, targetFrameRate will be ignored

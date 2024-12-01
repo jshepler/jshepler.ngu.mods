@@ -36,11 +36,18 @@ namespace jshepler.ngu.mods
                     , new CodeInstruction(OpCodes.Ldc_R4, 0.0f)
                     , new CodeInstruction(OpCodes.Stfld, enemyAttackTimerField))
 
+                // sets warning text to blue
                 .MatchForward(false, new CodeMatch(OpCodes.Ldstr, " opens his mouth unnaturally wide and shoots out 100,000 FREAKING LOCUSTS! INCOMING!!!"))
                 .Advance(2)
-                .SetInstruction(new CodeInstruction(OpCodes.Ldc_I4_3));
+                //.SetInstruction(new CodeInstruction(OpCodes.Ldc_I4_3));
+                .SetInstruction(Transpilers.EmitDelegate(warningColor));
 
             return cm.InstructionEnumeration();//.DumpToLog();
+        }
+
+        private static int warningColor()
+        {
+            return Hardcore.IsHardcoreGame ? 2 : 3;
         }
     }
 }

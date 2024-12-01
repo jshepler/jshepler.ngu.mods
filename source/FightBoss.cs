@@ -125,7 +125,7 @@ namespace jshepler.ngu.mods
                 _image.fillAmount = Plugin.Character.bossController.bossHPBar.value;
                 _text.text = $"Boss {Plugin.Character.bossID + 1}";
             }
-            else if (CanNuke || CanFight)
+            else if ((CanNuke || CanFight) && !Hardcore.IsHardcoreGame)
             {
                 _image.fillAmount = 1f;
                 _image.color = CanNuke ? Plugin.ButtonColor_Green : Plugin.ButtonColor_Yellow;

@@ -92,7 +92,7 @@ namespace jshepler.ngu.mods
             return sb.Length == 0 ? null : sb.ToString();
         }
 
-        private static PTR GetNeededAT(PTR ak)
+        internal static PTR GetNeededAT(PTR ak)
         {
             var neededAT = new PTR(0, 0);
 

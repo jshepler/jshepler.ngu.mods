@@ -61,19 +61,15 @@ namespace jshepler.ngu.mods
             var character = Plugin.Character;
             var controller = character.wishesController;
 
-            var wish = character.wishes.wishes[id];
-            var props = controller.properties[id];
-
-            if (wish.level >= props.maxLevel)
+            var wish = Wishes.AllWishes[id];
+            if (wish.Level >= wish.MaxLevel)
                 return 0.0;
 
-            var isRunning = wish.energy > 0 && wish.magic > 0 && wish.res3 > 0;
-            var ppt = isRunning ? controller.progressPerTick(id) : controller.progressPerTickMax(id);
-
-            if (ppt == 0f)
+            var ppt = controller.rawProgressPerTickMax(id);
+            if (ppt < 1e-8f)
                 return double.MaxValue;
 
-            var ttl = (1.0 - wish.progress) / ppt / 50.0;
+            var ttl = (1.0 - wish.Progress) / ppt / 50.0;
             return ttl;
         }
     }

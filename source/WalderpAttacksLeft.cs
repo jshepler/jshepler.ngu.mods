@@ -12,6 +12,9 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(EnemyAI), "waldoAI")]
         private static void EnemyAI_waldoAI_postfix(EnemyAI __instance)
         {
+            if (Hardcore.IsHardcoreGame)
+                return;
+
             if (__instance.growCount != _lastGrowCount)
             {
                 var attacksLeft = fnAttacksLeft(__instance.growCount);

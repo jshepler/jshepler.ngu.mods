@@ -13,10 +13,12 @@ namespace jshepler.ngu.mods
     [HarmonyPatch]
     internal class TrackQPGained
     {
+        internal const int SOURCE_COUNT = 5;
         private static bool _altIsDown = false;
 
         // there isn't a method used to add qp, so need to compare before/after the various methods that add qp
         private static long _qpBefore = 0;
+        private static int _lastQuestSource;
 
         private static long _qpLastRB
         {
@@ -50,6 +52,23 @@ namespace jshepler.ngu.mods
             if (method != null)
                 return;
 
+            Plugin.OnSaveLoaded += (o, e) =>
+            {
+                var count = _sourcesThisRB.Length;
+                if (count < SOURCE_COUNT)
+                    _sourcesThisRB = _sourcesThisRB.Concat(Enumerable.Range(0, SOURCE_COUNT - count).Select(i => 0L)).ToArray();
+
+                count = _sourcesLastRB.Length;
+                if (count < SOURCE_COUNT)
+                    _sourcesLastRB = _sourcesLastRB.Concat(Enumerable.Range(0, SOURCE_COUNT - count).Select(i => 0L)).ToArray();
+
+                //while (_sourcesThisRB.Length < SOURCE_COUNT)
+                //    _sourcesThisRB.Append(0L);
+
+                //while (_sourcesLastRB.Length < SOURCE_COUNT)
+                //    _sourcesLastRB.Append(0L);
+            };
+
             Plugin.OnUpdate += (o, e) =>
             {
                 _altIsDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
@@ -63,20 +82,21 @@ namespace jshepler.ngu.mods
             _qpThisRB = 0L;
 
             _sourcesLastRB = _sourcesThisRB;
-            _sourcesThisRB = [0L, 0L, 0L];
+            _sourcesThisRB = new long[SOURCE_COUNT];
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(BeastQuestController), "giveRewardsAndClear", [typeof(bool)])]
         private static void quests_before()
         {
             _qpBefore = _curQP;
+            _lastQuestSource = Plugin.Character.beastQuest.reducedRewards ? QPSource.MinorQuests : QPSource.MajorQuests;
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(BeastQuestController), "giveRewardsAndClear", [typeof(bool)])]
         private static void quests_after()
         {
             var gained = _curQP - _qpBefore;
-            _sourcesThisRB[QPSource.Quests] += gained;
+            _sourcesThisRB[_lastQuestSource] += gained;
             _qpThisRB += gained;
         }
 
@@ -176,7 +196,7 @@ namespace jshepler.ngu.mods
                     List<(string, long, float)> dataThisRB = [];
                     List<(string, long, float)> dataLastRB = [];
 
-                    for (var source = 0; source < 3; source++)
+                    for (var source = 0; source < SOURCE_COUNT; source++)
                     {
                         var sourceThisRB = _sourcesThisRB[source];
                         if (sourceThisRB > 0)
@@ -210,22 +230,24 @@ namespace jshepler.ngu.mods
             }
         }
 
-#pragma warning disable Harmony003 // Harmony non-ref patch parameters modified
         private static int sorter((string s, long l, float f) a, (string s, long l, float f) b) => b.f.CompareTo(a.f);
-#pragma warning restore Harmony003 // Harmony non-ref patch parameters modified
 
         internal static class QPSource
         {
             internal static int Quests = 0;
             internal static int Titans = 1;
             internal static int Fruit = 2;
+            internal static int MinorQuests = 3;
+            internal static int MajorQuests = 4;
 
             internal static Func<int, string> Name = i => i switch
             {
                 0 => "Quests",
                 1 => "Titans",
                 2 => "Fruit",
-                _ => string.Empty
+                3 => "Minor Quests",
+                4 => "Major Quests",
+                _ => $"??? {i}"
             };
         }
     }

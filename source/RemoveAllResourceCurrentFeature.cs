@@ -7,9 +7,10 @@ namespace jshepler.ngu.mods
     internal class RemoveAllResourceCurrentFeature
     {
         [HarmonyPrefix, HarmonyPatch(typeof(Character), "removeMostEnergy")]
-        private static bool Character_removeMostEnergy_prefix(Character __instance)
+        internal static bool Character_removeMostEnergy_prefix(Character __instance)
         {
-            if (!Input.GetKey(KeyCode.LeftShift)) return true;
+            if (!Input.GetKey(KeyCode.LeftShift))
+                return true;
 
             switch (__instance.CurrentMenu())
             {
@@ -38,15 +39,20 @@ namespace jshepler.ngu.mods
                     __instance.NGUController.removeAllEnergy();
                     return false;
 
+                case Menu.Wishes:
+                    __instance.wishesController.removeAllEnergy();
+                    return false;
+
                 default:
                     return true;
             }
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(Character), "removeMostMagic")]
-        private static bool Character_removeMostMagic_prefix(Character __instance)
+        internal static bool Character_removeMostMagic_prefix(Character __instance)
         {
-            if (!Input.GetKey(KeyCode.LeftShift)) return true;
+            if (!Input.GetKey(KeyCode.LeftShift))
+                return true;
 
             switch (__instance.CurrentMenu())
             {
@@ -66,15 +72,20 @@ namespace jshepler.ngu.mods
                     __instance.NGUController.removeAllMagic();
                     return false;
 
+                case Menu.Wishes:
+                    __instance.wishesController.removeAllMagic();
+                    return false;
+
                 default:
                     return true;
             }
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(Character), "removeAllRes3")]
-        private static bool Character_removeAllRes3_prefix(Character __instance)
+        internal static bool Character_removeAllRes3_prefix(Character __instance)
         {
-            if (!Input.GetKey(KeyCode.LeftShift)) return true;
+            if (!Input.GetKey(KeyCode.LeftShift))
+                return true;
 
             switch (__instance.CurrentMenu())
             {
@@ -82,9 +93,26 @@ namespace jshepler.ngu.mods
                     __instance.hacksController.removeAllR3();
                     return false;
 
+                case Menu.Wishes:
+                    __instance.wishesController.removeAllRes3();
+                    return false;
+
                 default:
                     return true;
             }
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(WishesController), "clearSelectedWish")]
+        private static bool WishesController_clearSelectedWish_prefix(WishesController __instance)
+        {
+            if (!Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift))
+                return true;
+
+            __instance.removeAllResources();
+            __instance.updateText();
+            __instance.updateAllPods();
+
+            return false;
         }
     }
 }

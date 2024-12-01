@@ -10,6 +10,9 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(AdventureController), "displayEnemyStats")]
         private static void AdventureController_updateAdventureStats_postfix(AdventureController __instance)
         {
+            if (Hardcore.IsHardcoreGame)
+                return;
+
             var ai = __instance.enemyAI;
             if (!__instance.character.InMenu(Menu.Adventure)
                 || __instance.currentEnemy == null

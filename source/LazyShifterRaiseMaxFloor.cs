@@ -3,7 +3,7 @@
 namespace jshepler.ngu.mods
 {
     [HarmonyPatch]
-    internal class TowerShifterRaiseHighest
+    internal class LazyShifterRaiseMaxFloor
     {
         private static int _floor = 0;
         private static int _killCount = 0;

@@ -206,11 +206,13 @@ namespace jshepler.ngu.mods
             var baseExpBonus = __instance.baseExpBonusPerDish();
             message += "\n\n<b>Exp Bonus Gain</b> (before meal efficiency):"
                 + "\n   = 0.005 × [base gain] × [cooking multi]"
-                + $"\n   = {baseExpBonus}";
+                + $"\n   = {baseExpBonus} (clamped)";
 
             var max = totalCookingMulti * 0.005f;
             var min = max * 0.36f;
-            message += $"\n(clamped: {min} to {max})";
+            //message += $"\n(clamped: {min} to {max})";
+            message += $"\n\n(max = [cooking multi] × 0.005 = {max})"
+                + $"\n(min = [max] * 0.36 = {min})";
 
             var totalBonusGain = baseExpBonus * __instance.getCurPercentofMaxScore();
             message += $"\n\n   ... × [efficiency] = {totalBonusGain} (additive)"

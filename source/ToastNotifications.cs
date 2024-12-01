@@ -14,6 +14,8 @@ namespace jshepler.ngu.mods
         private static bool _enabled => Options.NotificationToasts.Enabled.Value;
         private static bool _topDown => Options.NotificationToasts.TopDown.Value;
 
+        internal static bool IgnoreNewToasts = false;
+
         private static GameObject _toastsContainer;
         private static GameObject _baseTooltip;
         private static List<Toast> _pool = new();
@@ -99,23 +101,6 @@ namespace jshepler.ngu.mods
         }
 
 
-        // The nuking bosses can generate MANY notications, slowing that frame down, and blocking things until they all go away.
-        // I've tried a couple things to try and mitigate that, but didn't play out how I'd like, so instead going to ignore
-        // those notifications.
-        private static bool _killedBoss = false;
-
-        [HarmonyPrefix, HarmonyPatch(typeof(BossController), "rewardExp")]
-        private static void BossController_rewardExp_prefix()
-        {
-            _killedBoss = true;
-        }
-
-        [HarmonyPostfix, HarmonyPatch(typeof(BossController), "rewardExp")]
-        private static void BossController_rewardExp_postfix()
-        {
-            _killedBoss = false;
-        }
-
         // when splash screen is open (offline progress report when loading save, or when clicking build number),
         // it covers everything - including notifications; when that screen is open, toasts get buffered until
         // that screen is closed
@@ -186,11 +171,17 @@ namespace jshepler.ngu.mods
             return Plugin.Character.StartCoroutine(ShowToast(tm));
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Method Declaration", "Harmony003:Harmony non-ref patch parameters modified", Justification = "not a patch method, nor is tm modified")]
+        private static WaitUntil _waitForNotNuking = new WaitUntil(() => !Plugin.Character.bossController.nukeBoss);
+
         private static IEnumerator ShowToast(ToastMessage tm)
         {
-            // ignore nuking bosses - nuking more than 50 or so bosses has negative impact on UX, imo
-            if (_killedBoss && Plugin.Character.bossController.nukeBoss)
+            if (Plugin.Character.bossController.nukeBoss)
+            {
+                yield return _waitForNotNuking;
+                yield break;
+            }
+
+            if (IgnoreNewToasts)
                 yield break;
 
             if (_splashScreenIsOpen || _baseTooltip == null)

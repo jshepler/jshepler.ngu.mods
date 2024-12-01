@@ -32,16 +32,18 @@ namespace jshepler.ngu.mods.Popups
             _blocker = buildBLocker();
             IsOpen = false;
 
-            Plugin.onGUI += (o, e) =>
-            {
-                if (!IsOpen)
-                    return;
+            Plugin.onGUI += OnGUI;
+        }
 
-                if (Input.GetKeyDown(KeyCode.Escape))
-                    Close();
-                else
-                    DrawWindow(WindowRect);
-            };
+        private void OnGUI(object sender, EventArgs e)
+        {
+            if (!IsOpen)
+                return;
+
+            if (Input.GetKeyDown(KeyCode.Escape))
+                Close();
+            else
+                DrawWindow(WindowRect);
         }
 
         protected abstract void DrawWindow(Rect windowRect);

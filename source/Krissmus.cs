@@ -20,8 +20,8 @@ namespace jshepler.ngu.mods
             Plugin.OnUpdate += (o, e) =>
             {
                 if (Input.GetKeyDown(KeyCode.X)
-                    && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)
-                    && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))))
+                    && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+                    && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)))
                 {
                     Plugin.Character.menuSwapper.swapMenu((int)Menu.Krissmuss);
                 }

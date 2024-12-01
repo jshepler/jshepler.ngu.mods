@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using System.Linq;
+using HarmonyLib;
 using jshepler.ngu.mods.ModSave;
 using UnityEngine;
 
@@ -30,7 +31,7 @@ namespace jshepler.ngu.mods
         private static void TotalTimePlayed_Start_prefix(TotalTimePlayed __instance)
         {
             __instance.timerText.verticalOverflow = VerticalWrapMode.Overflow;
-            __instance.timerText.font = Font.CreateDynamicFontFromOSFont("Lucida Console", 12);
+            __instance.timerText.font = Fonts.LiberationMono_Regular;
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(TotalTimePlayed), "updateText")]

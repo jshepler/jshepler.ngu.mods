@@ -235,9 +235,7 @@ namespace jshepler.ngu.mods
             }
         }
 
-#pragma warning disable Harmony003 // Harmony non-ref patch parameters modified
         private static int sorter((string s, long l, float f) a, (string s, long l, float f) b) => b.f.CompareTo(a.f);
-#pragma warning restore Harmony003 // Harmony non-ref patch parameters modified
 
         internal static class PPSource
         {

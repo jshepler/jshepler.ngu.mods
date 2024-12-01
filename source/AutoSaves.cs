@@ -85,7 +85,7 @@ namespace jshepler.ngu.mods
             }
         }
 
-        private static void DoSave(string saveName, bool doCleanSave = false)
+        internal static void DoSave(string saveName, bool doCleanSave = false)
         {
             ModSave.Patches.DoCleanSave = doCleanSave;
 
@@ -116,6 +116,12 @@ namespace jshepler.ngu.mods
 
         private static void LoadLastQuicksave()
         {
+            if (Hardcore.Enabled)
+            {
+                Plugin.ShowOverrideNotification("<b><color=red>HARDCORE MODE</color></b>\n\nCannot load quicksaves in hardcore");
+                return;
+            }
+
             var folder = new DirectoryInfo(ModifiedPersistentDataPath());
             if (!folder.Exists)
                 return;

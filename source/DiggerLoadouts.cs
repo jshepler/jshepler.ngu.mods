@@ -15,6 +15,8 @@ namespace jshepler.ngu.mods
         private static Text _setLoadoutButtonText;
         private static Text _applyLoadoutButtonText;
 
+        private static int _curPage => Plugin.Character.allDiggers.curPage;
+
         private static Dictionary<int, List<int>> _loadouts => ModSave.Data.DiggerLoadouts;
         private static Dictionary<int, List<long>> _levels => ModSave.Data.DiggerLevels;
         private static int _id
@@ -87,7 +89,7 @@ namespace jshepler.ngu.mods
                 for (var x = 0; x < 3; x++)
                 {
                     _loadoutTexts[x].text = $"Page {x + 1}";
-                    _loadoutButtons[x].image.color = Color.white;
+                    _loadoutButtons[x].image.color = x == _curPage ? Plugin.ButtonColor_Yellow : Color.white;
                 }
         }
 

@@ -18,34 +18,34 @@ namespace jshepler.ngu.mods
         private static float SpeedBonus() => _controller.totalWishSpeedBonuses();
         private static float MinTime() => _controller.minimumWishTime();
 
-        private static float EnergyFactor(int id) => Mathf.Pow(_character.totalEnergyPower() * (float)_character.wishes.wishes[id].energy, BIAS);
-        private static float EnergyFactorMax() => Mathf.Pow(_character.totalEnergyPower() * (float)_character.totalCapEnergy(), BIAS);
-        private static float MagicFactor(int id) => Mathf.Pow(_character.totalMagicPower() * (float)_character.wishes.wishes[id].magic, BIAS);
-        private static float MagicFactorMax() => Mathf.Pow(_character.totalMagicPower() * (float)_character.totalCapMagic(), BIAS);
-        private static float Res3Factor(int id) => Mathf.Pow(_character.totalRes3Power() * (float)_character.wishes.wishes[id].res3, BIAS);
-        private static float Res3FactorMax() => Mathf.Pow(_character.totalRes3Power() * (float)_character.totalCapRes3(), BIAS);
+        private static WishWrapper _wish(int id) => Wishes.AllWishes[id];
 
-        private static float TimeToLevel(int id) => (1f - _character.wishes.wishes[id].progress) / _controller.progressPerTick(id) / 50f;
-        private static float TimeToLevelMax(int id) => (1f - _character.wishes.wishes[id].progress) / _controller.progressPerTickMax(id) / 50f;
+        private static float EnergyFactor(int id) => Mathf.Pow(_character.totalEnergyPower() * _wish(id).Energy, BIAS);
+        private static float EnergyFactorMax() => Mathf.Pow(_character.totalEnergyPower() * _character.totalCapEnergy(), BIAS);
+        private static float MagicFactor(int id) => Mathf.Pow(_character.totalMagicPower() * _wish(id).Magic, BIAS);
+        private static float MagicFactorMax() => Mathf.Pow(_character.totalMagicPower() * _character.totalCapMagic(), BIAS);
+        private static float Res3Factor(int id) => Mathf.Pow(_character.totalRes3Power() * _wish(id).Res3, BIAS);
+        private static float Res3FactorMax() => Mathf.Pow(_character.totalRes3Power() * _character.totalCapRes3(), BIAS);
 
-        private static bool IsRunning(int id) => _character.wishes.wishes[id].energy > 0 && _character.wishes.wishes[id].magic > 0 && _character.wishes.wishes[id].res3 > 0;
+        private static float TimeToLevel(int id) => (1f - _wish(id).Progress) / _controller.progressPerTick(id) / 50f;
+        private static float TimeToLevelMax(int id) => (1f - _wish(id).Progress) / _controller.progressPerTickMax(id) / 50f;
+
+        private static bool IsRunning(int id) => _wish(id).IsRunning;
 
         private static Dictionary<int, float> TotalTimeRemaining(int id)
         {
+            var wish = _wish(id);
             var minTime = _controller.minimumWishTime();
             var ppt = IsRunning(id)
                 ? EnergyFactor(id) * MagicFactor(id) * Res3Factor(id) * SpeedBonus() / SpeedDivider(id)
                 : EnergyFactorMax() * MagicFactorMax() * Res3FactorMax() * SpeedBonus() / SpeedDivider(id);
 
-            var maxLevel = _controller.properties[id].maxLevel;
-            var curLevel = _character.wishes.wishes[id].level;
             var time = new Dictionary<int, float>();
-
-            if (curLevel == maxLevel)
+            if (wish.Level == wish.MaxLevel)
                 return time;
 
-            time.Add(curLevel + 1, IsRunning(id) ? TimeToLevel(id) : TimeToLevelMax(id));
-            for (var L = curLevel + 2; L < maxLevel + 1; L++)
+            time.Add(wish.Level + 1, wish.IsRunning ? TimeToLevel(id) : TimeToLevelMax(id));
+            for (var L = wish.Level + 2; L < wish.MaxLevel + 1; L++)
             {
                 var tta = ppt * (1f / L);
                 time.Add(L, 1f / Math.Min(minTime, tta) / 50f);
@@ -64,9 +64,9 @@ namespace jshepler.ngu.mods
         [HarmonyTranspiler, HarmonyPatch(typeof(WishesController), "showWishTooltip")]
         private static IEnumerable<CodeInstruction> WishesController_showWishTooltip_transpiler(IEnumerable<CodeInstruction> instructions)
         {
-            var timeToLevel = typeof(WishesController).GetMethod("timeToLevel", new[] { typeof(int) });
-            var concat2strings = typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) });
-            var concat3strings = typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string), typeof(string) });
+            var timeToLevel = typeof(WishesController).GetMethod("timeToLevel", [typeof(int)]);
+            var concat2strings = typeof(string).GetMethod("Concat", [typeof(string), typeof(string)]);
+            var concat3strings = typeof(string).GetMethod("Concat", [typeof(string), typeof(string), typeof(string)]);
 
             var cm = new CodeMatcher(instructions)
                 .MatchForward(true
@@ -88,8 +88,8 @@ namespace jshepler.ngu.mods
             if (times == null || times.Count == 0)
                 return string.Empty;
 
-            var levels = Input.GetKey(KeyCode.LeftAlt) ? "\n" + times.Join(kv => $"{kv.Key}: {NumberOutput.timeOutput(kv.Value)}", "\n") : string.Empty;
             var total = times.Sum(kv => kv.Value);
+            var levels = Input.GetKey(KeyCode.LeftAlt) ? "\n" + times.Join(kv => $"{kv.Key}: {NumberOutput.timeOutput(kv.Value)}", "\n") : string.Empty;
 
             return $"\n<b>Time to max Level:</b> {NumberOutput.timeOutput(total)}{levels}";
         }

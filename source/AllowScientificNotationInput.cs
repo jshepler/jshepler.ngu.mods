@@ -9,8 +9,8 @@ namespace jshepler.ngu.mods
     [HarmonyPatch]
     internal class AllowScientificNotationInput
     {
-        private static MethodInfo longParse = typeof(long).GetMethod("Parse", new[] { typeof(string) });
-        private static long ParseScientificNotation(string s) => long.Parse(s, NumberStyles.Float | NumberStyles.AllowThousands);
+        private static MethodInfo longParse = typeof(long).GetMethod("Parse", [typeof(string)]);
+        private static long ParseScientificNotation(string s) => string.IsNullOrWhiteSpace(s) ? 0L : long.Parse(s, NumberStyles.Float | NumberStyles.AllowThousands);
 
 
 

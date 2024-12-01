@@ -341,17 +341,16 @@ namespace jshepler.ngu.mods
 
         private static float poopBonus(int fruitId)
         {
-            var bonus = 1f;
+            var character = _controller.character;
+            var fruit = character.yggdrasil.fruits[fruitId];
 
-            if (Plugin.Character.yggdrasil.fruits[fruitId].usePoop)
-                bonus = Plugin.Character.allArbitrary.poopModifier();
+            if (!fruit.usePoop)
+                return 1f;
 
-            if (bonus < 1f)
-                bonus = 1f;
-            else if (bonus > 1.65f)
-                bonus = 1.65f;
+            if (character.settings.poopOnlyMaxTier && fruit.harvestTier() < fruit.maxTier)
+                return 1f;
 
-            return bonus;
+            return character.allArbitrary.poopModifier();
         }
     }
 }

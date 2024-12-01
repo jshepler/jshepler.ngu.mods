@@ -20,10 +20,15 @@ namespace jshepler.ngu.mods
         //internal static Color ButtonColor_LightBlue = new Color32(127, 208, 255, 255);
 
         // https://www.schemecolor.com/blue-red-yellow-green.php
-        internal static Color ButtonColor_Green = new Color32(40, 204, 45, 255); // #28cc2d
-        internal static Color ButtonColor_Yellow = new Color32(255, 244, 79, 255); // #fff44f
-        internal static Color ButtonColor_Red = new Color32(216, 46, 63, 255); // #d82e3f
-        internal static Color ButtonColor_LightBlue = new Color32(99, 202, 216, 255); // #63cad8
+        internal static readonly Color ButtonColor_Green = new Color32(40, 204, 45, 255); // #28cc2d
+        internal static readonly Color ButtonColor_Yellow = new Color32(255, 244, 79, 255); // #fff44f
+        internal static readonly Color ButtonColor_Red = new Color32(216, 46, 63, 255); // #d82e3f
+        internal static readonly Color ButtonColor_LightBlue = new Color32(99, 202, 216, 255); // #63cad8
+
+        internal const string TEXT_GREEN = "#28cc2d";
+        internal const string TEXT_YELLOW = "#fff44f";
+        internal const string TEXT_RED = "#d82e3f";
+        internal const string TEXT_LIGHT_BLUE = "#63cad8";
 
         private readonly Harmony harmony = new Harmony(PluginInfo.PLUGIN_GUID);
         private static ManualLogSource Log;
@@ -101,36 +106,6 @@ namespace jshepler.ngu.mods
         {
             Character = __instance;
             GameHasStarted = true;
-
-            var args = Environment.GetCommandLineArgs();
-            if (args.Length > 2)
-            {
-                for (var x = 1; x < args.Length - 1; x++)
-                {
-                    if (args[x] == "-game")
-                    {
-                        AutoSaves.GameName = args[x + 1];
-                        Fullscreen.SetWindowTitle($"NGU Idle - {args[x + 1]}");
-                        break;
-                    }
-                }
-            }
-
-            var width = Options.CustomResolution.Width.Value;
-            var height = Options.CustomResolution.Height.Value;
-            if (width > 0 && height > 0)
-                Screen.SetResolution(width, height, false);
-
-            if (Options.OverrideCulture.Enabled.Value == true)
-            {
-                var localString = Options.OverrideCulture.Locale.Value;
-                try
-                {
-                    CultureInfo.CurrentCulture = new CultureInfo(localString, false);
-                }
-
-                catch { }
-            }
 
             OnGameStart?.Invoke(null, EventArgs.Empty);
         }

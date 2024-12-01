@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -10,10 +11,25 @@ namespace jshepler.ngu.mods
     [HarmonyPatch]
     internal class BuyAllCustomEMR3
     {
-        private static EnergyPurchases _energyPurchases;
+        // Canvas/Exp Energy Canvas /Exp Menu 1/Scroll Rect/Content/Custom All Button
+        // Canvas/Exp Magic Canvas/Exp Menu 1/Scroll Rect/Content/Custom All
+        // Canvas/Exp Res 3 Canvas/Res3 Exp Menu/Scroll Rect/Content/Custom All
+
         private static bool _shiftDown = false;
         private static bool _ctrlDown = false;
         private static long _customAllAllCost;
+
+        private static EnergyPurchases _energyPurchases;
+        private static MethodInfo _buyCustomAllEnergyMethod = typeof(EnergyPurchases).GetMethod("buyCustomAll", BindingFlags.Instance | BindingFlags.NonPublic);
+        private static void _buyCustomAllEnergy() => _buyCustomAllEnergyMethod.Invoke(_energyPurchases, []);
+
+        private static MagicPurchases _magicPurchases;
+        private static MethodInfo _buyCustomAllMagicMethod = typeof(MagicPurchases).GetMethod("buyCustomAll", BindingFlags.Instance | BindingFlags.NonPublic);
+        private static void _buyCustomAllMagic() => _buyCustomAllMagicMethod.Invoke(_magicPurchases, []);
+
+        private static Resource3Purchases _res3Purchases;
+        private static MethodInfo _buyCustomAllRes3Method = typeof(Resource3Purchases).GetMethod("buyCustomAll", BindingFlags.Instance | BindingFlags.NonPublic);
+        private static void _buyCustomAllRes3() => _buyCustomAllRes3Method.Invoke(_res3Purchases, []);
 
         [HarmonyPostfix, HarmonyPatch(typeof(EnergyPurchases), "Start")]
         private static void EnergyPurchases_Start_postfix(EnergyPurchases __instance)
@@ -44,21 +60,30 @@ namespace jshepler.ngu.mods
                     _energyPurchases.refresh();
             };
 
-            //var buyCustomAllMethod = typeof(EnergyPurchases).GetMethod("buyCustomAll", BindingFlags.Instance | BindingFlags.NonPublic);
-            //var buyCustomAll = () => { buyCustomAllMethod.Invoke(__instance, []); };
-
-            GameObject.Find("Canvas/Exp Energy Canvas /Exp Menu 1/Scroll Rect/Content/Custom All Button")
-                .AddComponent<ClickHandlerComponent>()
+            __instance.buyAllCustom.gameObject.AddComponent<ClickHandlerComponent>()
                 .OnRightClick(e =>
                 {
-                    //var cost = _shiftDown ? _customAllAllCost : __instance.customAllCost();
-
-                    //while (Plugin.Character.realExp >= cost)
-                    //    buyCustomAll();
-
-                    if(_shiftDown)
-                        Plugin.BeginCoroutine(RepeatBuyAllEMR());
+                    if (_shiftDown)
+                        StartRepeatBuyAll(BuyAllEMR, _customAllAllCost);
+                    else
+                        StartRepeatBuyAll(_buyCustomAllEnergy, __instance.customAllCost());
                 });
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(MagicPurchases), "Start")]
+        private static void MagicPurchases_Start_postfix(MagicPurchases __instance)
+        {
+            _magicPurchases = __instance;
+            __instance.buyAllCustom.gameObject.AddComponent<ClickHandlerComponent>()
+                .OnRightClick(e => StartRepeatBuyAll(_buyCustomAllMagic, __instance.customAllCost()));
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(Resource3Purchases), "Start")]
+        private static void Resource3Purchases_Start_postfix(Resource3Purchases __instance)
+        {
+            _res3Purchases = __instance;
+            __instance.buyAllCustom.gameObject.AddComponent<ClickHandlerComponent>()
+                .OnRightClick(e => StartRepeatBuyAll(_buyCustomAllRes3, __instance.customAllCost()));
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(EnergyPurchases), "updateEnergyPurchases")]
@@ -89,34 +114,48 @@ namespace jshepler.ngu.mods
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(EnergyPurchases), "buyCustomAll")]
-        private static bool EnergyPurchases_buyCustomAll_prefix(EnergyPurchases __instance)
+        private static bool EnergyPurchases_buyCustomAll_prefix()
         {
             if (!_shiftDown)
                 return true;
 
-            return BuyAllEMR();
+            BuyAllEMR();
+            return false;
         }
 
-        private static IEnumerator RepeatBuyAllEMR()
+        private static Coroutine _cr;
+        private static void StartRepeatBuyAll(Action buyAll, long customCost)
+        {
+            if (_cr != null)
+                return;
+
+            ToastNotifications.IgnoreNewToasts = true;
+            _cr = Plugin.BeginCoroutine(RepeatBuyAll(buyAll, customCost));
+        }
+
+        private static IEnumerator RepeatBuyAll(Action buyAll, long customCost)
         {
             var character = Plugin.Character;
-            var numberOfBuys = Mathf.FloorToInt(character.realExp / _customAllAllCost);
-            var buysPerFrame = Mathf.FloorToInt(numberOfBuys / 30);
+            //var numberOfBuys = Mathf.FloorToInt(character.realExp / customCost);
+            //var buysPerFrame = Mathf.FloorToInt(numberOfBuys / 30);
 
-            while (character.realExp >= _customAllAllCost)
+            while (character.realExp >= customCost)
             {
-                for(var x = 0; x < buysPerFrame; x++)
-                    BuyAllEMR();
+                for (var x = 0; x < 100; x++)
+                    buyAll();
 
                 yield return null; // continues on next frame
             }
+
+            _cr = null;
+            ToastNotifications.IgnoreNewToasts = false;
         }
 
-        private static bool BuyAllEMR()
+        private static void BuyAllEMR()
         {
             var character = Plugin.Character;
             if (character.realExp < _customAllAllCost)
-                return false;
+                return;
 
             var customEnergyPowerAmount = character.settings.customPowerAmount;
             var customEnergyCapAmount = character.settings.customCapAmount;
@@ -137,7 +176,7 @@ namespace jshepler.ngu.mods
                 || (magicUnlocked && (customMagicBarAmount < 0 || customMagicCapAmount < 0 || customMagicPowerAmount < 0))
                 || (res3Unlocked && (customRes3BarAmount < 0 || customRes3CapAmount < 0 || customRes3PowerAmount < 0)))
             {
-                return false;
+                return;
             }
 
             var hardCap = character.hardCap();
@@ -167,7 +206,7 @@ namespace jshepler.ngu.mods
             ep.refresh();
             EnergyPurchases_updateEnergyPurchases_postfix(ep);
 
-            return false;
+            return;
         }
 
         private class Resources

@@ -1,4 +1,6 @@
-﻿using BepInEx.Configuration;
+﻿using System.Collections.Generic;
+using System.Reflection;
+using BepInEx.Configuration;
 
 namespace jshepler.ngu.mods
 {
@@ -36,11 +38,14 @@ namespace jshepler.ngu.mods
             Options.DropTableTooltip.OnlyUnlocked = Config.Bind("DropTableTooltip", "OnlyUnlocked", true, "if true, only items that meet their drop conditions will be displayed");
             Options.DropTableTooltip.UnknownItems = Config.Bind("DropTableTooltip", "UnknownItems", DropTableTooltip.UnknownItemDisplay.Blur, "how unknown items (not yet dropped) are displayed; Blur replaces names with \"????\"");
 
+            Options.GameModes.Hardcore = Config.Bind("GameModes", "Hardcore", false, "enable to disable loading local saves and game ends when player dies - cloud save erased; MUST START NEW GAME TO GO INTO EFFECT");
+            Options.GameModes.PermaTC = Config.Bind("GameModes", "PermaTC", false, "enable to permanently spawn trolls every 2 minutes, every 5th a big troll; MUST START NEW GAME TO GO INTO EFFECT");
+
             Options.NotificationToasts.Enabled = Config.Bind("NotificationToasts", "Enabled", true, "enable to separate \"timed tooltips\" into separate notifications as toasts");
             Options.NotificationToasts.TopDown = Config.Bind("NotificationToasts", "TopDown", true, "if true, toasts are displayed top-right and go down; if false, toasts are displayed bottom-right and go up");
-
             Options.OverrideCulture.Enabled = Config.Bind("OverrideCulture", "Enabled", false, "if enabled, uses the specified locale string to override your system's current culture for the game - ONLY AFFECTS NUMBER FORMATTING");
             Options.OverrideCulture.Locale = Config.Bind("OverrideCulture", "Locale", "en-US", "locale string used if OverrideCulture.Enabled is true; examples: de-DE, fr-FR");
+
             Options.PruneSaves.DaysToKeep = Config.Bind("PruneSaves", "DaysToKeep", 0, "When quick/auto saving, will delete saves older than value; 0 = disabled");
             Options.Questing.AlwaysRandom = Config.Bind("Questing", "AlwaysRandom", false, "If true, new quests will always be random instead of targeting current zone");
             Options.Questing.AutoButter = Config.Bind("Questing", "AutoButter", false, "If true, will automatically use butter when starting a major quest");
@@ -68,11 +73,36 @@ namespace jshepler.ngu.mods
             Options.Twitch.RewardTriggers.TossGold = Config.Bind("Twitch.RewardTriggers", "TossGold", "", "Custom reward name to toss gold into money pit");
             Options.Twitch.RewardTriggers.Kitty = Config.Bind("Twitch.RewardTriggers", "Kitty", "", "Custom reward name to trigger troll kitty event");
 
-            Options.WisheQueue.Enabled = Config.Bind("WisheQueue", "Enabled", false, "enables the wish queue");
+            Options.WishList.Enabled = Config.Bind("WishList", "Enabled", false, "enables the wish list automation");
+            Options.WishList.AutoAdvance = Config.Bind("WishList", "Auto Advance", true, "if enabled and a wish finishes, start the next wish");
+            Options.WishList.SingleLevelMode = Config.Bind("WishList", "SingleLevelMode", false, "if enabled, wishes gain a single level then starts the next one in current list or sort order");
+            Options.WishList.BlacklistMode = Config.Bind("WishList", "BlacklistMode", false, "if enabled, listed wishes will be ignored when starting next wish");
             Options.WishR3Cap.Enabled = Config.Bind("WishR3Cap", "Enabled", true, "when auto-allocating resources or when a wish completes a level, will (re)distribute R3 amongst running wishes to not be more than is needed for min wish time");
 
             Options.FruitActivationIndicator.Enabled = Config.Bind("FruitActivationIndicator", "Enabled", false, "when enabled, the Yggdrasil button will light up red if any fruit needs activation");
             Options.LSCreminder.MaxMinutesToTarget = Config.Bind("LSCreminder", "MaxMinutesToTarget", 5, "max time to target for both laser sword and quadruple laser sword together, will light up Challenges button on Rebirth screen; 0 = disabled");
+
+            // when loading an old version of the cfg file, some options may have changed or been removed;
+            // this will check for known things that have changed and copy values if appropriate,
+            // then remove all orphaned entries
+            var orphaned = (Dictionary<ConfigDefinition, string>)typeof(ConfigFile).GetProperty("OrphanedEntries", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(Config);
+            if (orphaned.Count > 0)
+            {
+                string value;
+
+                // WishQueue was renamed to WishList in v1.16
+                if (orphaned.TryGetValue("WisheQueue", "Enabled", out value))
+                    WishList.Enabled.Value = value == "true";
+
+                orphaned.Clear();
+                Config.Save();
+            }
+        }
+
+        private static bool TryGetValue(this Dictionary<ConfigDefinition, string> dict, string section, string key, out string value)
+        {
+            var def = new ConfigDefinition(section, key);
+            return dict.TryGetValue(def, out value);
         }
 
         internal static class RemoteTriggers
@@ -186,9 +216,12 @@ namespace jshepler.ngu.mods
             }
         }
 
-        internal static class WisheQueue
+        internal static class WishList
         {
             internal static ConfigEntry<bool> Enabled;
+            internal static ConfigEntry<bool> AutoAdvance;
+            internal static ConfigEntry<bool> SingleLevelMode;
+            internal static ConfigEntry<bool> BlacklistMode;
         }
 
         internal static class WishR3Cap
@@ -242,6 +275,12 @@ namespace jshepler.ngu.mods
         {
             internal static ConfigEntry<bool> Enabled;
             internal static ConfigEntry<string> Locale;
+        }
+
+        internal static class GameModes
+        {
+            internal static ConfigEntry<bool> Hardcore;
+            internal static ConfigEntry<bool> PermaTC;
         }
     }
 }

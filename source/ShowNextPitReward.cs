@@ -62,7 +62,6 @@ namespace jshepler.ngu.mods
             _tooltip.hideTooltip();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Method Declaration", "Harmony003:Harmony non-ref patch parameters modified", Justification = "not a patch method")]
         private static string GetNextPitReward(int log10)
         {
             if (log10 > 30 && _character.wishes.wishes[4].level < 1)

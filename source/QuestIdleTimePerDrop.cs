@@ -1,12 +1,31 @@
 ﻿using System.Collections.Generic;
+using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
+using UnityEngine;
 
 namespace jshepler.ngu.mods
 {
     [HarmonyPatch]
     internal class QuestIdleTimePerDrop
     {
+        private static bool _altIsDown = true;
+
+        [HarmonyPrepare]
+        private static void prep(MethodBase method)
+        {
+            if (method != null)
+                return;
+
+            Plugin.OnUpdate += (o, e) =>
+            {
+                if (!Plugin.Character.InMenu(Menu.Quests))
+                    return;
+
+                _altIsDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+            };
+        }
+
         [HarmonyTranspiler, HarmonyPatch(typeof(BeastQuestController), "showIdleModeTooltip")]
         private static IEnumerable<CodeInstruction> BeastQuestController_showIdleModeTooltip_transpiler(IEnumerable<CodeInstruction> instructions)
         {
@@ -40,7 +59,27 @@ namespace jshepler.ngu.mods
             var timePerDrop = NumberOutput.timeOutput(secondsPerDrop);
             var totalTime = NumberOutput.timeOutput(secondsForQuest);
 
-            return $"\n\nTime per drop: {timePerDrop}\nTotal quest time: {totalTime}\nAverage quests per day: {avgQuestsPerDay:0.#}\n";
+            var speed = character.inventory.itemList.redLiquidComplete ? 0.8f : 1.0f;
+            var respawn = character.adventureController.respawnTime();
+            var questDC = character.beastQuestController.questDropChance();
+            var idleDF = character.beastQuestController.idleDropFactor();
+            var seconds = (speed + respawn) / questDC * idleDF;
+
+            var altText = !_altIsDown ? string.Empty :
+                $"\n   idle attack speed: {speed}"
+                + $"\n   respawn: {respawn}"
+                + $"\n   quest DC: {questDC}"
+                + $"\n   idle speed divider (perks): {idleDF}"
+                + $"\n   seconds per drop"
+                + $"\n      = (speed + respawn) / questDC * divider"
+                + $"\n      = {seconds} ({NumberOutput.timeOutput(seconds)})\n";
+
+            var text = $"\n\nTime per drop: {timePerDrop}"
+                + altText
+                + $"\nTotal quest time: {totalTime}"
+                + $"\nAverage quests per day: {avgQuestsPerDay:0.#}\n";
+
+            return text;
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(BeastQuestController), "timeToNextFill")]

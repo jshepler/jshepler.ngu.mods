@@ -91,8 +91,10 @@ namespace jshepler.ngu.mods
 
         internal static bool IsEmpty(this Loadout l)
         {
+            var weap2Unlocked = Plugin.Character.inventoryController.weapon2Unlocked();
             return l.head == -1000 && l.chest == -1000 && l.legs == -1000 && l.boots == -1000
-                && l.weapon == -1000 && l.weapon2 == -1000
+                && l.weapon == -1000
+                && (weap2Unlocked || l.weapon2 == -1000)
                 && l.accessories.TrueForAll(i => i == -1000);
         }
 

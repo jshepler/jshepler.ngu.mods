@@ -46,10 +46,22 @@ namespace jshepler.ngu.mods.ModSave
             set => Set("BM_IronPill_LastGained", value);
         }
 
-        internal static List<int> WishQueue
+        internal static List<int> WishList
         {
-            get => Get<List<int>>("WishQueue",new());
-            set => Set("WishQueue", value);
+            get => Get<List<int>>("WishList", new());
+            set => Set("WishList", value);
+        }
+
+        internal static List<int> WishTargets
+        {
+            get => Get<List<int>>("WishTargets", new());
+            set => Set("WishTargets", value);
+        }
+
+        internal static List<int> WishesLastRunning
+        {
+            get => Get<List<int>>("WishesLastRunning", new());
+            set => Set("WishesLastRunning", value);
         }
 
         internal static Dictionary<int, int[]> EnabledEnergyIDs
@@ -240,14 +252,50 @@ namespace jshepler.ngu.mods.ModSave
 
         internal static long[] QPSourcesThisRB
         {
-            get => Get<long[]>("QPSourcesThisRB", [0L, 0L, 0L]);
+            get => Get("QPSourcesThisRB", new long[TrackQPGained.SOURCE_COUNT]);
             set => Set("QPSourcesThisRB", value);
         }
 
         internal static long[] QPSourcesLastRB
         {
-            get => Get<long[]>("QPSourcesLastRB", [0L, 0L, 0L]);
+            get => Get("QPSourcesLastRB", new long[TrackQPGained.SOURCE_COUNT]);
             set => Set("QPSourcesLastRB", value);
+        }
+
+        internal static float BaseAdvPowerGained
+        {
+            get => Get("BaseAdvPowerGained", 0f);
+            set => Set("BaseAdvPowerGained", value);
+        }
+
+        internal static float[] BaseAdvPowerGainSources
+        {
+            get => Get("BaseAdvPowerGainSources", new float[TrackBaseAdvPowerGained.Sources.COUNT]);
+            set => Set("BaseAdvPowerGainSources", value);
+        }
+
+        internal static bool Hardcore
+        {
+            get => Get("HardCore", false);
+            set => Set("HardCore", value);
+        }
+
+        internal static bool PermaTC
+        {
+            get => Get("PermaTC", false);
+            set => Set("PermaTC", value);
+        }
+
+        internal static float PTC_Timer
+        {
+            get => Get("PTC_Timer", 0f);
+            set => Set("PTC_Timer", value);
+        }
+
+        internal static int PTC_TrollCount
+        {
+            get => Get("PTC_TrollCount", 0);
+            set => Set("PTC_TrollCount", value);
         }
 
         // REMINDER: NO TYPES DEFINED IN MODS ELSE NOT LOADABLE IN VANILLA
