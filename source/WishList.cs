@@ -51,8 +51,6 @@ namespace jshepler.ngu.mods
                 }
 
                 _offlineCount = Wishes.RunningWishes.Count();
-
-                __instance.character.wishes.wishes[31].level = 9;
             };
 
             Plugin.OnOfflineProgressionComplete += (o, e) =>
