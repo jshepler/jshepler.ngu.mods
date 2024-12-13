@@ -44,13 +44,15 @@ namespace jshepler.ngu.mods
                     Data.Values.Remove("WishQueue");
                 }
 
-                if (_wishTargets.Count == _wishList.Count)
-                    return;
-
-                _wishTargets.Clear();
-                _wishTargets.AddRange(_wishList.Select(id => 0));
+                if (_wishTargets.Count != _wishList.Count)
+                {
+                    _wishTargets.Clear();
+                    _wishTargets.AddRange(_wishList.Select(id => 0));
+                }
 
                 _offlineCount = Wishes.RunningWishes.Count();
+
+                __instance.character.wishes.wishes[31].level = 9;
             };
 
             Plugin.OnOfflineProgressionComplete += (o, e) =>
@@ -139,7 +141,7 @@ namespace jshepler.ngu.mods
 
             if (qIndex >= 0)
             {
-                if (wish.Level == wish.MaxLevel || WishTargetReached(wish.Id, wish.Level))
+                if (wish.Level == wish.MaxLevel || WishTargetReached(wish))
                     removeWishAt(qIndex);
                 else
                     _popup.MoveBottom(qIndex);
@@ -174,7 +176,12 @@ namespace jshepler.ngu.mods
         internal static void ResumeWishes()
         {
             _controller.removeAllResources();
-            var tracked = _lastRunning.Select(id => Wishes.AllWishes[id]).ToList();
+
+            var tracked = _lastRunning
+                .Select(id => Wishes.AllWishes[id])
+                .Where(w => w.Level < w.MaxLevel || !WishTargetReached(w))
+                .ToList();
+
             WishSplit.SplitResources(tracked);
             _controller.updateMenu();
         }
@@ -222,7 +229,20 @@ namespace jshepler.ngu.mods
             if (_blacklistMode || _wishList.Count == 0)
                 return null;
 
-            return _wishList.Select(i => Wishes.AllWishes[i]).FirstOrDefault(w => !w.IsRunning);
+            var inList = _wishList.Select(i => Wishes.AllWishes[i]).ToList();
+
+            // make sure there aren't any wishes in the list that shouldn't be there
+            for (var x = 0; x < inList.Count; x++)
+            {
+                var wish = inList[x];
+                if (wish.Level >= wish.MaxLevel || WishTargetReached(wish))
+                {
+                    removeWish(wish.Id);
+                    inList.RemoveAt(x--);
+                }
+            }
+
+            return inList.FirstOrDefault(w => !w.IsRunning);
         }
 
         private static WishWrapper getNextWishFromList_old2(int startIndex)
@@ -384,13 +404,19 @@ namespace jshepler.ngu.mods
             }
         }
 
-        internal static bool WishTargetReached(int wishId, int level)
+        internal static bool WishTargetReached(int wishId)
         {
-            var index = _wishList.IndexOf(wishId);
-            if (index == -1 || _wishTargets[index] == 0 || level < _wishTargets[index])
+            return WishTargetReached(Wishes.AllWishes[wishId]);
+        }
+
+        internal static bool WishTargetReached(WishWrapper wish)
+        {
+            var index = _wishList.IndexOf(wish.Id);
+            if (index == -1)
                 return false;
 
-            return true;
+            var target = _wishTargets[index];
+            return target > 0 && wish.Level >= target;
         }
     }
 }

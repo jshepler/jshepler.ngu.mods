@@ -143,7 +143,7 @@ namespace jshepler.ngu.mods
             if (_offlineInProgress || level >= __instance.maxWishLevel(id)) // code in wishlist handles max level
                 return;
 
-            if (_wishListEnabled && (_wishListSingleLevelMode || WishList.WishTargetReached(id, level)))
+            if (_wishListEnabled && (_wishListSingleLevelMode || WishList.WishTargetReached(id)))
             {
                 WishList.ClearAndStartNextWish(id);
                 return;
