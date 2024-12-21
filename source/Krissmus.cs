@@ -13,8 +13,12 @@ namespace jshepler.ngu.mods
             if (original != null)
                 return;
 
-            // unlocks krissmuss ui theme from christmass 2019 event
-            Plugin.OnSaveLoaded += (o, e) => Plugin.Character.settings.prizePicked = 6;
+            // unlocks krissmuss ui theme and daycare kitty from christmass 2019 event
+            Plugin.OnSaveLoaded += (o, e) =>
+            {
+                Plugin.Character.settings.prizePicked = 6;
+                Plugin.Character.inventory.unlockedKittyArt[2] = true;
+            };
 
             // opens hidden "Krissmuss" screen from christmas 2020 event
             Plugin.OnUpdate += (o, e) =>

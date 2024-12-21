@@ -37,12 +37,15 @@ namespace jshepler.ngu.mods.Popups
         }
 
         internal WishListPopup()
-            : base(new Rect(Screen.width * .375f, Screen.height * .2f, Screen.width * .5f, Screen.height * .4f))
+            : base(new Rect(Screen.width / 2f - 330f, Screen.height / 2f - 170f, 660, 340))
         {
         }
 
         internal override void Open()
         {
+            base.WindowRect.x = Screen.width / 2f - 330f;
+            base.WindowRect.y = Screen.height / 2f - 170f;
+
             _blacklistToggle = _blacklistMode;
             base.Open();
         }

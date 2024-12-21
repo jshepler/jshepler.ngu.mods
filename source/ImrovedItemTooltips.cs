@@ -180,6 +180,12 @@ namespace jshepler.ngu.mods
                 if (_appendDualWieldText)
                     text += $"\n\n<b>Dual-Wield Effectiveness:</b> {Plugin.Character.inventoryController.weapon2Factor() * 100f:0}%";
 
+                if (item.isMacGuffin())
+                    text += $"\n\n<b>Time Factor:</b> {Plugin.Character.inventoryController.macGuffinBonusTimeFactor()}";
+
+                if (item.id == 92 && item.level > 0 && Plugin.Character.settings.yggdrasilOn)
+                    text += $"\n\n<b>Gain <color=blue>{(int)(item.level * (1f + item.level / 100f))}</color> seeds if consumed now</b>";
+
                 if (Input.GetKey(KeyCode.LeftAlt))
                     text += BuildItemSourcesString(item);
 

@@ -1,4 +1,6 @@
-﻿using HarmonyLib;
+﻿using System.IO.Pipes;
+using System.Linq;
+using HarmonyLib;
 using jshepler.ngu.mods.Popups;
 using UnityEngine;
 
@@ -14,12 +16,13 @@ namespace jshepler.ngu.mods
         private static bool _autoYeetInProgress = false;
         private static Card _autoYeetedCard = null;
 
-        private static bool _autoSortEnabled => Options.AutoCards.AutoSortEnabled.Value;
-        private static CardSortBy _autoSortBy => Options.AutoCards.AutoSortBy.Value;
-        private static int _sortDirection => (int)Options.AutoCards.AutoSortDirection.Value;
-        private static bool _autoYeetEnabled => Options.AutoCards.AutoYeetEnabled.Value;
-        private static rarity _maxYeetRarity => Options.AutoCards.MaxYeetRarity.Value;
-        private static float _maxYeetEfficiency => Options.AutoCards.MaxYeetEfficiency.Value;
+        private static bool _autoSortEnabled => Options.Cards.AutoSortEnabled.Value;
+        private static CardSortBy _autoSortBy => Options.Cards.AutoSortBy.Value;
+        private static int _sortDirection => (int)Options.Cards.AutoSortDirection.Value;
+        private static bool _autoYeetEnabled => Options.Cards.AutoYeetEnabled.Value;
+        private static rarity _maxYeetRarity => Options.Cards.MaxYeetRarity.Value;
+        private static float _maxYeetEfficiency => Options.Cards.MaxYeetEfficiency.Value;
+        private static bool _autoProtectChonkers => Options.Cards.AutoProtectChonkers.Value;
 
         private static AutoCardsPopup _popup;
 
@@ -40,6 +43,13 @@ namespace jshepler.ngu.mods
 
             if (_autoSortEnabled)
                 SortCards();
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(CardsController), "generateCard")]
+        private static void CardsController_generateCard_postfix(bool isChonker, Card __result)
+        {
+            if (isChonker)
+                __result.isProtected = _autoProtectChonkers;
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(CardsController), "Update")]
@@ -74,7 +84,7 @@ namespace jshepler.ngu.mods
             if (_autoYeetedCard == null)
                 return;
 
-            message = $"<b><color=blue>AUTO-YEET:</color> <color=red>{_autoYeetedCard.cardRarity}</color></b>\n\n{message}";
+            message = $"<b><color=blue>AUTO-YEET</color></b>\n\n{message}";
         }
 
         private static void yeetCards()
@@ -83,21 +93,20 @@ namespace jshepler.ngu.mods
             var cards = character.cards.cards;
             var index = cards.Count;
 
+            var alwaysYeet = Options.Cards.AlwaysYeetCSV.Value.Split(',').Select(s => s == "1").ToArray();
+
             while (index > 0)
             {
                 var card = cards[--index];
-                if (card.type == cardType.end)
+                if (card.isProtected)
                     continue;
 
                 _autoYeetedCard = card;
 
-                if (_maxYeetEfficiency > 0f)
-                {
-                    if (CardTooltip.GetCardEfficiency(card) <= _maxYeetEfficiency)
-                        character.cardsController.trashCard(index);
-                }
-
-                else if (card.cardRarity <= _maxYeetRarity)
+                if (alwaysYeet[(int)card.bonusType]
+                    || (_maxYeetEfficiency == 0f && card.cardRarity <= _maxYeetRarity)
+                    || (_maxYeetEfficiency > 0f && CardTooltip.GetCardEfficiency(card) <= _maxYeetEfficiency)
+                )
                     character.cardsController.trashCard(index);
 
                 _autoYeetedCard = null;

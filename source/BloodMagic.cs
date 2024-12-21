@@ -10,37 +10,48 @@ namespace jshepler.ngu.mods
         // based on AllBloodMagicController.lootBonus() and .goldBonus()
         const double MINBLOOD_LOOT = 10000.0;
         const double MINBLOOD_GOLD = 1000000.0;
-        private static Func<double, float> _calcLootBonusPct = blood => (blood < MINBLOOD_LOOT) ? 0f : 100F * (float)(Math.Floor(Math.Log(blood / MINBLOOD_LOOT, 2.0) + 1.0) * 0.0099999997764825821);
-        private static Func<double, float> _calcGoldBonusPct = blood => (blood < MINBLOOD_GOLD) ? 0f : 100f * (float)(Math.Floor(Math.Pow(Math.Log(blood / MINBLOOD_GOLD, 2.0) + 1.0, 2.0)) * 0.0099999997764825821);
+
+        private static double _totalBPS => Plugin.Character.bloodMagicController.bloodMagics.Sum(bm => bm.bloodGainedPerSecond());
 
         [HarmonyPostfix, HarmonyPatch(typeof(AllBloodMagicController), "updateBloodDisplay")]
         private static void AllBloodMagicController_updateBloodDisplay_postifx(AllBloodMagicController __instance)
         {
-            var totalBPS = __instance.bloodMagics.Sum(bm => bm.bloodGainedPerSecond());
+            //_totalBPS = __instance.bloodMagics.Sum(bm => bm.bloodGainedPerSecond());
             var fontSize = __instance.bloodText.fontSize * .9;
             
-            __instance.bloodText.text += $"\n<size={fontSize}><b>Gain:</b> +{__instance.character.display(totalBPS)}/s</size>";
+            __instance.bloodText.text += $"\n<size={fontSize}><b>Gain:</b> +{__instance.character.display(_totalBPS)}/s</size>";
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(RebirthPowerSpell), "lootSpellTooltip")]
         private static bool RebirthPowerSpells_lootSpellTooltip_prefix(RebirthPowerSpell __instance, ref string ___message)
         {
-            var character = __instance.character;
+            var bm = __instance.character.bloodMagic;
+            var bloodInvested = bm.lootSpellBlood;
 
-            var lootSpellBlood = character.bloodMagic.lootSpellBlood;
-            var oldPct = _calcLootBonusPct(lootSpellBlood);
-            
-            var newTotal = lootSpellBlood + character.bloodMagic.bloodPoints;
-            var newPct = _calcLootBonusPct(newTotal);
-            var willGain = newPct - oldPct;
+            ___message = "<b>Blood Spaghetti</b>"
+                + "\n\nGather up all of your Blood and form it into something resembling spaghetti. You can slip spaghetti into a foe's pockets, causing it (and whatever loot they're holding onto) to fall out more often!"
+                + $"\n\nFor you math nerds, it's log2(Blood/{MINBLOOD_LOOT}) % better drop chance."
+                + $"\n\n<b>Minimum Blood Required: </b>{MINBLOOD_LOOT}"
+                + $"\n<b>Total Blood Invested: </b>{__instance.character.display(bloodInvested)}";
 
-            ___message = $"<b>Blood Spaghetti</b>\n\nGather up all of your Blood and form it into something resembling spaghetti. You can slip spaghetti into a foe's pockets, causing it (and whatever loot they're holding onto) to fall out more often!\n\nFor you math nerds, it's log2(Blood/{MINBLOOD_LOOT}) % better drop chance.\n\n<b>Minimum Blood Required: </b>{MINBLOOD_LOOT}\n<b>Total Blood Invested: </b>{character.display(lootSpellBlood)}\n\n<b>Will gain +{willGain:#,##0.#}% if used now.</b>";
-            __instance.tooltip.showTooltip(___message);
+            var curBonus = bloodToLootBonus(bloodInvested);
+            var totalBlood = bloodInvested + bm.bloodPoints;
+            var newBonus = bloodToLootBonus(totalBlood);
+            ___message += $"\n\n<b>Total bonus if used now:</b> {newBonus:#,##0.#}% (+{(newBonus - curBonus):#,##0.#}%)";
 
-            if (!__instance.IsInvoking("lootSpellTooltip"))
+            if (_totalBPS > 0)
             {
-                __instance.InvokeRepeating("lootSpellTooltip", 0, 1);
+                var nextBonus = newBonus + 1;
+                var nextTotalBlood = lootBonusToBlood(nextBonus);
+                var bloodRemaining = nextTotalBlood - totalBlood;
+                var secondsRemaining = bloodRemaining / _totalBPS;
+
+                ___message += $"\n   ({nextBonus:#,##0.#}% in {NumberOutput.timeOutput(secondsRemaining)})";
             }
+
+            __instance.tooltip.showTooltip(___message);
+            if (!__instance.IsInvoking("lootSpellTooltip"))
+                __instance.InvokeRepeating("lootSpellTooltip", 0, 0.1f);
 
             return false;
         }
@@ -48,22 +59,34 @@ namespace jshepler.ngu.mods
         [HarmonyPrefix, HarmonyPatch(typeof(RebirthPowerSpell), "goldSpellTooltip")]
         private static bool RebirthPowerSpells_goldSpellTooltip_prefix(RebirthPowerSpell __instance, ref string ___message)
         {
-            var character = __instance.character;
+            var bm = __instance.character.bloodMagic;
+            var bloodInvested = bm.goldSpellBlood;
 
-            var goldSpellBlood = character.bloodMagic.goldSpellBlood;
-            var oldPct = _calcGoldBonusPct(goldSpellBlood);
-            
-            var newTotal = goldSpellBlood + character.bloodMagic.bloodPoints;
-            var newPct = _calcGoldBonusPct(newTotal);
-            var willGain = newPct - oldPct;
+            ___message = "<b>Counterfeit Gold</b>"
+                + "\n\nUse the power of Blood to create some counterfeit gold, and slip it into the time machine's time bubble to increase gold production! Lasts until rebirth."
+                + $"\n\nWARNING: MATH. Your bonus GPS is equal to log2(Blood/{MINBLOOD_GOLD})^2%."
+                + $"\n\n<b>Minimum Blood Required: </b>{MINBLOOD_GOLD}"
+                + $"\n<b>Total Blood Invested: </b>{__instance.character.display(bloodInvested)}";
 
-            ___message = $"<b>Counterfeit Gold</b>\n\nUse the power of Blood to create some counterfeit gold, and slip it into the time machine's time bubble to increase gold production! Lasts until rebirth.\n\nWARNING: MATH. Your bonus GPS is equal to log2(Blood/{MINBLOOD_GOLD})^2%.\n\n<b>Minimum Blood Required: </b>{MINBLOOD_GOLD}\n<b>Total Blood Invested: </b>{character.display(goldSpellBlood)}\n\n<b>Will gain +{willGain:#,##0.#}% if used now.</b>";
-            __instance.tooltip.showTooltip(___message);
+            var curBonus = bloodToGoldBonus(bloodInvested);
+            var totalBlood = bloodInvested + bm.bloodPoints;
+            var newBonus = bloodToGoldBonus(totalBlood);
+            ___message += $"\n\n<b>Total bonus if used now:</b> {newBonus:#,##0.#}% (+{(newBonus - curBonus):#,##0.#}%)";
 
-            if (!__instance.IsInvoking("goldSpellTooltip"))
+
+            if (_totalBPS > 0)
             {
-                __instance.InvokeRepeating("goldSpellTooltip", 0, 1);
+                var nextBonus = newBonus + 1;
+                var nextTotalBlood = goldBonusToBlood(nextBonus);
+                var bloodRemaining = nextTotalBlood - totalBlood;
+                var secondsRemaining = bloodRemaining / _totalBPS;
+
+                ___message += $"\n   ({nextBonus:#,##0.#}% in {NumberOutput.timeOutput(secondsRemaining)})";
             }
+
+            __instance.tooltip.showTooltip(___message);
+            if (!__instance.IsInvoking("goldSpellTooltip"))
+                __instance.InvokeRepeating("goldSpellTooltip", 0, 0.1f);
 
             return false;
         }
@@ -83,6 +106,36 @@ namespace jshepler.ngu.mods
 
             Plugin.OnPreSave += (o, e) => ModSave.Data.BM_IronPill_LastGained = field.Value;
             Plugin.OnSaveLoaded += (o, e) => field.Value = ModSave.Data.BM_IronPill_LastGained;
+        }
+
+        // AllBloodMagicController.lootBonus()
+        // Math.Floor(Math.Log(character.bloodMagic.lootSpellBlood / character.bloodMagicController.spells.minLootBlood(), 2.0) + 1.0) * 0.009999999776482582
+        private static long bloodToLootBonus(double blood)
+        {
+            if (blood < MINBLOOD_LOOT)
+                return 0L;
+
+            return (long)Math.Floor(Math.Log(blood / MINBLOOD_LOOT, 2.0) + 1.0);// * 0.01;
+        }
+
+        private static double lootBonusToBlood(long lootBonus)
+        {
+            return MINBLOOD_LOOT * Math.Pow(2.0, lootBonus - 1);
+        }
+
+        // AllBloodMagicController.goldBonus()
+        // Math.Floor(Math.Pow(Math.Log(character.bloodMagic.goldSpellBlood / character.bloodMagicController.spells.minGoldBlood(), 2.0) + 1.0, 2.0)) * 0.009999999776482582
+        private static long bloodToGoldBonus(double blood)
+        {
+            if (blood < MINBLOOD_GOLD)
+                return 0L;
+
+            return (long)Math.Floor(Math.Pow(Math.Log(blood / MINBLOOD_GOLD, 2.0) + 1.0, 2.0));// * 0.01;
+        }
+
+        private static double goldBonusToBlood(long goldBonus)
+        {
+            return MINBLOOD_GOLD * Math.Pow(2.0, Math.Sqrt(goldBonus) - 1);
         }
     }
 }

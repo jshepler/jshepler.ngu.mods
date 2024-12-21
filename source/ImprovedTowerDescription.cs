@@ -103,8 +103,8 @@ namespace jshepler.ngu.mods
             var currentProgress = (float)character.adventure.itopod.pointProgress;
             var killsRemaining = Mathf.CeilToInt((MAXPROGRESS - currentProgress) / progressPerKill);
 
-            var secondsPerKill = _last5KillTimes.Count == 0 ? 0 : _last5KillTimes.Average();
             var isEstimated = currentFloor > optimalFloor;
+            var secondsPerKill = isEstimated ? _last5KillTimes.Count == 0 ? 0 : _last5KillTimes.Average() : 0f;
 
             if (!isEstimated)
             {
@@ -113,38 +113,75 @@ namespace jshepler.ngu.mods
                 secondsPerKill = respawnTime + idleAttackSpeed;
             }
 
-            var secondsPerPP = killsPerPP * secondsPerKill;
-            var secondsRemaining = killsRemaining * secondsPerKill; //secondsPerKill == 0 ? 0 : (MAXPROGRESS - currentProgress) / progressPerKill * secondsPerKill;
-
-            var ppPerKill = (float)progressPerKill / MAXPROGRESS;
-            var ppPerHour = secondsPerKill == 0f ? 0 : (60 * 60 / secondsPerKill) * ppPerKill;
-            var ppPerDay = secondsPerKill == 0f ? 0 : (60 * 60 * 24 / secondsPerKill) * ppPerKill;
+            var killsPerHour = 3600f / secondsPerKill;
+            var killsPerDay = 86400f / secondsPerKill;
 
             _tooltipText = $"\n\n<b>PP Progress:</b> {currentProgress:#,##0} / {MAXPROGRESS:#,##0} ({currentProgress / MAXPROGRESS * 100f:##0.00}%)"
                 + $"\n\n<b>Seconds per kill:</b> {(secondsPerKill == 0f ? "????" : NumberOutput.timeOutput(secondsPerKill))} ({(isEstimated ? "estimated" : currentFloor < optimalFloor ? "sub-optimal" : "optimal")})"
-                + (killsPerPP == 1 ? $"\n<b>PP per kill:</b> {ppPerKill:#,##0.00}" : $"\n<b>Kills per PP:</b> {killsPerPP} taking {(secondsPerPP == 0f ? "????" : NumberOutput.timeOutput(secondsPerPP))}")
-                + $"\n<b>PP per hour:</b> {ppPerHour:#,##0.##}"
+                + $"\n<b>Kills per hour:</b> {killsPerHour:#,##0.##}"
+                + $"\n<b>Kills per day:</b> {killsPerDay:#,##0.##}";
+
+
+            var secondsPerPP = killsPerPP * secondsPerKill;
+            var secondsRemaining = killsRemaining * secondsPerKill;
+            var ppPerKill = (float)progressPerKill / MAXPROGRESS;
+            var ppPerHour = secondsPerKill == 0f ? 0 : killsPerHour * ppPerKill;
+            var ppPerDay = secondsPerKill == 0f ? 0 : killsPerDay * ppPerKill;
+
+            if (killsPerPP == 1)
+                _tooltipText += $"\n\n<b>PP per kill:</b> {ppPerKill:#,##0.00}";
+            else
+                _tooltipText += $"\n\n<b>Kills per PP:</b> {killsPerPP} taking {(secondsPerPP == 0f ? "????" : NumberOutput.timeOutput(secondsPerPP))}"
+                    + $"\n<b>Kills to next PP:</b> {killsRemaining} in {(secondsRemaining == 0f ? "????" : NumberOutput.timeOutput(secondsRemaining))}";
+
+            //_tooltipText += killsPerPP == 1
+            //    ? $"\n\n<b>PP per kill:</b> {ppPerKill:#,##0.00}"
+            //    : $"\n\n<b>Kills per PP:</b> {killsPerPP} taking {(secondsPerPP == 0f ? "????" : NumberOutput.timeOutput(secondsPerPP))}";
+
+            //if (killsPerPP > 1)
+            //    _tooltipText += $"\n<b>Kills to next PP:</b> {killsRemaining} in {(secondsRemaining == 0f ? "????" : NumberOutput.timeOutput(secondsRemaining))}";
+
+            _tooltipText += $"\n<b>PP per hour:</b> {ppPerHour:#,##0.##}"
                 + $"\n<b>PP per day:</b> {ppPerDay:#,##0.##}";
+
 
             var tier = character.adventureController.lootDrop.itopodTier(currentFloor);
             var killsPerEXP = controller.lootDrop.killsPerEXP(tier);
+            var killsToNextAP = controller.lootDrop.killsUntilAP(currentFloor);
             var baseExpPerGroup = controller.lootDrop.itopodEXPAwarded(tier);
-            var expPerGroup = controller.character.checkExpAdded(baseExpPerGroup);
+            var expPerGroup = character.checkExpAdded(baseExpPerGroup);
             var secondsPerExpGroup = killsPerEXP * secondsPerKill;
             var expPerDay = secondsPerKill == 0f ? 0L : (long)(60 * 60 * 24 / secondsPerExpGroup) * expPerGroup;
+            var apPerDay = secondsPerKill == 0f ? 0L : (long)(60 * 60 * 24 / secondsPerExpGroup);
 
-            _tooltipText += $"\n\n<b>Kills per EXP drop:</b> {killsPerEXP} taking {(secondsPerExpGroup == 0f ? "????" : NumberOutput.timeOutput(secondsPerExpGroup))}"
-                + $"\n<b>EXP per drop:</b> {controller.character.display(expPerGroup)} ({baseExpPerGroup} base)"
-                + $"\n<b>EXP per day:</b> {controller.character.display(expPerDay)}";
+            _tooltipText += $"\n\n<b>Kills per EXP/AP drop:</b> {killsPerEXP} taking {(secondsPerExpGroup == 0f ? "????" : NumberOutput.timeOutput(secondsPerExpGroup))}"
+                + $"\n<b>Kills to next EXP/AP:</b> {killsToNextAP} in {(secondsPerKill == 0f ? "???" : NumberOutput.timeOutput(killsToNextAP * secondsPerKill))}"
+                + $"\n<b>EXP per drop:</b> {character.display(expPerGroup)} ({baseExpPerGroup} base)"
+                + $"\n<b>EXP per day:</b> {character.display(expPerDay)}"
+                + $"\n<b>AP per day:</b> {character.display(apPerDay)}";
 
-            var killsToNextAP = controller.lootDrop.killsUntilAP(currentFloor);
-            _tooltipText += $"\n\n<b>Kills to next PP:</b> {killsRemaining} in {(secondsRemaining == 0f ? "????" : NumberOutput.timeOutput(secondsRemaining))}"
-                + $"\n<b>Kills to next AP/EXP:</b> {killsToNextAP} in {(secondsPerKill == 0f ? "???" : NumberOutput.timeOutput(killsToNextAP * secondsPerKill))}";
+
+            if (character.adventure.itopod.perkLevel[30] >= 1)
+            {
+                var killsPerPoop = character.adventureController.itopod.poopThreshold();
+                var killsToNextPoop = killsPerPoop - character.adventure.itopod.poopProgress;
+                var dcPoop = character.adventureController.itopod.effectPerLevel[30];
+                var avgPoopPerDay = (killsPerDay / killsPerPoop) + (killsPerDay * dcPoop);
+                _tooltipText += $"\n\n<b>Kills per Poop:</b> {killsPerPoop} taking {NumberOutput.timeOutput(killsPerPoop * secondsPerKill)}"
+                    + $"\n<b>Kills to next Poop:</b> {killsToNextPoop} in {(secondsPerKill == 0f ? "???" : NumberOutput.timeOutput(killsToNextPoop * secondsPerKill))}"
+                    + $"\n<b>DC per kill:</b> {dcPoop * 100f:0.####}%"
+                    + $"\n<b>Avg Poop per day:</b> ~{avgPoopPerDay:#,##0.##}";
+            }
+
 
             if (character.achievements.achievementComplete[145] && character.adventure.itopod.perkLevel[68] >= 1)
             {
+                var killsPerGuff = controller.lootDrop.killsPerMacguffin();
                 var killsToNextGuff = controller.lootDrop.killsUntilMacguffin();
-                _tooltipText += $"\n<b>Kills to next MacGuffin:</b> {killsToNextGuff} in {(secondsPerKill == 0f ? "???" : NumberOutput.timeOutput(killsToNextGuff * secondsPerKill))}";
+                var guffsPerDay = killsPerDay / killsPerGuff;
+                _tooltipText += $"\n\n<b>Kills per MacGuffin:</b> {killsPerGuff} taking {NumberOutput.timeOutput(killsPerGuff * secondsPerKill)}"
+                    + $"\n<b>Kills to next MacGuffin:</b> {killsToNextGuff} in {(secondsPerKill == 0f ? "???" : NumberOutput.timeOutput(killsToNextGuff * secondsPerKill))}"
+                    + $"\n<b>MacGuffins per day:</b> {character.display(guffsPerDay)}";
             }
 
             _tooltipText += $"\n\n<b>Max Floor: </b> {maxFloor - 1}"
@@ -158,13 +195,13 @@ namespace jshepler.ngu.mods
             if (optimalFloor < 1599)
                 _tooltipText += $"\n<b>ATP for next opt:</b> {character.display(nextOptimalATP)}";
 
-            var next50Floor = (Mathf.FloorToInt(currentFloor / 50f) + 1) * 50;
+            var next50Floor = (Mathf.FloorToInt(optimalFloor / 50f) + 1) * 50;
             var next50FloorPower = next50Floor < 1600 ? getPowForOpt(next50Floor) : 0f;
             var next50FloorATP = _atpNeeded(next50FloorPower);
             if (next50Floor < 1600)
                 _tooltipText += $"\n<b>  ... next 50th ({next50Floor}):</b> {character.display(next50FloorATP)}";
 
-            var nextBoostFloor = _boostFloors.FirstOrDefault(f => f > currentFloor);
+            var nextBoostFloor = _boostFloors.FirstOrDefault(f => f > optimalFloor);
             var nextBoostFloorPower = nextBoostFloor == 0 ? 0 : getPowForOpt(nextBoostFloor);
             var nextBoostATP = _atpNeeded(nextBoostFloorPower);
             if(nextBoostFloor > 0)
@@ -194,7 +231,7 @@ namespace jshepler.ngu.mods
         private static float getPowForOpt(int floor)
         {
             var iap = Plugin.Character.idleAttackPower();
-            return (Mathf.Pow(1.05f, floor) * 765) / iap;
+            return Mathf.Pow(1.05f, floor) * 765 / iap;
         }
 
         private static int getOptForPow(float pow)

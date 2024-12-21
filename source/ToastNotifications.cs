@@ -288,6 +288,9 @@ namespace jshepler.ngu.mods
             _gob.name = "Toast";
             _text = _gob.GetComponentInChildren<Text>();
             _rect = _gob.GetComponent<RectTransform>();
+
+            // if _baseTooltip is cloned at the wrong time, it's possible to have the wrong font
+            _text.font = Fonts.LiberationSans_Regular;
         }
 
         internal float Width => _rect.rect.width;

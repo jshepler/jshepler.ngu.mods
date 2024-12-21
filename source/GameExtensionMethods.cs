@@ -109,9 +109,9 @@ namespace jshepler.ngu.mods
                 -3 => inv.legs,
                 -2 => inv.chest,
                 -1 => inv.head,
-                _ => slotId < 10000 ? inv.inventory[slotId]
-                    : slotId < 100000 ? inv.accs[slotId - 10000]
-                    : inv.macguffins[slotId - 100000]
+                < 10000 => inv.inventory[slotId],
+                < 100000 => inv.accs[slotId - 10000],
+                _ => inv.macguffins[slotId - 1000000]
             };
         }
 

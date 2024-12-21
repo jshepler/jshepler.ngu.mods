@@ -30,7 +30,7 @@ The config file is only read when the game starts, so exit the game before makin
 There are only a few config options at the moment. I'll probably add options in the future for the more questionable things.
 
 # GO integration bookmarklets
-***NOTE (unrelated to bookmarklets): importing saves from modded NGU into GO won't work unless you import a clean save - see mods 57 and 139 below.***
+***NOTE (unrelated to bookmarklets): ~~importing saves from modded NGU into GO won't work unless you import a clean save - see mods 57 and 139 below.~~*** *Since GO version 0.10.0, it no longer fails to load saves from modded NGU.*
 
 Bookmarklets are bookmarks that execute javascript instead of taking you to a specified URL. They run in the active browser tab as part of the site being viewed.
 
@@ -268,10 +268,12 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
     currently: blood rituals
 
 52. added tooltip to Money Pit button that shows what the next reward will be as well as the time remaining, AP gained, and toss multiplier (for rewards that get it)
+    
+    hold alt to see the rewards for each tier group - useful for planning pit days
 
-53. press control-shift-x to open the hidden krissmuss 2020 event screen
+53. press control-shift-x to open the hidden krismuss 2020 event screen
 
-54. unlocked krissmuss 2019 ui theme
+54. unlocked krismuss 2019 ui theme and daycare kitty
 
 55. fixed ygg seeds gained display format bug - not all fruits used current display option (e.g. scientific notation) for number of seeds gained
 
@@ -440,6 +442,9 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
     - kills per EXP drop
     - EXP per drop
     - EXP per day
+    - AP per day
+    - poop per day
+    - guffs per day
     - the optimal floor even if > max floor
     - AT power needed for optimal floors: next, next 50th (next exp increase), next boost (e.g. when boost drops change from 1k to 2k)
 
@@ -617,7 +622,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 138. shift-click the + button next to a hack's target to set that hack's hard cap
 
-139. pressing shift-F5 will do a clean quicksave - doesn't include any save data from my mods (useful for loading into GO)
+139. pressing shift-F5 will do a clean quicksave - doesn't include any save data from my mods (~~useful for loading into GO~~ no longer needed)
 
 140. when in a challenge and not at max zone, adventure button lights up yellow (except when in ITOPOD)
 
@@ -668,11 +673,14 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 157. when a troll resets energy and you have the `Instant Training Cap` AP purchase, 12 energy will auto allocate to BT (just like it does when swapping loadouts and have the `Unassign E/M on Loadout Swap` setting enabled)
 
 158. options to auto sort/yeet cards, sorts by: rarity > bonus type > bonus amount
-      - cfg file option to enable/disable auto yeet/sort
-      - cfg file option to set sort by: rarity first, bonus type first, mayo efficiency, bonus variance
-      - cfg file option to set sort direction
-      - cfg file option to set max rarirty to yeet
-      - cfg file option to set max efficiency to yeet (overrides max rarity)
+      - press F1 while on cards screen to open in-game config panel
+      - enable/disable auto yeet/sort
+      - set sort by: rarity first, bonus type first, mayo efficiency, bonus variance
+      - set sort direction
+      - set max rarirty to yeet
+      - set max efficiency to yeet (overrides max rarity)
+      - select bonus(es) to always yeet
+      - enable/disable automatically protecting chonker cards
       - enabled or not, can press the s/y keys to sort/yeet cards
 
 159. blood gain modifiers breakdown to `Stats Breakdown - Misc`
@@ -778,3 +786,26 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
      - `-targetFrameRate [rate]` limits FPS to specified limit (disables vsync), ex: `-targetFrameRate 60` to limit to 60 FPS
      - `-vSyncCount [count]` sets how many frames to sync at, ex: `-vSyncCount 1` (this is game's default setting)
      - if vSyncCount is set and is > 0, targetFrameRate will be ignored
+
+193. show time to next bonus increase to blood spaghetti and counterfeit gold
+
+194. right-click money pit to toss gold
+
+195. shows hack bonus summary in a tooltip when hovering over the WTF button on hacks page
+
+196. wish tooltips show resource allocation as a % of cap, where 100% = min wish time (e.g. 4 hours)
+
+     if over 100%, you have more than you need to min wish time
+
+     hold alt to see current progress and progress per tick - useful in seeing the effect of floats on wishes that are "too slow"
+
+197. shows current time factor for guffs and beards on their tooltips
+
+198. on the tooltip for A Giant Seed (item 92), shows how many seeds you'll gain if consumed
+
+199. when an item in daycare (that's not a guff) reaches 100, the daycare button lights up green
+
+200. fixes bugs with walerp's hide-n-seek game:
+     - while hiding, going offline would still advance walderp's respawn timer (sounds great, but causes some conflicts where he's both hiding and spawned)
+     - the 3 minute timer for moving where walderp hides is done in a way that prevents him from being in any menu for up to 3 minutes after being killed
+     - when found, the timer isn't reset so on next kill don't get the full 3 minutes

@@ -100,7 +100,7 @@ namespace jshepler.ngu.mods
                 return neededAT;
 
             var atPowerPct = ((ak.Power / totalPowerWithoutAdvPower) - 1) * 100f; // -1 to convert form "multiplier" to "bonus"
-            neededAT.Power = (long)Math.Ceiling(Math.Pow(atPowerPct / 10, 2.5)); // https://ngu-idle.fandom.com/wiki/Advanced_Training#Formulas
+            neededAT.Power = (float)Math.Ceiling(Math.Pow(atPowerPct / 10, 2.5)); // https://ngu-idle.fandom.com/wiki/Advanced_Training#Formulas
             if (neededAT.Power < 0)
                 neededAT.Power = 0;
 

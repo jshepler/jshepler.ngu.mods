@@ -74,9 +74,9 @@ namespace jshepler.ngu.mods.AutoAllocator
                 return;
 
             int nextId;
-            for (var x = 0; x < NUMBER_OF_HACKS; x++)
+            for (var x = 0; x < NUMBER_OF_HACKS - 1; x++) //  -1 to skip THE END hack
             {
-                nextId = (id + x) % NUMBER_OF_HACKS;
+                nextId = (id + x) % (NUMBER_OF_HACKS - 1);
                 if (!IsTargetReached(nextId))
                 {
                     if (!this[nextId])

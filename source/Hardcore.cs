@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using HarmonyLib;
+﻿using HarmonyLib;
 using SFB;
 using UnityEngine;
 using UnityEngine.UI;
@@ -24,7 +23,13 @@ namespace jshepler.ngu.mods
         {
             // disable the load local file button on the start screen (main menu)
             if (Enabled)
-                GameObject.Find("Canvas/Box Canvas/Main Menu Screen/Load File Button").GetComponent<Button>().interactable = false;
+            {
+                var ob = GameObject.Find("Canvas/Box Canvas/Main Menu Screen/Load File Button");
+                ob.GetComponent<Button>().interactable = false;
+                ob.AddComponent<PointerHandlerComponent>()
+                    .OnPointerEnter(e => Plugin.ShowTooltip("<b><color=red>HARDCARE MODE</color></b>\n\nLoading local save is disabled"))
+                    .OnPointerExit(e => Plugin.HideTooltip());
+            }
 
             Plugin.OnSaveLoaded += (o, e) =>
             {
@@ -43,24 +48,19 @@ namespace jshepler.ngu.mods
         }
 
         // disable loading cloud save if HC is enabled and the save doesn't have the HC flag set to true
-        [HarmonyPostfix, HarmonyPatch(typeof(SteamManager), "OnRemoteStorageFileReadAsyncComplete")]
-        private static void SteamManager_OnRemoteStorageFileReadAsyncComplete_postfix()
+        [HarmonyPostfix, HarmonyPatch(typeof(MainMenuController), "setCloudSaveValidity")]
+        private static void MainMenuController_setCloudSaveValidity_postfix(ref PlayerData ___cloudPlayerData, Text ___cloudInfo, ref bool ___validCloudSave)
         {
-            if (!Enabled)
+            if (!Enabled || !___validCloudSave)
                 return;
 
-            var mm = Plugin.Character.mainMenu;
-            var cloudPlayerDataField = typeof(MainMenuController).GetField("cloudPlayerData", BindingFlags.Instance | BindingFlags.NonPublic);
-            var cloudPlayerData = cloudPlayerDataField.GetValue(mm) as ModSave.ModPlayerData;
-
-            // should never be null, even if loading vanilla save, but check anyway in case the cast fails for some reason
-            // if null or is hardcore save, allow it
-            if (cloudPlayerData == null || (cloudPlayerData.Data.ContainsKey("HardCore") && (bool)cloudPlayerData.Data["HardCore"]))
+            var modData = ___cloudPlayerData as ModSave.ModPlayerData;
+            if (modData == null || (modData.Data.ContainsKey("HardCore") && (bool)modData.Data["HardCore"]))
                 return;
 
-            cloudPlayerDataField.SetValue(mm, null);
-            mm.setCloudSaveValidity(false);
-            mm.cloudInfo.text = "<b><color=red>HARDCORE MODE</color></b>\n\nCloud save is not hardcore\n\n";
+            ___cloudPlayerData = null;
+            ___validCloudSave = false;
+            ___cloudInfo.text = "<b><color=red>HARDCORE MODE</color></b>\n\nCloud save is not hardcore\n\n";
         }
 
         // disable the load auto save button

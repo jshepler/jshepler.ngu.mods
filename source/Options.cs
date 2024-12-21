@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using BepInEx.Configuration;
 
@@ -8,79 +9,81 @@ namespace jshepler.ngu.mods
     {
         internal static void Init(ConfigFile Config)
         {
-            Options.Allocators.AutoAllocatorEnabled = Config.Bind("Allocators", "AutoAllocator.Enabled", false, "auto allocates idle resources, maintaining speed cap");
-            Options.Allocators.OverCapAllocatorEnabled = Config.Bind("Allocators", "OverCapAllocator.Enabled", false, "allocates enough of a resource to keep BB until target level or RB time");
-            Options.Allocators.RatioSplitAllocatorEnabled = Config.Bind("Allocators", "RatioSplitAllocator.Enabled", false, "splits resource between bars, using their ratios, to keep even leveling speed");
+            Allocators.AutoAllocatorEnabled = Config.Bind("Allocators", "AutoAllocator.Enabled", false, "auto allocates idle resources, maintaining speed cap");
+            Allocators.OverCapAllocatorEnabled = Config.Bind("Allocators", "OverCapAllocator.Enabled", false, "allocates enough of a resource to keep BB until target level or RB time");
+            Allocators.RatioSplitAllocatorEnabled = Config.Bind("Allocators", "RatioSplitAllocator.Enabled", false, "splits resource between bars, using their ratios, to keep even leveling speed");
 
-            Options.AutoCards.AutoSortEnabled = Config.Bind("AutoCards", "AutoSort.Enabled", true, "if enabled, sorts cards as they are added");
-            Options.AutoCards.AutoSortBy = Config.Bind("AutoCards", "AutoSort.By", CardSortBy.RarityFirst, "RarityFirst: rarity, type, bonus; TypeFirst: type, rarity, bonus; Efficency: based on bonus/mayo");
-            Options.AutoCards.AutoSortDirection = Config.Bind("AutoCards", "AutoSort.Direction", CardSortDirection.Ascending, "the order cards are sorted");
-            Options.AutoCards.AutoYeetEnabled = Config.Bind("AutoCards", "AutoYeet.Enabled", false, "if enabled, will yeet cards as they are added, at or below the configured max rarity");
-            Options.AutoCards.MaxYeetRarity = Config.Bind("AutoCards", "AutoYeet.MaxYeetRarity", rarity.Crappy, "if AutoYeet is enabled, this is the max rarity that will get yeeted");
-            Options.AutoCards.MaxYeetEfficiency = Config.Bind("AutoCards", "AutoYeet.MaxYeetEfficiency", 0f, "if set, overrides MaxYeetRarity and will yeet cards up to specified efficency, 0.0 to 1.0 (100%), 0 = disabled");
+            AutoHarvest.Enabled = Config.Bind("AutoHarvest", "Enabled", false, "enable auto harvest/eat fruits when fully grown (max tier)");
+            AutoSnipe.TargetZone = Config.Bind("AutoSnipe", "TargetZone", 0, "used to target specific enemy in specific zone, other zones always snipe bosses; enter zone number (from wiki: https://ngu-idle.fandom.com/wiki/Adventure_Mode#Zones)");
+            AutoSnipe.TargetEnemy = Config.Bind("AutoSnipe", "TargetEnemy", 0, "used to target specific enemy in specific zone; enter enemy number (from bestiary), 0 = bosses");
+            AutoMergeTransform.Enabled = Config.Bind("AutoMergeTransform", "Enabled", false, "enables/disables auto merging and transforming of pendants and looties");
 
-            Options.AutoHarvest.Enabled = Config.Bind("AutoHarvest", "Enabled", false, "enable auto harvest/eat fruits when fully grown (max tier)");
-            Options.AutoSnipe.TargetZone = Config.Bind("AutoSnipe", "TargetZone", 0, "used to target specific enemy in specific zone, other zones always snipe bosses; enter zone number (from wiki: https://ngu-idle.fandom.com/wiki/Adventure_Mode#Zones)");
-            Options.AutoSnipe.TargetEnemy = Config.Bind("AutoSnipe", "TargetEnemy", 0, "used to target specific enemy in specific zone; enter enemy number (from bestiary), 0 = bosses");
-            Options.AutoMergeTransform.Enabled = Config.Bind("AutoMergeTransform", "Enabled", false, "enables/disables auto merging and transforming of pendants and looties");
+            Cards.AutoSortEnabled = Config.Bind("Cards", "AutoSort.Enabled", true, "if enabled, sorts cards as they are added");
+            Cards.AutoSortBy = Config.Bind("Cards", "AutoSort.By", CardSortBy.RarityFirst, "RarityFirst: rarity, type, bonus; TypeFirst: type, rarity, bonus; Efficency: based on bonus/mayo");
+            Cards.AutoSortDirection = Config.Bind("Cards", "AutoSort.Direction", CardSortDirection.Ascending, "the order cards are sorted");
+            Cards.AutoYeetEnabled = Config.Bind("Cards", "AutoYeet.Enabled", false, "if enabled, will yeet cards as they are added, at or below the configured max rarity");
+            Cards.MaxYeetRarity = Config.Bind("Cards", "AutoYeet.MaxYeetRarity", rarity.Crappy, "if AutoYeet is enabled, this is the max rarity that will get yeeted");
+            Cards.MaxYeetEfficiency = Config.Bind("Cards", "AutoYeet.MaxYeetEfficiency", 0f, "if set, overrides MaxYeetRarity and will yeet cards up to specified efficency, 0.0 to 1.0 (100%), 0 = disabled");
+            Cards.AlwaysYeetCSV = Config.Bind("Cards", "AutoYeet.AlwaysYeet", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "set in-game via F1 popup on cards screen");
+            Cards.AutoProtectChonkers = Config.Bind("Cards", "AutoProtectChonkers", true, "vanilla game always protects chonkers when spawned - this makes it an option");
 
-            Options.CheckForNewVersion.Enabled = Config.Bind("CheckForNewVersion", "Enabled", true, "checks for new version when loading a save and every hour after");
-            Options.CustomResolution.Width = Config.Bind("CustomResolution", "Width", 0, "custom resolution width, 0 = disabled");
-            Options.CustomResolution.Height = Config.Bind("CustomResolution", "Height", 0, "custom resolution height, 0 = disabled");
+            CheckForNewVersion.Enabled = Config.Bind("CheckForNewVersion", "Enabled", true, "checks for new version when loading a save and every hour after");
+            CustomResolution.Width = Config.Bind("CustomResolution", "Width", 0, "custom resolution width, 0 = disabled");
+            CustomResolution.Height = Config.Bind("CustomResolution", "Height", 0, "custom resolution height, 0 = disabled");
 
-            Options.DefaultDaycareKitty.Filename = Config.Bind("DefaultDaycareKitty", "Filename", "", "filename of 250x110 image in config folder, used to replace default kitty sprite, leave empty to disable");
-            Options.DefaultPlayerPortait.BossId = Config.Bind("DefaultPlayerPortait", "BossId", 0, "replaces default player portrait with the portrait of boss id (enemy # from bestiary), 0 = disabled");
-            Options.DefaultPlayerPortait.Filename = Config.Bind("DefaultPlayerPortait", "Filename", "", "filename of 184x184 image in config folder, used to replace default player portrait (overrides BossId option), leave empty to disable");
-            Options.TrollKitty.Filename = Config.Bind("TrollKitty", "Filename", "", "filename of 900x600 image in config folder, used to replace troll kitty sprite, leave empty to disable");
+            DefaultDaycareKitty.Filename = Config.Bind("DefaultDaycareKitty", "Filename", "", "filename of 250x110 image in config folder, used to replace default kitty sprite, leave empty to disable");
+            DefaultPlayerPortait.BossId = Config.Bind("DefaultPlayerPortait", "BossId", 0, "replaces default player portrait with the portrait of boss id (enemy # from bestiary), 0 = disabled");
+            DefaultPlayerPortait.Filename = Config.Bind("DefaultPlayerPortait", "Filename", "", "filename of 184x184 image in config folder, used to replace default player portrait (overrides BossId option), leave empty to disable");
+            TrollKitty.Filename = Config.Bind("TrollKitty", "Filename", "", "filename of 900x600 image in config folder, used to replace troll kitty sprite, leave empty to disable");
 
-            Options.DiggerUpggradeIndicator.Enabled = Config.Bind("DiggerUpggradeIndicator", "Enabled", false, "if enabled, digger button will light up yellow if any digger can be upgraded");
-            Options.DropTableTooltip.Enabled = Config.Bind("DropTableTooltip", "Enabled", true, "enables display of zones' Drop Table tooltip by holding the alt key");
-            Options.DropTableTooltip.OnlyUnlocked = Config.Bind("DropTableTooltip", "OnlyUnlocked", true, "if true, only items that meet their drop conditions will be displayed");
-            Options.DropTableTooltip.UnknownItems = Config.Bind("DropTableTooltip", "UnknownItems", DropTableTooltip.UnknownItemDisplay.Blur, "how unknown items (not yet dropped) are displayed; Blur replaces names with \"????\"");
+            DiggerUpggradeIndicator.Enabled = Config.Bind("DiggerUpggradeIndicator", "Enabled", false, "if enabled, digger button will light up yellow if any digger can be upgraded");
+            DropTableTooltip.Enabled = Config.Bind("DropTableTooltip", "Enabled", true, "enables display of zones' Drop Table tooltip by holding the alt key");
+            DropTableTooltip.OnlyUnlocked = Config.Bind("DropTableTooltip", "OnlyUnlocked", true, "if true, only items that meet their drop conditions will be displayed");
+            DropTableTooltip.UnknownItems = Config.Bind("DropTableTooltip", "UnknownItems", DropTableTooltip.UnknownItemDisplay.Blur, "how unknown items (not yet dropped) are displayed; Blur replaces names with \"????\"");
 
-            Options.GameModes.Hardcore = Config.Bind("GameModes", "Hardcore", false, "enable to disable loading local saves and game ends when player dies - cloud save erased; MUST START NEW GAME TO GO INTO EFFECT");
-            Options.GameModes.PermaTC = Config.Bind("GameModes", "PermaTC", false, "enable to permanently spawn trolls every 2 minutes, every 5th a big troll; MUST START NEW GAME TO GO INTO EFFECT");
+            GameModes.Hardcore = Config.Bind("GameModes", "Hardcore", false, "enable to disable loading local saves and game ends when player dies - cloud save erased; MUST START NEW GAME TO GO INTO EFFECT");
+            GameModes.PermaTC = Config.Bind("GameModes", "PermaTC", false, "enable to permanently spawn trolls every 2 minutes, every 5th a big troll; MUST START NEW GAME TO GO INTO EFFECT");
 
-            Options.NotificationToasts.Enabled = Config.Bind("NotificationToasts", "Enabled", true, "enable to separate \"timed tooltips\" into separate notifications as toasts");
-            Options.NotificationToasts.TopDown = Config.Bind("NotificationToasts", "TopDown", true, "if true, toasts are displayed top-right and go down; if false, toasts are displayed bottom-right and go up");
-            Options.OverrideCulture.Enabled = Config.Bind("OverrideCulture", "Enabled", false, "if enabled, uses the specified locale string to override your system's current culture for the game - ONLY AFFECTS NUMBER FORMATTING");
-            Options.OverrideCulture.Locale = Config.Bind("OverrideCulture", "Locale", "en-US", "locale string used if OverrideCulture.Enabled is true; examples: de-DE, fr-FR");
+            NotificationToasts.Enabled = Config.Bind("NotificationToasts", "Enabled", true, "enable to separate \"timed tooltips\" into separate notifications as toasts");
+            NotificationToasts.TopDown = Config.Bind("NotificationToasts", "TopDown", true, "if true, toasts are displayed top-right and go down; if false, toasts are displayed bottom-right and go up");
+            OverrideCulture.Enabled = Config.Bind("OverrideCulture", "Enabled", false, "if enabled, uses the specified locale string to override your system's current culture for the game - ONLY AFFECTS NUMBER FORMATTING");
+            OverrideCulture.Locale = Config.Bind("OverrideCulture", "Locale", "en-US", "locale string used if OverrideCulture.Enabled is true; examples: de-DE, fr-FR");
 
-            Options.PruneSaves.DaysToKeep = Config.Bind("PruneSaves", "DaysToKeep", 0, "When quick/auto saving, will delete saves older than value; 0 = disabled");
-            Options.Questing.AlwaysRandom = Config.Bind("Questing", "AlwaysRandom", false, "If true, new quests will always be random instead of targeting current zone");
-            Options.Questing.AutoButter = Config.Bind("Questing", "AutoButter", false, "If true, will automatically use butter when starting a major quest");
+            PruneSaves.DaysToKeep = Config.Bind("PruneSaves", "DaysToKeep", 0, "When quick/auto saving, will delete saves older than value; 0 = disabled");
+            Questing.AlwaysRandom = Config.Bind("Questing", "AlwaysRandom", false, "If true, new quests will always be random instead of targeting current zone");
+            Questing.AutoButter = Config.Bind("Questing", "AutoButter", false, "If true, will automatically use butter when starting a major quest");
 
-            Options.RemoteTriggers.Enabled = Config.Bind("RemoteTriggers", "Enabled", false, "enables receiving of remote commands");
-            Options.RemoteTriggers.UrlPrefix = Config.Bind("RemoteTriggers", "Prefix", "http://localhost:8088/ngu/", "urls must start with this prefix else will be ignored");
-            Options.RemoteTriggers.AutoBoost.Enabled = Config.Bind("RemoteTriggers.AutoBoost", "Enabled", true, "enables auto-boost trigger");
-            Options.RemoteTriggers.AutoMerge.Enabled = Config.Bind("RemoteTriggers.AutoMerge", "Enabled", true, "enables auto-merge trigger");
-            Options.RemoteTriggers.TossGold.Enabled = Config.Bind("RemoteTriggers.TossGold", "Enabled", true, "enables toss gold trigger");
-            Options.RemoteTriggers.FightBoss.Enabled = Config.Bind("RemoteTriggers.FightBoss", "Enabled", true, "enables fight boss trigger");
-            Options.RemoteTriggers.Kitty.Enabled = Config.Bind("RemoteTriggers.Kitty", "Enabled", true, "enables kitty trigger");
+            RemoteTriggers.Enabled = Config.Bind("RemoteTriggers", "Enabled", false, "enables receiving of remote commands");
+            RemoteTriggers.UrlPrefix = Config.Bind("RemoteTriggers", "Prefix", "http://localhost:8088/ngu/", "urls must start with this prefix else will be ignored");
+            RemoteTriggers.AutoBoost.Enabled = Config.Bind("RemoteTriggers.AutoBoost", "Enabled", true, "enables auto-boost trigger");
+            RemoteTriggers.AutoMerge.Enabled = Config.Bind("RemoteTriggers.AutoMerge", "Enabled", true, "enables auto-merge trigger");
+            RemoteTriggers.TossGold.Enabled = Config.Bind("RemoteTriggers.TossGold", "Enabled", true, "enables toss gold trigger");
+            RemoteTriggers.FightBoss.Enabled = Config.Bind("RemoteTriggers.FightBoss", "Enabled", true, "enables fight boss trigger");
+            RemoteTriggers.Kitty.Enabled = Config.Bind("RemoteTriggers.Kitty", "Enabled", true, "enables kitty trigger");
 
-            Options.Twitch.Enabled = Config.Bind("Twitch", "Enabled", false, "Enables twitch integration");
-            Options.Twitch.AutoConnect = Config.Bind("Twitch", "AutoConnect", false, "Connects to twitch when game starts");
-            Options.Twitch.ClientId = Config.Bind("Twitch", "ClientId", "", "The client id for the registered twitch application (see README)");
-            Options.Twitch.ClientSecret = Config.Bind("Twitch", "ClientSecret", "", "The client secret from the registered twitch applicatino (see README)");
-            Options.Twitch.AppAccessToken = Config.Bind("Twitch", "AppAccessToken", "", "The stored access token for the app - set automatically");
-            Options.Twitch.UserAccessToken = Config.Bind("Twitch", "UserAccessToken", "", "The stored access token for the current user - set automatically");
-            Options.Twitch.UserRefreshToken = Config.Bind("Twitch", "UserRefreshToken", "", "The stored refresh token for the current user - set automatically");
+            Twitch.Enabled = Config.Bind("Twitch", "Enabled", false, "Enables twitch integration");
+            Twitch.AutoConnect = Config.Bind("Twitch", "AutoConnect", false, "Connects to twitch when game starts");
+            Twitch.ClientId = Config.Bind("Twitch", "ClientId", "", "The client id for the registered twitch application (see README)");
+            Twitch.ClientSecret = Config.Bind("Twitch", "ClientSecret", "", "The client secret from the registered twitch applicatino (see README)");
+            Twitch.AppAccessToken = Config.Bind("Twitch", "AppAccessToken", "", "The stored access token for the app - set automatically");
+            Twitch.UserAccessToken = Config.Bind("Twitch", "UserAccessToken", "", "The stored access token for the current user - set automatically");
+            Twitch.UserRefreshToken = Config.Bind("Twitch", "UserRefreshToken", "", "The stored refresh token for the current user - set automatically");
 
-            Options.Twitch.RewardTriggers.Merge = Config.Bind("Twitch.RewardTriggers", "Merge", "", "Custom reward name to trigger merge");
-            Options.Twitch.RewardTriggers.Boost = Config.Bind("Twitch.RewardTriggers", "Boost", "", "Custom reward name to trigger boost");
-            Options.Twitch.RewardTriggers.MergeBoost = Config.Bind("Twitch.RewardTriggers", "MergeBoost", "", "Custom reward name to trigger merge+boost");
-            Options.Twitch.RewardTriggers.FightBoss = Config.Bind("Twitch.RewardTriggers", "FightBoss", "", "Custom reward name to trigger boss fight");
-            Options.Twitch.RewardTriggers.TossGold = Config.Bind("Twitch.RewardTriggers", "TossGold", "", "Custom reward name to toss gold into money pit");
-            Options.Twitch.RewardTriggers.Kitty = Config.Bind("Twitch.RewardTriggers", "Kitty", "", "Custom reward name to trigger troll kitty event");
+            Twitch.RewardTriggers.Merge = Config.Bind("Twitch.RewardTriggers", "Merge", "", "Custom reward name to trigger merge");
+            Twitch.RewardTriggers.Boost = Config.Bind("Twitch.RewardTriggers", "Boost", "", "Custom reward name to trigger boost");
+            Twitch.RewardTriggers.MergeBoost = Config.Bind("Twitch.RewardTriggers", "MergeBoost", "", "Custom reward name to trigger merge+boost");
+            Twitch.RewardTriggers.FightBoss = Config.Bind("Twitch.RewardTriggers", "FightBoss", "", "Custom reward name to trigger boss fight");
+            Twitch.RewardTriggers.TossGold = Config.Bind("Twitch.RewardTriggers", "TossGold", "", "Custom reward name to toss gold into money pit");
+            Twitch.RewardTriggers.Kitty = Config.Bind("Twitch.RewardTriggers", "Kitty", "", "Custom reward name to trigger troll kitty event");
 
-            Options.WishList.Enabled = Config.Bind("WishList", "Enabled", false, "enables the wish list automation");
-            Options.WishList.AutoAdvance = Config.Bind("WishList", "Auto Advance", true, "if enabled and a wish finishes, start the next wish");
-            Options.WishList.SingleLevelMode = Config.Bind("WishList", "SingleLevelMode", false, "if enabled, wishes gain a single level then starts the next one in current list or sort order");
-            Options.WishList.BlacklistMode = Config.Bind("WishList", "BlacklistMode", false, "if enabled, listed wishes will be ignored when starting next wish");
-            Options.WishR3Cap.Enabled = Config.Bind("WishR3Cap", "Enabled", true, "when auto-allocating resources or when a wish completes a level, will (re)distribute R3 amongst running wishes to not be more than is needed for min wish time");
+            WishList.Enabled = Config.Bind("WishList", "Enabled", false, "enables the wish list automation");
+            WishList.AutoAdvance = Config.Bind("WishList", "Auto Advance", true, "if enabled and a wish finishes, start the next wish");
+            WishList.SingleLevelMode = Config.Bind("WishList", "SingleLevelMode", false, "if enabled, wishes gain a single level then starts the next one in current list or sort order");
+            WishList.BlacklistMode = Config.Bind("WishList", "BlacklistMode", false, "if enabled, listed wishes will be ignored when starting next wish");
+            WishR3Cap.Enabled = Config.Bind("WishR3Cap", "Enabled", true, "when auto-allocating resources or when a wish completes a level, will (re)distribute R3 amongst running wishes to not be more than is needed for min wish time");
 
-            Options.FruitActivationIndicator.Enabled = Config.Bind("FruitActivationIndicator", "Enabled", false, "when enabled, the Yggdrasil button will light up red if any fruit needs activation");
-            Options.LSCreminder.MaxMinutesToTarget = Config.Bind("LSCreminder", "MaxMinutesToTarget", 5, "max time to target for both laser sword and quadruple laser sword together, will light up Challenges button on Rebirth screen; 0 = disabled");
+            FruitActivationIndicator.Enabled = Config.Bind("FruitActivationIndicator", "Enabled", false, "when enabled, the Yggdrasil button will light up red if any fruit needs activation");
+            LSCreminder.MaxMinutesToTarget = Config.Bind("LSCreminder", "MaxMinutesToTarget", 5, "max time to target for both laser sword and quadruple laser sword together, will light up Challenges button on Rebirth screen; 0 = disabled");
 
             // when loading an old version of the cfg file, some options may have changed or been removed;
             // this will check for known things that have changed and copy values if appropriate,
@@ -90,9 +93,34 @@ namespace jshepler.ngu.mods
             {
                 string value;
 
-                // WishQueue was renamed to WishList in v1.16
+                // WishQueue was renamed to WishList in 1.16
                 if (orphaned.TryGetValue("WisheQueue", "Enabled", out value))
                     WishList.Enabled.Value = value == "true";
+
+                // AutoCards renamed to Cards in 1.17
+                if (orphaned.TryGetValue("AutoCards", "AutoSort.Enabled", out value))
+                    Cards.AutoSortEnabled.Value = value == "true";
+
+                if (orphaned.TryGetValue("AutoCards", "AutoSort.By", out value))
+                    Cards.AutoSortBy.Value = (CardSortBy)Enum.Parse(typeof(CardSortBy), value);
+
+                if (orphaned.TryGetValue("AutoCards", "AutoSort.Direction", out value))
+                    Cards.AutoSortDirection.Value = (CardSortDirection)Enum.Parse(typeof(CardSortDirection), value);
+
+                if (orphaned.TryGetValue("AutoCards", "AutoYeet.Enabled", out value))
+                    Cards.AutoYeetEnabled.Value = value == "true";
+
+                if (orphaned.TryGetValue("AutoCards", "AutoYeet.MaxYeetRarity", out value))
+                    Cards.MaxYeetRarity.Value = (rarity)Enum.Parse(typeof(rarity), value);
+
+                if (orphaned.TryGetValue("AutoCards", "AutoYeet.MaxYeetEfficiency", out value))
+                    Cards.MaxYeetEfficiency.Value = float.Parse(value);
+
+                if (orphaned.TryGetValue("AutoCards", "AutoYeet.AlwaysYeet", out value))
+                    Cards.AlwaysYeetCSV.Value = value;
+
+                if (orphaned.TryGetValue("AutoCards", "AutoProtectChonkers", out value))
+                    Cards.AutoProtectChonkers.Value = value == "true";
 
                 orphaned.Clear();
                 Config.Save();
@@ -256,7 +284,7 @@ namespace jshepler.ngu.mods
             internal static ConfigEntry<bool> AlwaysRandom;
         }
 
-        internal static class AutoCards
+        internal static class Cards
         {
             internal static ConfigEntry<bool> AutoSortEnabled;
             internal static ConfigEntry<CardSortBy> AutoSortBy;
@@ -264,6 +292,8 @@ namespace jshepler.ngu.mods
             internal static ConfigEntry<bool> AutoYeetEnabled;
             internal static ConfigEntry<rarity> MaxYeetRarity;
             internal static ConfigEntry<float> MaxYeetEfficiency;
+            internal static ConfigEntry<string> AlwaysYeetCSV;
+            internal static ConfigEntry<bool> AutoProtectChonkers;
         }
 
         internal static class LSCreminder

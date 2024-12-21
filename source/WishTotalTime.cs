@@ -31,6 +31,7 @@ namespace jshepler.ngu.mods
         private static float TimeToLevelMax(int id) => (1f - _wish(id).Progress) / _controller.progressPerTickMax(id) / 50f;
 
         private static bool IsRunning(int id) => _wish(id).IsRunning;
+        private static string Display(double d) => _controller.character.display(d, 2);
 
         private static Dictionary<int, float> TotalTimeRemaining(int id)
         {
@@ -89,9 +90,39 @@ namespace jshepler.ngu.mods
                 return string.Empty;
 
             var total = times.Sum(kv => kv.Value);
-            var levels = Input.GetKey(KeyCode.LeftAlt) ? "\n" + times.Join(kv => $"{kv.Key}: {NumberOutput.timeOutput(kv.Value)}", "\n") : string.Empty;
+            var text = $"\n<b>Time to max Level:</b> {NumberOutput.timeOutput(total)}";
 
-            return $"\n<b>Time to max Level:</b> {NumberOutput.timeOutput(total)}{levels}";
+            var altDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+            if (altDown)
+            {
+                var levels = times.Join(kv => $"{kv.Key}: {NumberOutput.timeOutput(kv.Value)}", "\n");
+                text += $"\n{levels}";
+            }
+
+            //text += "\n\n% of cap (min time) at cur/max resources";
+
+            var curPPT = _controller.progressPerTick(id);
+            //var maxPPT = _controller.progressPerTickMax(id);
+            var capPPT = _controller.minimumWishTime();
+            //var curPctPPT = curPPT / capPPT * 100f;
+            //var maxPctPPT = maxPPT / capPPT * 100f;
+            //text += $"\n         <b>Speed:</b> {curPctPPT:0.##}% / {maxPctPPT:0.##}%";
+
+            var curEMRF = _controller.energyFactor(id) * _controller.magicFactor(id) * _controller.res3Factor(id);
+            var maxEMRF = _controller.energyFactorMax(id) * _controller.magicFactorMax(id) * _controller.res3FactorMax(id);
+            var capEMRF = capPPT * SpeedDivider(id) * (_wish(id).Level + 1) / SpeedBonus();
+            var curPctEMRF = curEMRF / capEMRF * 100f;
+            var maxPctEMRF = maxEMRF / capEMRF * 100f;
+            text += $"\n\n<b>EMR3 (cur | max):</b> {curPctEMRF:0.##}% | {maxPctEMRF:0.##}%";
+
+            if (altDown)
+            {
+                var prog = _wish(id).Progress;
+                text += $"\n\n<b>Progress:</b> {prog * 100f:00.0000000000000}%"
+                    + $"\n     per tick: {curPPT * 100f:00.0000000############}%";
+            }
+
+            return text;
         }
     }
 }
