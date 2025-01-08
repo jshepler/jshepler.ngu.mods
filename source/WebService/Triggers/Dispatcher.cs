@@ -114,6 +114,9 @@ namespace jshepler.ngu.mods.WebService.Triggers
             if (!TriggerConfig.FightBossEnabled)
                 return () => Plugin.ShowOverrideNotification("trigger: fight boss disabled");
 
+            if (Hardcore.IsHardcoreGame)
+                return () => Plugin.ShowOverrideNotification("trigger: fight boss disabled - HARDCORE MODE");
+
             if (InManualFight)
                 return () => Plugin.ShowOverrideNotification("trigger: fight boss ignored - manual adventure fight in progress");
 

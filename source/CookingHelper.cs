@@ -145,14 +145,15 @@ namespace jshepler.ngu.mods
             var eatRate = __instance.eatRate();
             var cookTimer = Plugin.Character.cooking.cookTimer;
             var readyAt = DateTime.Now.AddSeconds(eatRate - cookTimer);
+            var daysDiff = (readyAt.Date - DateTime.Now.Date).Days;
 
-            var daysDiff = readyAt.Day - DateTime.Now.Day;
             var dayString = daysDiff switch
             {
+                > 1 => $"in {daysDiff} days",
                 1 => "tomorrow",
                 0 => "today",
                 -1 => "yesterday",
-                _ => $"{daysDiff} days ago"
+                _ => $"{-daysDiff} days ago"
             };
             
             __instance.nextdishTimerText.text += $"\nReady {dayString} at: {readyAt:h:mm:ss tt}";

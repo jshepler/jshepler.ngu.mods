@@ -71,7 +71,7 @@ namespace jshepler.ngu.mods.AutoAllocator
         {
             var id = __instance.id;
 
-            if (Input.GetKey(KeyCode.LeftShift) && Options.Allocators.AutoAllocatorEnabled.Value == true)
+            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
             {
                 Instance[id] = !Instance[id];
 

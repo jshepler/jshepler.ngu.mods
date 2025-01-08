@@ -56,6 +56,8 @@ namespace jshepler.ngu.mods.AutoAllocator
             return _allAugsController.augments[id].hitAugmentTarget();
         }
 
+        private static bool _altIsDown = false;
+
         [HarmonyPostfix, HarmonyPatch(typeof(AllAugsController), "Start")]
         private static void AllAugsController_Start_postfix(AllAugsController __instance)
         {
@@ -64,6 +66,33 @@ namespace jshepler.ngu.mods.AutoAllocator
 
             __instance.augments.Do((c, i) =>
                 Instance.TextComponents[i] = c.transform.Find("Aug +/Text").GetComponent<Text>());
+
+            var wasAltDown = false;
+            Plugin.OnUpdate += (o, e) =>
+            {
+                _altIsDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+                if (_altIsDown != wasAltDown)
+                {
+                    wasAltDown = _altIsDown;
+                    __instance.updateMenu();
+                }
+            };
+        }
+
+        [HarmonyPostfix,
+            HarmonyPatch(typeof(AugmentController), "updateAugTexts"),
+            HarmonyPatch(typeof(AugmentController), "updateUpgradeTexts")]
+        private static void AugmentController_updateAugTexts_postfix(AugmentController __instance)
+        {
+            if (!_altIsDown || !Plugin.Character.InMenu(Menu.Augments))
+                return;
+
+            var id = __instance.id;
+            var augD = _augDivider(id);
+            var upgD = _upgDivider(id);
+
+            __instance.augLevelText.text = augD < upgD ? "1" : (augD / upgD).ToString("#.#####");
+            __instance.upgradeLevelText.text = upgD < augD ? "1" : (upgD / augD).ToString("#.#####");
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(AugmentController), "addEnergyAug")]
@@ -71,7 +100,7 @@ namespace jshepler.ngu.mods.AutoAllocator
         {
             var id = __instance.id;
 
-            if (Input.GetKey(KeyCode.LeftShift) && Options.Allocators.AutoAllocatorEnabled.Value == true)
+            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
             {
                 Instance[id] = !Instance[id];
 
@@ -81,7 +110,7 @@ namespace jshepler.ngu.mods.AutoAllocator
                 return false;
             }
 
-            if (Input.GetKey(KeyCode.LeftControl) && Options.Allocators.OverCapAllocatorEnabled.Value == true)
+            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
             {
                 Instance[id] = false;
                 OverCap(id);
@@ -95,7 +124,7 @@ namespace jshepler.ngu.mods.AutoAllocator
                 return false;
             }
 
-            if (Input.GetKey(KeyCode.LeftAlt) && Options.Allocators.RatioSplitAllocatorEnabled.Value == true)
+            if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
             {
                 Instance[id] = false;
                 Allocators.Energy[Allocators.Feature.AugmentUpgrade][id] = false;

@@ -7,29 +7,31 @@ namespace jshepler.ngu.mods
     [HarmonyPatch]
     internal class OfflineTime
     {
-        private static bool _skipOfflineProgress = false;
+        internal static bool SkipOfflineProgress = false;
 
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(OpenFileDialog), "loadFileMainMenuStandalone")]
-        [HarmonyPatch(typeof(OpenFileDialog), "startLoadStandalone")]
+        [HarmonyPrefix,
+            HarmonyPatch(typeof(OpenFileDialog), "loadFileMainMenuStandalone"),
+            HarmonyPatch(typeof(OpenFileDialog), "startLoadStandalone"),
+            HarmonyPatch(typeof(MainMenuController), "loadAutosaveSteam"),
+            HarmonyPatch(typeof(MainMenuController), "loadCloudSaveSteam")]
         private static void OpenFileDialog_openLoadScreen_prefix()
         {
-            _skipOfflineProgress = Input.GetKey(KeyCode.LeftShift);
+            SkipOfflineProgress = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(StandaloneFileBrowser), "OpenFilePanel", typeof(string), typeof(string), typeof(string), typeof(bool))]
         private static void StandaloneFileBrowser_OpenFilePanel_prefix(ref string title)
         {
-            if (_skipOfflineProgress)
+            if (SkipOfflineProgress)
                 title += " (SKIPPING OFFLINE PROGRESS)";
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(Character), "addOfflineProgress")]
         private static bool OfflineTime_addOfflineProgress_prefix(int timeElapsed, Character __instance)
         {
-            if (_skipOfflineProgress)
+            if (SkipOfflineProgress)
             {
-                _skipOfflineProgress = false;
+                SkipOfflineProgress = false;
                 return false;
             }
 

@@ -40,6 +40,9 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(StatsDisplay), "displayMisc")]
         private static void StatsDisplay_displayMisc_postfix(StatsDisplay __instance)
         {
+            if (!__instance.character.cards.cardsOn)
+                return;
+
             var character = __instance.character;
             (var mayoGenStats, var mayoGenValues) = BuildMayoGenRate(character);
 

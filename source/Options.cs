@@ -9,11 +9,6 @@ namespace jshepler.ngu.mods
     {
         internal static void Init(ConfigFile Config)
         {
-            Allocators.AutoAllocatorEnabled = Config.Bind("Allocators", "AutoAllocator.Enabled", false, "auto allocates idle resources, maintaining speed cap");
-            Allocators.OverCapAllocatorEnabled = Config.Bind("Allocators", "OverCapAllocator.Enabled", false, "allocates enough of a resource to keep BB until target level or RB time");
-            Allocators.RatioSplitAllocatorEnabled = Config.Bind("Allocators", "RatioSplitAllocator.Enabled", false, "splits resource between bars, using their ratios, to keep even leveling speed");
-
-            AutoHarvest.Enabled = Config.Bind("AutoHarvest", "Enabled", false, "enable auto harvest/eat fruits when fully grown (max tier)");
             AutoSnipe.TargetZone = Config.Bind("AutoSnipe", "TargetZone", 0, "used to target specific enemy in specific zone, other zones always snipe bosses; enter zone number (from wiki: https://ngu-idle.fandom.com/wiki/Adventure_Mode#Zones)");
             AutoSnipe.TargetEnemy = Config.Bind("AutoSnipe", "TargetEnemy", 0, "used to target specific enemy in specific zone; enter enemy number (from bestiary), 0 = bosses");
             AutoMergeTransform.Enabled = Config.Bind("AutoMergeTransform", "Enabled", false, "enables/disables auto merging and transforming of pendants and looties");
@@ -48,6 +43,7 @@ namespace jshepler.ngu.mods
             NotificationToasts.TopDown = Config.Bind("NotificationToasts", "TopDown", true, "if true, toasts are displayed top-right and go down; if false, toasts are displayed bottom-right and go up");
             OverrideCulture.Enabled = Config.Bind("OverrideCulture", "Enabled", false, "if enabled, uses the specified locale string to override your system's current culture for the game - ONLY AFFECTS NUMBER FORMATTING");
             OverrideCulture.Locale = Config.Bind("OverrideCulture", "Locale", "en-US", "locale string used if OverrideCulture.Enabled is true; examples: de-DE, fr-FR");
+            ResourceNames.ShowFullName = Config.Bind("ResourceNames", "ShowFullName", ShowFullResourceName.None, "Which of the top-left bars to show full names instead of first letter");
 
             PruneSaves.DaysToKeep = Config.Bind("PruneSaves", "DaysToKeep", 0, "When quick/auto saving, will delete saves older than value; 0 = disabled");
             Questing.AlwaysRandom = Config.Bind("Questing", "AlwaysRandom", false, "If true, new quests will always be random instead of targeting current zone");
@@ -82,8 +78,10 @@ namespace jshepler.ngu.mods
             WishList.BlacklistMode = Config.Bind("WishList", "BlacklistMode", false, "if enabled, listed wishes will be ignored when starting next wish");
             WishR3Cap.Enabled = Config.Bind("WishR3Cap", "Enabled", true, "when auto-allocating resources or when a wish completes a level, will (re)distribute R3 amongst running wishes to not be more than is needed for min wish time");
 
-            FruitActivationIndicator.Enabled = Config.Bind("FruitActivationIndicator", "Enabled", false, "when enabled, the Yggdrasil button will light up red if any fruit needs activation");
             LSCreminder.MaxMinutesToTarget = Config.Bind("LSCreminder", "MaxMinutesToTarget", 5, "max time to target for both laser sword and quadruple laser sword together, will light up Challenges button on Rebirth screen; 0 = disabled");
+            Yggdrasil.ActivationIndicator = Config.Bind("Yggdrasil", "ActivationIndicator", false, "when enabled, the Yggdrasil button will light up red if any fruit needs activation");
+            Yggdrasil.AutoHarvest = Config.Bind("Yggdrasil", "AutoHarvest", false, "enable auto harvest/eat fruits when fully grown (max tier)");
+            Yggdrasil.PoopAudioChance = Config.Bind("Yggdrasil", "PoopAudioChance", 0f, "chance a fart audio clip is played when gain fruit, 0.0 to 1.0");
 
             // when loading an old version of the cfg file, some options may have changed or been removed;
             // this will check for known things that have changed and copy values if appropriate,
@@ -121,6 +119,12 @@ namespace jshepler.ngu.mods
 
                 if (orphaned.TryGetValue("AutoCards", "AutoProtectChonkers", out value))
                     Cards.AutoProtectChonkers.Value = value == "true";
+
+                if (orphaned.TryGetValue("AutoHarvest", "Enabled", out value))
+                    Yggdrasil.AutoHarvest.Value = value == "true";
+
+                if (orphaned.TryGetValue("FruitActivationIndicator", "Enabled", out value))
+                    Yggdrasil.ActivationIndicator.Value = value == "true";
 
                 orphaned.Clear();
                 Config.Save();
@@ -164,11 +168,6 @@ namespace jshepler.ngu.mods
             }
         }
 
-        internal static class AutoHarvest
-        {
-            internal static ConfigEntry<bool> Enabled;
-        }
-
         internal static class AutoSnipe
         {
             internal static ConfigEntry<int> TargetZone;
@@ -182,13 +181,6 @@ namespace jshepler.ngu.mods
             internal static ConfigEntry<bool> Enabled;
             internal static ConfigEntry<bool> OnlyUnlocked;
             internal static ConfigEntry<UnknownItemDisplay> UnknownItems;
-        }
-
-        internal static class Allocators
-        {
-            internal static ConfigEntry<bool> AutoAllocatorEnabled;
-            internal static ConfigEntry<bool> OverCapAllocatorEnabled;
-            internal static ConfigEntry<bool> RatioSplitAllocatorEnabled;
         }
 
         internal static class DefaultPlayerPortait
@@ -268,11 +260,6 @@ namespace jshepler.ngu.mods
             internal static ConfigEntry<bool> Enabled;
         }
 
-        internal static class FruitActivationIndicator
-        {
-            internal static ConfigEntry<bool> Enabled;
-        }
-
         internal static class DiggerUpggradeIndicator
         {
             internal static ConfigEntry<bool> Enabled;
@@ -311,6 +298,18 @@ namespace jshepler.ngu.mods
         {
             internal static ConfigEntry<bool> Hardcore;
             internal static ConfigEntry<bool> PermaTC;
+        }
+
+        internal static class Yggdrasil
+        {
+            internal static ConfigEntry<bool> AutoHarvest;
+            internal static ConfigEntry<bool> ActivationIndicator;
+            internal static ConfigEntry<float> PoopAudioChance;
+        }
+
+        internal static class ResourceNames
+        {
+            internal static ConfigEntry<ShowFullResourceName> ShowFullName;
         }
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace jshepler.ngu.mods
 {
-    [HarmonyPatch]
+    //[HarmonyPatch]
     internal class RestoreAllocations
     {
         private static StoredAllocations _allocations;

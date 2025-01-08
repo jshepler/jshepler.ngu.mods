@@ -54,10 +54,6 @@ namespace jshepler.ngu.mods.Popups
         private static GUIStyle _activeWishStyle;
         private static GUIStyle _trackedWishStyle;
         private static Vector2 _scrollView;
-        private static Texture2D _arrow_up;
-        private static Texture2D _arrow_top;
-        private static Texture2D _arrow_down;
-        private static Texture2D _arrow_bottom;
         private static void initStyles(Rect windowRect)
         {
             _windowStyle = new GUIStyle("box");
@@ -68,7 +64,14 @@ namespace jshepler.ngu.mods.Popups
 
             _trackedWishStyle = new GUIStyle("label");
             _trackedWishStyle.normal.textColor = Color.yellow;
+        }
 
+        private static Texture2D _arrow_up;
+        private static Texture2D _arrow_top;
+        private static Texture2D _arrow_down;
+        private static Texture2D _arrow_bottom;
+        internal static void loadImages()
+        {
             var au = Resources.arrow_up;
             using (var ms = new MemoryStream())
             {

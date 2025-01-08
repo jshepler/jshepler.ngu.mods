@@ -33,6 +33,18 @@ namespace jshepler.ngu.mods
             Plugin.OnSaveLoaded += (o, e) =>
             {
                 _lastAdvPower = _curAdvPower;
+
+                if (_sources[Sources.SewerSet] == 0 && Plugin.Character.inventory.itemList.maxxedSewers())
+                {
+                    _sources[Sources.SewerSet] = 5f;
+                    _totalGained += 5f;
+                }
+
+                if (_sources[Sources.Perks] == 0 && Plugin.Character.adventure.itopod.perkLevel[2] > 0)
+                {
+                    _sources[Sources.Perks] = 100f;
+                    _totalGained += 100f;
+                }
             };
 
             Plugin.OnLateUpdate += (o, e) =>
@@ -62,8 +74,9 @@ namespace jshepler.ngu.mods
         [HarmonyPrefix, HarmonyPatch(typeof(AllItemListController), "checkforBonuses")]
         private static void sewerSet_before()
         {
-            _before = _curAdvPower;
-            _nextSource = Sources.SewerSet;
+            var il = Plugin.Character.inventory.itemList;
+            if (!il.sewersComplete && il.maxxedSewers())
+                _sources[Sources.SewerSet] += 5;
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(FruitController), "consumeAdventureFruit")]
@@ -118,7 +131,7 @@ namespace jshepler.ngu.mods
             HarmonyPatch(typeof(AdventurePurchases), "buy1000Attack"),
             HarmonyPatch(typeof(AdventurePurchases), "buy10KAttack"),
             HarmonyPatch(typeof(AdventurePurchases), "buyCustomPower"),
-            HarmonyPatch(typeof(AllItemListController), "checkforBonuses"),
+            //HarmonyPatch(typeof(AllItemListController), "checkforBonuses"),
             HarmonyPatch(typeof(FruitController), "consumeAdventureFruit"),
             HarmonyPatch(typeof(ItopodPerkController), "doEffect"),
             HarmonyPatch(typeof(PitController), "tier1Reward"),
@@ -203,7 +216,7 @@ namespace jshepler.ngu.mods
                     0 => "Exp",
                     1 => "Sewer Set",
                     2 => "Fruit",
-                    3 => "Perk",
+                    3 => "Perk 2",
                     4 => "Money Pit",
                     5 => "Iron Pill",
                     _ => $"??({source})"

@@ -22,14 +22,9 @@ namespace jshepler.ngu.mods
         private static IEnumerator watchForMaxedItem()
         {
             var character = Plugin.Character;
-
-            //var maxedItems = character.inventoryController.daycares
-            //    .Select(c => new { c, i = character.inventory.daycare[c.id] })
-            //    .Where(a => a.i.id > 0 && !a.i.isMacGuffin() && a.i.level + a.c.levelsAdded() >= 100);
-
-            // basically same as above but I've gotten rusty in my linq queries and can use the practice
             var maxedItems =
                 from c in character.inventoryController.daycares
+                where c.id < character.inventory.daycare.Count
                 let i = character.inventory.daycare[c.id]
                 where i.id > 0 && !i.isMacGuffin() && i.level + c.levelsAdded() >= 100
                 select i;

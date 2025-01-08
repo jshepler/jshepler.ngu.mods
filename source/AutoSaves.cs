@@ -145,6 +145,7 @@ namespace jshepler.ngu.mods
             character.mainMenu.setLocalPlayerData(dataFromString);
             character.mainMenu.setLocalSaveValidity(validity: true);
 
+            OfflineTime.SkipOfflineProgress = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
             character.mainMenu.loadAutosaveSteam();
         }
 

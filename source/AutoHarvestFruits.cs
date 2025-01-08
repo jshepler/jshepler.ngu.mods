@@ -9,7 +9,7 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(AllYggdrasil), "updateFruitTimers")]
         private static void AllYggdrasil_updateFruitTimers_postfix(AllYggdrasil __instance)
         {
-            if (Options.AutoHarvest.Enabled.Value && __instance.anyFruitMaxxed())
+            if (Options.Yggdrasil.AutoHarvest.Value && __instance.anyFruitMaxxed())
                 __instance.consumeAll();
         }
 

@@ -21,12 +21,19 @@ namespace jshepler.ngu.mods
         {
             var character = Plugin.Character;
             var pitController = character.pitController;
+            var dailyController = character.dailyController;
 
-            if (character.pit.pitTime.totalseconds < (double)pitController.currentPitTime())
-                return;
+            if (pitController.canToss())
+            {
+                _tossGoldMethod.Invoke(pitController, []);
+                Plugin.ShowNotification(pitController.pitText.text);
+            }
 
-            _tossGoldMethod.Invoke(pitController, []);
-            Plugin.ShowNotification(pitController.pitText.text);
+            else if (dailyController.canSpin())
+            {
+                dailyController.startNoBullshitSpin();
+                Plugin.ShowNotification(dailyController.outcomeText.text);
+            }
         }
     }
 }

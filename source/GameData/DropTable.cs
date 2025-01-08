@@ -57,6 +57,7 @@ namespace jshepler.ngu.mods.GameData
                     , new DropItems(0.10f, Items.Sewers_TutorialCube)
                     , new DropItems(0.65f
                         , Items.Sewers_CrappHelmet
+                        , Items.Sewers_CrappyChestplate
                         , Items.Sewers_CrappyBoots
                         , Items.Sewers_CrappyLeggings
                         , Items.Sewers_GrossRing
@@ -191,14 +192,13 @@ namespace jshepler.ngu.mods.GameData
                         , Items.T1_ChefsHat
                         , Items.T1_NonSlipShoes
                         , Items.T1_RegularPants)
-                    , new DropItems(0.15f
-                        , Items.T1_BloodyCleaver
-                        , Items.T1_ChefsApron
-                        , Items.T1_ChefsHat
-                        , Items.T1_NonSlipShoes
-                        , Items.T1_RegularPants
-                        , Items.T1_RawSlabOfMeat
-                        , Items.T1_SuspiciousSausageNecklace))
+                    , new DropItems(0.15f, Items.T1_BloodyCleaver)
+                    , new DropItems(0.15f, Items.T1_ChefsApron)
+                    , new DropItems(0.15f, Items.T1_ChefsHat)
+                    , new DropItems(0.15f, Items.T1_NonSlipShoes)
+                    , new DropItems(0.15f, Items.T1_RegularPants)
+                    , new DropItems(0.15f, Items.T1_RawSlabOfMeat)
+                    , new DropItems(0.15f, Items.T1_SuspiciousSausageNecklace))
             });
 
             // 7 - clock
@@ -292,11 +292,11 @@ namespace jshepler.ngu.mods.GameData
                 NormalDrops = new DropGroup(100000f
                     , new DropItems(0.06f, 0.20f, _boosts10)
                     , new DropItems(0.06f, 0.20f, _boosts20)
-                    , new DropItems(0.45f, Items.AB_GhostTypewriter))
+                    , new DropItems(0.0045f, Items.AB_GhostTypewriter))
 
                 , BossDrops = new DropGroup(140000f
                     , new DropItems(0.03f, 0.10f, 5, Items.Exp)
-                    , new DropItems(0.45f, Items.AB_GhostTypewriter)
+                    , new DropItems(0.0045f, Items.AB_GhostTypewriter)
                     , new DropItems(0.002f, Items.BustedCopyOfWandoos98)
                     , new DropItems(0.30f
                         , Items.AB_AmuletOfSunshineSparklesAndGore

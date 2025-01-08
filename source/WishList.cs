@@ -34,6 +34,7 @@ namespace jshepler.ngu.mods
         {
             _controller = __instance;
             _popup = new WishListPopup();
+            WishListPopup.loadImages();
 
             Plugin.OnSaveLoaded += (o, e) =>
             {

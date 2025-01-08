@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using System.Reflection;
+using HarmonyLib;
 using SFB;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,7 +9,7 @@ namespace jshepler.ngu.mods
     [HarmonyPatch]
     internal class Hardcore
     {
-        internal static bool Enabled = Options.GameModes.Hardcore.Value;
+        internal static bool Enabled => Options.GameModes.Hardcore.Value || Startup.HardcoreRequested;
 
         internal static bool IsHardcoreGame
         {
@@ -18,18 +19,24 @@ namespace jshepler.ngu.mods
 
         private static bool _playerDied = false;
 
-        [HarmonyPostfix, HarmonyPatch(typeof(MainMenuController), "Awake")]
-        private static void MainMenuController_Awake_postfix()
+        [HarmonyPrepare]
+        private static void prep(MethodBase method)
         {
-            // disable the load local file button on the start screen (main menu)
-            if (Enabled)
+            if (method != null)
+                return;
+
+            Startup.AfterStartup += (o, e) =>
             {
-                var ob = GameObject.Find("Canvas/Box Canvas/Main Menu Screen/Load File Button");
-                ob.GetComponent<Button>().interactable = false;
-                ob.AddComponent<PointerHandlerComponent>()
-                    .OnPointerEnter(e => Plugin.ShowTooltip("<b><color=red>HARDCARE MODE</color></b>\n\nLoading local save is disabled"))
-                    .OnPointerExit(e => Plugin.HideTooltip());
-            }
+                // disable the load local file button on the start screen (main menu)
+                if (Enabled)
+                {
+                    var ob = GameObject.Find("Canvas/Box Canvas/Main Menu Screen/Load File Button");
+                    ob.GetComponent<Button>().interactable = false;
+                    ob.AddComponent<PointerHandlerComponent>()
+                        .OnPointerEnter(e => Plugin.ShowTooltip("<b><color=red>HARDCARE MODE</color></b>\n\nLoading local save is disabled"))
+                        .OnPointerExit(e => Plugin.HideTooltip());
+                }
+            };
 
             Plugin.OnSaveLoaded += (o, e) =>
             {

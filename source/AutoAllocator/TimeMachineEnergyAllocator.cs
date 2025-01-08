@@ -50,7 +50,7 @@ namespace jshepler.ngu.mods.AutoAllocator
         [HarmonyPrefix, HarmonyPatch(typeof(TimeMachineController), "addEnergy")]
         private static bool TimeMachineController_addEnergy_prefix(TimeMachineController __instance)
         {
-            if (Input.GetKey(KeyCode.LeftShift) && Options.Allocators.AutoAllocatorEnabled.Value == true)
+            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
             {
                 Instance[0] = !Instance[0];
 
@@ -63,7 +63,7 @@ namespace jshepler.ngu.mods.AutoAllocator
                 return false;
             }
 
-            if (Input.GetKey(KeyCode.LeftControl) && Options.Allocators.OverCapAllocatorEnabled.Value == true)
+            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
             {
                 Instance[0] = false;
                 OverCap();

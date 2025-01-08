@@ -111,6 +111,7 @@ namespace jshepler.ngu.mods
                 -1 => inv.head,
                 < 10000 => inv.inventory[slotId],
                 < 100000 => inv.accs[slotId - 10000],
+                < 1000000 => inv.daycare[slotId - 100000],
                 _ => inv.macguffins[slotId - 1000000]
             };
         }

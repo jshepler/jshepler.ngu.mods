@@ -3,7 +3,7 @@ Collection of mods I wrote for myself.
 
 I had not intended to make these public, as I don't want to support them long-term (i.e. when no longer playing the game). A few people have asked that I share the code, so here you go.
 
-The majority are QoL enhancements. There are a couple bug fixes, and few thigns that are somewhat cheaty-ish but nothing majorly so.
+The majority are QoL enhancements. There are a couple bug fixes, and few things that are somewhat cheaty-ish but nothing majorly so.
 
 # Installation
 These mods are written for [bepinex](https://github.com/BepInEx/BepInEx) v5.4.21, which can be downloaded [here](https://github.com/BepInEx/BepInEx/releases/tag/v5.4.21). Download the x64 version and extract the contents of the zip file:
@@ -12,9 +12,9 @@ These mods are written for [bepinex](https://github.com/BepInEx/BepInEx) v5.4.21
 
 to NGU Idle's game folder `...\Steam\steamapps\common\NGU IDLE`:
 
-![NGU folder after extraion](bepinex_extracted.png)
+![NGU folder after extraction](bepinex_extracted.png)
 
-***NOTE: if using linux, need to add `WINEDLLOVERRIDES="winhttp=n,b" %command%` to the game's launch options in steam.***
+***NOTE: if using Linux, need to add `WINEDLLOVERRIDES="winhttp=n,b" %command%` to the game's launch options in steam.***
 
 Bepinex will set itself up the first time the game is run after extracting the zip. So start the game, then exit the game.
 
@@ -102,7 +102,7 @@ If NGU gets disconnected from Twitch, you should just be able to click the `Conn
 If it continues to stay disconnected, please send me the `...\Steam\steamapps\common\NGU IDLE\BepInEx\LogOutput.log` file. The best way to do this is to DM it to me on discord. I'm on the NGU discord and can be found in the `scripting` or `bug-reports-and-complaints` channels.
 
 # Mods
-(in no partiular order)
+(in no particular order)
 
 1. fix basic training when right-click to evenly split assigned energy and no more than needed per offense and defense
 
@@ -114,7 +114,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 5. auto-save on rebirth, challenge, pit throw, changing wandoos OS
 
-6. press F5 to do quicksave, F6 to load latest quicksave, ignores clean quicksaves, those that have "(CLEAN)" in the name
+6. press F5 to do quick save, F6 to load latest quick save, ignores clean quick saves, those that have "(CLEAN)" in the name
 
 7. the lazy ITOPOD shifter can raise max floor
 
@@ -151,7 +151,11 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
     (just holding those keys down will change the button text to indicate this will happen as well as the total EXP cost)
 
-19. shift-click load button to skip offline time progression when loading a save (open file dialog title indicates when progress will be skipped)
+19. skips offline progression calculations when loading a save:
+    - shift-click the load button on start screen (top) or main game screen (lower-left), the open file window's title bar will say "SKIPPING OFFLINE PROGRESS"
+    - shift-click the load auto save button on start screen
+    - shift-click the load cloud save button on start screen
+    - shift-F6 to skip offline progression when loading last quick save
 
 20. appends to adventure zone's tooltip the AT power needed to kill current enemy in 1-5 hits
 
@@ -168,7 +172,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 24. when starting a manual quest, if current zone has unlocked quest item, that item is assigned as the quest (instead of random quest item)
 
 25. improved bar tooltips, adds:
-    - current speed cap: augs, AT, TM, wandoos (all OS at same time), NGUs ***(displays real cap, even if over hardcap)***
+    - current speed cap: augs, AT, TM, wandoos (all OS at same time), NGUs ***(displays real cap, even if over hard cap)***
     - % of cap allocated: augs, AT, TM, BM, wandoos, NGUs, beards\*
     - over-capped duration (time until no longer over-capped): augs, AT, TM, wandoos, NGUs, beards\*
     - current speed - progress per tick & ticks per bar: augs, AT, TM, wandoos, NGUs, beards
@@ -213,7 +217,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
     currently: augment pairs (aug+upgrade), advanced training, NGUs
 
-36. added total boost from recycling to boosts' toolips
+36. added total boost from recycling to boosts' tooltips
 
 37. added boost modifier breakdown to stat breakdowns / misc
 
@@ -233,9 +237,9 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 41. fruit tooltips show what was last gained (persisted in save)
 
-42. added the current softcaps to infinity cube's power and toughness stats (red means < softcap, green means >= softcap)
+42. added the current soft caps to infinity cube's power and toughness stats (red means < soft cap, green means >= soft cap)
 
-    also removed the softcap warnings from the tooltip because it adds clutter for no benefit (for those that already know about cube softcaps)
+    also removed the soft cap warnings from the tooltip because it adds clutter for no benefit (for those that already know about cube soft caps)
 
     added uncapped power and toughness (what's used to determine tier) and amount needed for next tier
 
@@ -249,13 +253,13 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 46. test fix (only for energy NGUs) for when calculating how much of cap value to allocate when clicking an NGU's cap button to not clip the cap value to hard-cap
 
-47. when a piece of equipment is maxxed (level 100), automatically enables the item filter for that item (except looties and pendants)
+47. when a piece of equipment is maxed (level 100), automatically enables the item filter for that item (except looties and pendants)
 
     exceptions: looties, pendants, flubber, wanderer's cane
 
-48. display all fibonacci perk unlocks, green are unlocked, red are locked
+48. display all Fibonacci perk unlocks, green are unlocked, red are locked
 
-49. (WIP) changed how y position of tooltips changes when it would go off the top of the screen to stay up against the top instead of flipping down because some tooltips (e.g. fibonacci perk) would end up going below bottom of screen
+49. (WIP) changed how y position of tooltips changes when it would go off the top of the screen to stay up against the top instead of flipping down because some tooltips (e.g. Fibonacci perk) would end up going below bottom of screen
 
 50. add tab navigation to various fields, supports shift-tab and wrap-around (tabbing past first/last field, wraps to other end)
 
@@ -271,9 +275,9 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
     
     hold alt to see the rewards for each tier group - useful for planning pit days
 
-53. press control-shift-x to open the hidden krismuss 2020 event screen
+53. press control-shift-x to open the hidden Krismuss 2020 event screen
 
-54. unlocked krismuss 2019 ui theme and daycare kitty
+54. unlocked Krismuss 2019 ui theme and daycare kitty
 
 55. fixed ygg seeds gained display format bug - not all fruits used current display option (e.g. scientific notation) for number of seeds gained
 
@@ -307,7 +311,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 62. added shift-right-click on fib perk to only buy up to next unlock
 
-63. right-click on the enter itopod button to directly enter the tower, skipping the popup
+63. right-click on the enter ITOPOD button to directly enter the tower, skipping the popup
 
     (if shifter is enabled, will set optimal floor first)
 
@@ -401,7 +405,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
     - autoBoost: executes in-game auto-boost code
     - autoMerge: executes in-game auto-merge code
     - tossGold: executes in-game money pit's "Feed Me"
-    - fightBoss: if able to win fight, switches to boss screen, nukes (if able), fight boss (if winable), returns to prev screen
+    - fightBoss: if able to win fight, switches to boss screen, nukes (if able), fight boss (if winnable), returns to prev screen
     - kitty: starts troll challenge big troll's kitty event (for fun)
     - totalTimePlayed: generates html to display timer starting from current Total Time Player
 
@@ -489,7 +493,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 98. compare items: while hovering over an item in inventory, press c to lock its tooltip to the top-left of screen, press esc to close it
 
-99. option to change default player portrait to boss portait specified in cfg file
+99. option to change default player portrait to boss portrait specified in cfg file
 
     in `[DefaultPlayerPortait]` section, set `BossId` to the number from the in-game bestiary
 
@@ -503,7 +507,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
      order follows same order as auto merge/boost, described in [the wiki](https://ngu-idle.fandom.com/wiki/Inventory#AutoMerge_&_AutoBoost)
 
-104. save pruning: when an autosave or quicksave happens, saves older than DaysToKeep (in cfg file) are deleted
+104. save pruning: when an autosave or quick save happens, saves older than DaysToKeep (in cfg file) are deleted
 
      defaults to being disabled, edit cfg file to change DaysToKeep from 0 to something else
 
@@ -523,7 +527,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
     **requires adding bookmarklets to your browser - see [GO integration bookmarklets](https://github.com/jshepler/jshepler.ngu.mods?tab=readme-ov-file#go-integration-bookmarklets) above**
 
-109. adds dual-wield effectiveness to the second weaopon slot's item tooltip
+109. adds dual-wield effectiveness to the second weapon slot's item tooltip and adjusts current stats displayed to account for current effectiveness
 
 110. auto-allocation of mayo generators - hold alt key when on cards screen to change the "CAST", "PROTECT", "YEET" buttons to:
       - OFF: disable auto-allocation of mayo generators
@@ -561,9 +565,9 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 121. displays excess EMPC under `EQUIPMENT BONUSES` - how much of the bonus from equipment is "wasted" as it puts you over hard cap
 
-122. switches to basic training screen when rebirthing and don't yet have the Intant Training Cap AP purchase
+122. switches to basic training screen when rebirthing and don't yet have the Instant Training Cap AP purchase
 
-123. BT skill bars are faded until reach max cap reduction - visualzation to help prevent rebirthing too soon and/or getting skills out of sync
+123. BT skill bars are faded until reach max cap reduction - visualization to help prevent rebirthing too soon and/or getting skills out of sync
 
 124. BT button changes to yellow when a skill is unlocked and stays at level 0
 
@@ -596,9 +600,9 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 130. new regular cards (not chonker or THE END cards) are inserted before first chonker card in an attempt to help keep them organized/separated and to make it a little easier to cast/yeet normal cards
 
-131. fix game bug with cap buttons that manifests in sadistic, when cap > hardcap
+131. fix game bug with cap buttons that manifests in sadistic, when cap > hard cap
 
-     TLDR; the cap buttons allocate based on the cap that's clamped to hardcap, but the progress a bar gains per tick uses the real cap that can be higher than hardcap
+     TLDR; the cap buttons allocate based on the cap that's clamped to hard cap, but the progress a bar gains per tick uses the real cap that can be higher than hard cap
 
 132. cube boosting info:
       - cube tooltip shows current boost divider
@@ -622,7 +626,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 138. shift-click the + button next to a hack's target to set that hack's hard cap
 
-139. pressing shift-F5 will do a clean quicksave - doesn't include any save data from my mods (~~useful for loading into GO~~ no longer needed)
+139. pressing shift-F5 will do a clean quick save - doesn't include any save data from my mods (~~useful for loading into GO~~ no longer needed)
 
 140. when in a challenge and not at max zone, adventure button lights up yellow (except when in ITOPOD)
 
@@ -639,13 +643,13 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 142. tooltip to quest description text that shows breakdown of qp reward
 
-143. tooltip to fruits' eat/harevest button that shows what will be gained if eaten/harvested now
+143. tooltip to fruits' eat/harvest button that shows what will be gained if eaten/harvested now
 
 144. fixes game bug with walderp fight that if player survives the explosion from doing the wrong attack, walderp's next attack would be another explosion due to the code thinking the player didn't do any attack in time
 
 145. added the cube root of total drop chance modifier to Stats Breakdown | Misc Adventure
 
-146. added tracking infinity cube's power and toughness gained this/last rebirth, and estimates number of days until softcap and next tier (based on p/t gained last rebirth and last rebirth time)
+146. added tracking infinity cube's power and toughness gained this/last rebirth, and estimates number of days until soft cap and next tier (based on p/t gained last rebirth and last rebirth time)
 
 147. saves last rebirth time (for cube estimated days calc), shown on rebirth button tooltip
 
@@ -677,7 +681,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
       - enable/disable auto yeet/sort
       - set sort by: rarity first, bonus type first, mayo efficiency, bonus variance
       - set sort direction
-      - set max rarirty to yeet
+      - set max rarity to yeet
       - set max efficiency to yeet (overrides max rarity)
       - select bonus(es) to always yeet
       - enable/disable automatically protecting chonker cards
@@ -703,7 +707,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 165. TM speed modifiers to stat breakdowns - misc
 
-166. addtional info to mayo generator tooltips: time per mayo and mayo generated per day
+166. additional info to mayo generator tooltips: time per mayo and mayo generated per day
 
 167. mayo generation speed modifiers to stats breakdown - misc
 
@@ -750,7 +754,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 184. tooltip to base adventure power (in spend exp menu) that shows total base power gained and sources - this is for all time, not this/last rebirth
 
-185. in addition to the shift-right-click and ctrl-shift-right-click in mod 18, right-cicking (no shift or ctrl-shift) the buy all custom energy, maigc, resource 3 buttons will repeat buying until not enough exp
+185. in addition to the shift-right-click and ctrl-shift-right-click in mod 18, right-clicking (no shift or ctrl-shift) the buy all custom energy, magic, resource 3 buttons will repeat buying until not enough exp
 
 186. shift-click the `Clear Wish` button on the wishes screen to clear all resources from all wishes
 
@@ -763,12 +767,15 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 190. hardcore (HC) game mode
      - one life
      - local saves disabled - only steam cloud allowed
-     - if die in fight boss or adventure zone (including itopod), game over and steam cloud save deleted
+     - if die in fight boss or adventure zone (including ITOPOD), game over and steam cloud save deleted
      - enabled in cfg file and must start new game
      - can disable to revert to normal game, but then it's no longer a hardcore save and will not be loadable if hardcore is re-enabled
-     - not fully tested, please let me know of any issues or if you find where game is softlocked because a death is required to progress
-     - **T4 and T10 DO NOT require player death to progress**
+     - not fully tested, please let me know of any issues or if you find where game is soft locked because a death is required to progress
+     - **T4 and T10 DO NOT normally require player death to progress so no soft lock**
      - various aspects are open to change based on feedback
+     - disables the A/D damage % numbers
+     - disables right-click fight boss, pressing b key, and remote trigger - these would start fight boss but only when will win
+     - launch option to force hardcore, overriding cfg file: `-HC`
      - *can be enabled at the same time as the PermaTC mod below*
 
 191. permanent troll challenge (PermaTC)
@@ -778,7 +785,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
      - yes, that means getting trolls in NORB challenges
      - enabled in cfg file and must start a new game - will not work for an existing non-permaTC save
      - can disable to revert to normal game, but then it's no longer a permaTC save and will not work after re-enabling the option
-     - not fully tested, please let me know of any issues or if you find where this mod softlocks progression
+     - not fully tested, please let me know of any issues or if you find where this mod soft locks progression
      - various aspects are open to change based on feedback
      - *can be enabled at the same time as the HC mod above*
 
@@ -789,7 +796,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 193. show time to next bonus increase to blood spaghetti and counterfeit gold
 
-194. right-click money pit to toss gold
+194. right-click money pit to toss gold and do daily spin
 
 195. shows hack bonus summary in a tooltip when hovering over the WTF button on hacks page
 
@@ -809,3 +816,27 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
      - while hiding, going offline would still advance walderp's respawn timer (sounds great, but causes some conflicts where he's both hiding and spawned)
      - the 3 minute timer for moving where walderp hides is done in a way that prevents him from being in any menu for up to 3 minutes after being killed
      - when found, the timer isn't reset so on next kill don't get the full 3 minutes
+
+201. inventory search - press s key while on inventory screen, will already have focus so can just start typing, press ESC to close
+
+202. resource allocation summaries - hold alt while looking at EMR3 tooltips, top-left of the game
+
+203. augment ratio display - hold alt while on augments screen
+
+204. highest evil/sad boss defeated added to misc stats display
+
+205. ratio tool on spend exp - energy, magic, R3 screen - press F1
+
+206. tracks time spent offline and display on misc stats screen
+
+207. % chance to play fart sound when gain poop - chance set in cfg file, defaults to 0
+
+208. displays notification when gain poop: shows +gained, total gained current rebirth, total on hand
+
+209. option to always show full resource names (top-left) instead of first letter, set in cfg file, defaults to none
+
+210. hold shift to buy 10x deck size in AP shop (skips the confirmation popup)
+
+211. fix game bug that wasn't displaying total PP gained on misc stats screen
+
+212. fix game but that would show empty tooltip on loadout items that were in daycare

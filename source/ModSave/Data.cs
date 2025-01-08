@@ -100,6 +100,30 @@ namespace jshepler.ngu.mods.ModSave
             set => Set("TotalTimePlayedSadistic", value);
         }
 
+        internal static double TotalTimeOffline
+        {
+            get => Get("TotalTimeOffline", 0.0);
+            set => Set("TotalTimeOffline", value);
+        }
+
+        internal static double TotalTimeOfflineNormal
+        {
+            get => Get("TotalTimeOfflineNormal", 0.0);
+            set => Set("TotalTimeOfflineNormal", value);
+        }
+
+        internal static double TotalTimeOfflineEvil
+        {
+            get => Get("TotalTimeOfflineEvil", 0.0);
+            set => Set("TotalTimeOfflineEvil", value);
+        }
+
+        internal static double TotalTimeOfflineSadistic
+        {
+            get => Get("TotalTimeOfflineSadistic", 0.0);
+            set => Set("TotalTimeOfflineSadistic", value);
+        }
+
         internal static int AutoMayGenMode
         {
             get => Get("AutoMayGenMode", 0);
@@ -296,6 +320,12 @@ namespace jshepler.ngu.mods.ModSave
         {
             get => Get("PTC_TrollCount", 0);
             set => Set("PTC_TrollCount", value);
+        }
+
+        internal static int[][] PCBRatios
+        {
+            get => Get<int[][]>("PCBRatios", [[1, 37500, 1], [1, 37500, 1], [1, 37500, 1]]);
+            set => Set("PCBRatios", value);
         }
 
         // REMINDER: NO TYPES DEFINED IN MODS ELSE NOT LOADABLE IN VANILLA

@@ -75,7 +75,7 @@ namespace jshepler.ngu.mods.AutoAllocator
         {
             var id = __instance.id;
 
-            if (Input.GetKey(KeyCode.LeftShift) && Options.Allocators.AutoAllocatorEnabled.Value == true)
+            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
             {
                 if (Input.GetKey(KeyCode.LeftAlt))
                     Enumerable.Range(0, 7).Do(i => Instance[i] = !Instance[i]);
@@ -85,7 +85,7 @@ namespace jshepler.ngu.mods.AutoAllocator
                 return false;
             }
 
-            if (Input.GetKey(KeyCode.LeftControl) && Options.Allocators.OverCapAllocatorEnabled.Value == true)
+            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
             {
                 if (Input.GetKey(KeyCode.LeftAlt))
                 {
@@ -101,7 +101,7 @@ namespace jshepler.ngu.mods.AutoAllocator
                 return false;
             }
 
-            if (Input.GetKey(KeyCode.LeftAlt) && Options.Allocators.RatioSplitAllocatorEnabled.Value == true)
+            if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
             {
                 Instance.DisableAll();
                 SplitMagic();

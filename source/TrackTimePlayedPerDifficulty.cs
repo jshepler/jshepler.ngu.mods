@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using HarmonyLib;
+﻿using HarmonyLib;
 using jshepler.ngu.mods.ModSave;
 using UnityEngine;
 
@@ -17,7 +16,7 @@ namespace jshepler.ngu.mods
                 || timeElapsed <= 0)
                 return;
 
-            AddTime(timeElapsed);
+            AddTime(timeElapsed, true);
             CheckTime();
         }
 
@@ -37,13 +36,13 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(TotalTimePlayed), "updateText")]
         private static void TotalTimePlayed_updateText_postfix(TotalTimePlayed __instance)
         {
-            __instance.timerText.text +=
-                  $"\n         (normal): {NumberOutput.timeOutput(Data.TotalTimePlayedNormal)}"
-                + $"\n           (evil): {NumberOutput.timeOutput(Data.TotalTimePlayedEvil)}"
-                + $"\n       (sadistic): {NumberOutput.timeOutput(Data.TotalTimePlayedSadistic)}";
+            __instance.timerText.text += $" (offline: {NumberOutput.timeOutput(Data.TotalTimeOffline)})"
+                + $"\n         (normal): {NumberOutput.timeOutput(Data.TotalTimePlayedNormal)} (offline: {NumberOutput.timeOutput(Data.TotalTimeOfflineNormal)})"
+                + $"\n           (evil): {NumberOutput.timeOutput(Data.TotalTimePlayedEvil)} (offline: {NumberOutput.timeOutput(Data.TotalTimeOfflineEvil)})"
+                + $"\n       (sadistic): {NumberOutput.timeOutput(Data.TotalTimePlayedSadistic)} (offline: {NumberOutput.timeOutput(Data.TotalTimeOfflineSadistic)})";
         }
 
-        private static void AddTime(double totalSeconds)
+        private static void AddTime(double totalSeconds, bool offline = false)
         {
             // if game wasn't started with this mod, start it with current playtime;
             // if current difficulty isn't normal, there's no way to know how much was normal,
@@ -54,18 +53,27 @@ namespace jshepler.ngu.mods
                 return;
             }
 
+            if (offline)
+                Data.TotalTimeOffline += totalSeconds;
+
             switch (Plugin.Character.settings.rebirthDifficulty)
             {
                 case difficulty.normal:
                     Data.TotalTimePlayedNormal += totalSeconds;
+                    if (offline)
+                        Data.TotalTimeOfflineNormal += totalSeconds;
                     break;
 
                 case difficulty.evil:
                     Data.TotalTimePlayedEvil += totalSeconds;
+                    if (offline)
+                        Data.TotalTimeOfflineEvil += totalSeconds;
                     break;
 
                 case difficulty.sadistic:
                     Data.TotalTimePlayedSadistic += totalSeconds;
+                    if (offline)
+                        Data.TotalTimeOfflineSadistic += totalSeconds;
                     break;
             }
         }

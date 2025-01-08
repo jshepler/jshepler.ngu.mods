@@ -103,7 +103,7 @@ namespace jshepler.ngu.mods
             var currentProgress = (float)character.adventure.itopod.pointProgress;
             var killsRemaining = Mathf.CeilToInt((MAXPROGRESS - currentProgress) / progressPerKill);
 
-            var isEstimated = currentFloor > optimalFloor;
+            var isEstimated = currentFloor > optimalFloor || !character.adventure.autoattacking;
             var secondsPerKill = isEstimated ? _last5KillTimes.Count == 0 ? 0 : _last5KillTimes.Average() : 0f;
 
             if (!isEstimated)

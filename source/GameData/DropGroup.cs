@@ -32,11 +32,11 @@ namespace jshepler.ngu.mods.GameData
                 if (di.Condition == null)
                     continue;
 
-                if (di.Condition.IsConditionMet())
-                    return true;
+                if (!di.Condition.IsConditionMet())
+                    return false;
             }
 
-            return false;
+            return true;
         }
     }
 }

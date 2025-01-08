@@ -52,7 +52,7 @@ namespace jshepler.ngu.mods.AutoAllocator
         [HarmonyPrefix, HarmonyPatch(typeof(Wandoos98Controller), "addEnergy")]
         private static bool Wandoos98Controller_addEnergy_prefix(Wandoos98Controller __instance)
         {
-            if (Input.GetKey(KeyCode.LeftShift) && Options.Allocators.AutoAllocatorEnabled.Value == true)
+            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
             {
                 Instance[0] = !Instance[0];
 

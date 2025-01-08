@@ -41,14 +41,6 @@ namespace jshepler.ngu.mods
             if (!Plugin.GameHasStarted || __instance.adventure.interactable == false || string.IsNullOrWhiteSpace(___message))
                 return;
 
-            //var character = __instance.character;
-            //if (character.adventure.waldoFinds < 4 && character.adventure.waldoDefeats > character.adventure.waldoFinds)
-            //{
-            //    var menu = character.waldoUnlocker.currentMenu == -1 ? "---" : Enum.GetName(typeof(Menu), character.waldoUnlocker.currentMenu);
-            //    var seconds = 180 - (character.waldoUnlocker.waldoTimer % 180);
-            //    ___message += $"\n <b>... hiding in:</b> {menu} ({seconds})";
-            //}
-
             var text = BuildTooltipText();
             if (text != null)
             {
@@ -70,10 +62,12 @@ namespace jshepler.ngu.mods
 
             foreach (var req in TitanAK.Requirements)
             {
-                if (effectiveBossId < req.effectiveBossId && enemies[req.enemyId].kills == 0)
+                var enemyKills = enemies[req.enemyId].kills;
+
+                if (effectiveBossId < req.effectiveBossId && enemyKills == 0)
                     continue;
 
-                if (req.optionalKills > 0 && enemies[req.enemyId].kills >= req.optionalKills)
+                if (req.optionalKills > 0 && enemyKills >= req.optionalKills)
                     continue;
 
                 var neededAT = GetNeededAT(req.ptr);
@@ -83,6 +77,12 @@ namespace jshepler.ngu.mods
                 var haveIt = neededAT <= currentAT;
                 var color = haveIt ? "green" : "red";
                 sb.Append($"\n<color={color}>{req.name}:  T={character.display(neededAT.Toughness)}, P={character.display(neededAT.Power)}</color>");
+
+                if (req.optionalKills > 0 && enemyKills < req.optionalKills && enemyKills > 0)
+                {
+                    var killsLeft = req.optionalKills - enemyKills;
+                    sb.Append($"\n   ({killsLeft} kill{(killsLeft == 1 ? string.Empty : "s")} left for perma AK)");
+                }
 
                 // only show the one titan/version that cannot AK as presumably it's the next one to work towards
                 if (!haveIt && !Input.GetKey(KeyCode.LeftAlt))
@@ -96,29 +96,37 @@ namespace jshepler.ngu.mods
         {
             var neededAT = new PTR(0, 0);
 
-            if (totalPowerWithoutAdvPower >= ak.Power && totalDefWithoutAdvDef >= ak.Toughness)
-                return neededAT;
+            if (totalPowerWithoutAdvPower < ak.Power)
+            {
+                var atPowerPct = ((ak.Power / totalPowerWithoutAdvPower) - 1) * 100f; // -1 to convert form "multiplier" to "bonus"
+                neededAT.Power = (float)Math.Ceiling(Math.Pow(atPowerPct / 10, 2.5)); // https://ngu-idle.fandom.com/wiki/Advanced_Training#Formulas
+                if (neededAT.Power < 0)
+                    neededAT.Power = 0;
+            }
 
-            var atPowerPct = ((ak.Power / totalPowerWithoutAdvPower) - 1) * 100f; // -1 to convert form "multiplier" to "bonus"
-            neededAT.Power = (float)Math.Ceiling(Math.Pow(atPowerPct / 10, 2.5)); // https://ngu-idle.fandom.com/wiki/Advanced_Training#Formulas
-            if (neededAT.Power < 0)
-                neededAT.Power = 0;
-
-            var atDefPct = ((ak.Toughness / totalDefWithoutAdvDef) - 1) * 100f; // -1 to convert from "multiplier" to "bonus"
-            neededAT.Toughness = (long)Math.Ceiling(Math.Pow(atDefPct / 10, 2.5)); // https://ngu-idle.fandom.com/wiki/Advanced_Training#Formulas
-            if (neededAT.Toughness < 0)
-                neededAT.Toughness = 0;
+            if (totalDefWithoutAdvDef < ak.Toughness)
+            {
+                var atDefPct = ((ak.Toughness / totalDefWithoutAdvDef) - 1) * 100f; // -1 to convert from "multiplier" to "bonus"
+                neededAT.Toughness = (float)Math.Ceiling(Math.Pow(atDefPct / 10, 2.5)); // https://ngu-idle.fandom.com/wiki/Advanced_Training#Formulas
+                if (neededAT.Toughness < 0)
+                    neededAT.Toughness = 0;
+            }
 
             // regen also gets AT toughness multiplier, calc AT toughness needed for regen
             // and if higher than what's needed for ak.Toughness, use it instead
-            if (ak.Regen > 0f)
+            if (ak.Regen > 0f && totalRegenWithoutAdvDef < ak.Regen)
             {
                 var regenPct = ((ak.Regen / totalRegenWithoutAdvDef) - 1) * 100f;
-                var regenNeeded = (long)Math.Ceiling(Math.Pow(regenPct / 10, 2.5));
+                var regenNeeded = (float)Math.Ceiling(Math.Pow(regenPct / 10, 2.5));
 
                 if (regenNeeded > neededAT.Toughness)
                     neededAT.Toughness = regenNeeded;
             }
+
+            if (neededAT.Power > long.MaxValue)
+                neededAT.Power = float.PositiveInfinity;
+            if (neededAT.Toughness > long.MaxValue)
+                neededAT.Toughness = float.PositiveInfinity;
 
             return neededAT;
         }

@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using HarmonyLib;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace jshepler.ngu.mods
@@ -38,13 +39,17 @@ namespace jshepler.ngu.mods
         private static long _lastPoopCount;
 
         private static FieldInfo _tooltipText = typeof(HoverTooltip).GetField("tooltipText", BindingFlags.Instance | BindingFlags.NonPublic);
+        private static Fart _fart;
 
         // too many methods that add seeds/poop that I'd rather check current seed/poop count every update
-        [HarmonyPrepare]
-        private static void prep(MethodBase original)
+        [HarmonyPostfix, HarmonyPatch(typeof(AllYggdrasil), "Start")]
+        private static void AllYggdrasil_Start_postfix()
         {
-            if (original != null)
-                return;
+            _fart = new()
+            {
+                fartNoise = Plugin.Character.gameObject.AddComponent<AudioSource>(),
+                tooltip = Plugin.Character.tooltip
+            };
 
             Plugin.OnSaveLoaded += (o, e) =>
             {
@@ -59,11 +64,21 @@ namespace jshepler.ngu.mods
                     _seedsThisRB += (seeds - _lastSeedCount);
 
                 var poop = _curPoop;
-                if (poop > _lastPoopCount)
-                    _poopThisRB += (poop - _lastPoopCount);
+                var poopGained = poop - _lastPoopCount;
+                if (poopGained > 0)
+                {
+                    _poopThisRB += poopGained;
+                    Plugin.ShowNotification($"poop: +{poopGained} ({_poopThisRB} | {_curPoop})");
+
+                    if (UnityEngine.Random.value < Options.Yggdrasil.PoopAudioChance.Value)
+                        _fart.fart();
+                }
 
                 _lastSeedCount = seeds;
                 _lastPoopCount = poop;
+
+                if (Input.GetKeyDown(KeyCode.P))
+                    _fart.fart();
             };
         }
 

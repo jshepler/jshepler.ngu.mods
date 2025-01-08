@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using jshepler.ngu.mods.GameData;
 using jshepler.ngu.mods.GameData.DropConditions;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace jshepler.ngu.mods
 {
@@ -46,28 +49,126 @@ namespace jshepler.ngu.mods
             };
         };
 
+        private static int _offset = 0;
+        private static bool _altIsDown => Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+
+        [HarmonyPostfix, HarmonyPatch(typeof(BestiaryController), "Start")]
+        private static void BestiaryController_Start_postfix(BestiaryController __instance)
+        {
+            foreach (var controller in __instance.bestiaryIcons)
+                controller.gameObject.AddComponent<PointerHandlerComponent>()
+                    .OnPointerEnter(e => startShowBestiaryTooltip(controller))
+                    .OnPointerExit(e => stopShowBestiaryTooltip());
+
+            Plugin.OnUpdate += (o, e) =>
+            {
+                if (!Plugin.Character.InMenu(Menu.Adventure))
+                    return;
+
+                if (Input.GetKeyUp(KeyCode.LeftAlt) || Input.GetKeyUp(KeyCode.RightAlt))
+                    _offset = 0;
+
+                if (!_altIsDown)
+                    return;
+
+                if (Input.GetKeyDown(KeyCode.LeftArrow) && _zoneId > 0)
+                    _offset--;
+                else if (Input.GetKeyDown(KeyCode.RightArrow) && _zoneId < Zones.MAXZONEID)
+                    _offset++;
+            };
+        }
+
+        private static Coroutine _cor;
+        private static void startShowBestiaryTooltip(BestiaryIconController controller)
+        {
+            stopShowBestiaryTooltip();
+            _cor = Plugin.BeginCoroutine(showBestiaryTooltip(controller));
+        }
+
+        private static void stopShowBestiaryTooltip()
+        {
+            if (_cor != null)
+            {
+                Plugin.EndCoroutine(_cor);
+                _cor = null;
+            }
+
+            Plugin.HideTooltip();
+        }
+
+        private static WaitForSeconds _delay = new WaitForSeconds(0.1f);
+        private static IEnumerator showBestiaryTooltip(BestiaryIconController controller)
+        {
+            var enemyList = Plugin.Character.adventureController.enemyList;
+            var zones = new List<int>();
+            for (var x = 0; x < enemyList.Count; x++)
+                if (enemyList[x].Any(e => e.spriteID == controller.id))
+                    zones.Add(x);
+
+            while (true)
+            {
+                if (!_altIsDown)
+                {
+                    Plugin.HideTooltip();
+                    yield return _delay;
+                    continue;
+                }
+
+                var text = "Enemy doesn't spawn in any zone";
+                if (zones.Count > 0)
+                    text = BuildDropTable(zones[0]);
+
+                Plugin.ShowTooltip(text);
+                yield return _delay;
+            }
+        }
+
+        [HarmonyPrefix,
+            HarmonyPatch(typeof(ZoneBackwardsClick), "zoneBack"),
+            HarmonyPatch(typeof(ZoneForwardClick), "tryZoneForward")]
+        private static bool ZoneForwardBackwardClick_prefix()
+        {
+            return !_altIsDown;
+        }
+
         [HarmonyPrefix, HarmonyPatch(typeof(AdventureController), "zoneDescriptions")]
         private static bool AdventureController_zoneDescriptions_prefix(AdventureController __instance, ref string ___message)
         {
-            _zoneId = __instance.zone;
             if (Options.DropTableTooltip.Enabled.Value == false
                 || !Input.GetKey(KeyCode.LeftAlt)
-                || _zoneId >= DropTable.Zones.Count
-                || _zoneId < 0)
+                || __instance.zone >= DropTable.Zones.Count
+                || __instance.zone < 0)
                 return true;
+
+            ___message = BuildDropTable(__instance.zone);
+            __instance.tooltip.showTooltip(___message);
+
+            return false;
+        }
+
+        internal static string BuildDropTable(int zoneId)
+        {
+            _zoneId = zoneId + _offset;
+
+            var character = Plugin.Character;
+            var controller = character.adventureController;
 
             var zone = DropTable.Zones[_zoneId];
             var rooted = _zoneId >= 20;
-            _dcMulti = rooted ? __instance.character.lootFactorRooted() : __instance.character.lootFactor();
+            _dcMulti = rooted ? character.lootFactorRooted() : character.lootFactor();
 
-            var text = $"<b>Drop Table For {__instance.zoneName(_zoneId)}</b>"
+            var text = $"<b>Drop Table For {controller.zoneName(_zoneId)}</b>"
                 + $"\n\n<b>Total DC Modifier{(rooted ? " (rooted)" : string.Empty)}:</b> {_dcM(_dcMulti)}";
 
+            var enemies = controller.enemyList[_zoneId];
+            var normCount = enemies.Count(e => e.enemyType == enemyType.normal);
+            var bossCount = enemies.Count(e => e.enemyType == enemyType.boss);
+
             if (zone.NormalDrops != null)
-                text += $"\n\n<b>Normal Drops:</b>{DropsString(zone.NormalDrops)}";
+                text += $"\n\n<b>Normal Drops:</b> {(normCount / (float)enemies.Count) * 100f:0.##}%{DropsString(zone.NormalDrops)}";
 
             if (zone.BossDrops != null)
-                text += $"\n\n<b>Boss Drops:</b>{DropsString(zone.BossDrops)}";
+                text += $"\n\n<b>Boss Drops:</b> {(bossCount / (float)enemies.Count) * 100f:0.##}%{DropsString(zone.BossDrops)}";
 
             if (zone.TitanV1Drops != null)
             {
@@ -114,9 +215,7 @@ namespace jshepler.ngu.mods
                 text += $"\n\n<b>Secret Drop:</b>\n<b><color={color}>{_dcP(dc)}</color></b> for {name}";
             }
 
-            ___message = $"<size=11>{text}</size>";
-            __instance.tooltip.showTooltip(___message);
-            return false;
+            return $"<size=11>{text}</size>";
         }
 
         private static string DropString(MacGuffinDrop drop)
@@ -200,7 +299,7 @@ namespace jshepler.ngu.mods
 
                     case (int)Items.PP:
                         var pp = Evaluators.TitanPPP(_zoneId);
-                        text += $"{_number(pp / 1e+6D)} PP ({(idc.BaseAmount / 1e+6D):0.###} base)";
+                        text += $"{_number(pp / 1e+6D)} PP ({(idc.BaseAmount / 1e+6D)} base)";
                         break;
 
                     case (int)Items.AP:

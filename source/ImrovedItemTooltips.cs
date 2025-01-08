@@ -3,9 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using HarmonyLib;
 using jshepler.ngu.mods.GameData;
 using UnityEngine;
+using UnityEngine.TextCore;
 using UnityEngine.UI;
 
 namespace jshepler.ngu.mods
@@ -17,6 +19,49 @@ namespace jshepler.ngu.mods
         private static bool _appendDualWieldText = false;
         private static Coroutine _cor;
         private static FieldInfo _tooltipText = typeof(HoverTooltip).GetField("tooltipText", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        [HarmonyPrefix, HarmonyPatch(typeof(InventoryController), "itemTooltipText", [typeof(int)])]
+        private static void InventoryController_itemTooltipText_prefix(int id)
+        {
+            _isWeap2 = id == -6;
+        }
+
+        [HarmonyTranspiler, HarmonyPatch(typeof(InventoryController), "itemTooltipText", [typeof(Equipment)])]
+        private static IEnumerable<CodeInstruction> InventoryController_itemTooltipText_transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var toe = typeof(Equipment);
+            var curAttack = toe.GetField("curAttack");
+            var curDefense = toe.GetField("curDefense");
+            var spec1Cur = toe.GetField("spec1Cur");
+            var spec2Cur = toe.GetField("spec2Cur");
+            var spec3Cur = toe.GetField("spec3Cur");
+
+            var cm = new CodeMatcher(instructions)
+                .MatchForward(false, new CodeMatch(OpCodes.Ldfld, curAttack))
+                .Advance(1)
+                .Insert(Transpilers.EmitDelegate(effectiveWeap2Value))
+                .MatchForward(false, new CodeMatch(OpCodes.Ldfld, curDefense))
+                .Advance(1)
+                .Insert(Transpilers.EmitDelegate(effectiveWeap2Value))
+                .MatchForward(false, new CodeMatch(OpCodes.Ldfld, spec1Cur))
+                .Advance(1)
+                .Insert(Transpilers.EmitDelegate(effectiveWeap2Value))
+                .MatchForward(false, new CodeMatch(OpCodes.Ldfld, spec2Cur))
+                .Advance(1)
+                .Insert(Transpilers.EmitDelegate(effectiveWeap2Value))
+                .MatchForward(false, new CodeMatch(OpCodes.Ldfld, spec3Cur))
+                .Advance(1)
+                .Insert(Transpilers.EmitDelegate(effectiveWeap2Value));
+
+            return cm.InstructionEnumeration();
+        }
+
+        private static bool _isWeap2 = false;
+        private static float effectiveWeap2Value(float value)
+        {
+            var effectiveness = Plugin.Character.inventoryController.weapon2Factor();
+            return _isWeap2 ? value * effectiveness : value;
+        }
 
         // prepends item id
         [HarmonyPostfix, HarmonyPatch(typeof(InventoryController), "itemTooltipText", [typeof(Equipment)])]
@@ -78,6 +123,26 @@ namespace jshepler.ngu.mods
         }
 
         // loadouts
+
+        // this fixes bug in vanilla where a loadout item is in daycare and shows empty tooltip
+        [HarmonyPrefix, HarmonyPatch(typeof(LoadoutDisplayController), "updateTooltipMessage")]
+        private static bool LoadoutDisplayController_updateTooltipMessage_prefix(LoadoutDisplayController __instance, ref string ___message)
+        {
+            var iSlotId = __instance.GetInventorySlotId();
+            var dcId = __instance.inventoryController.daycareID(iSlotId);
+
+            _appendDaycareText = true;
+            if (dcId == -1)
+                return true;
+
+            _appendDaycareText = false;
+            var dcLevel = Plugin.Character.inventory.daycare[dcId].level + Plugin.Character.inventoryController.daycares[dcId].levelsAdded();
+
+            ___message = __instance.inventoryController.itemTooltipText(__instance.character.inventory.daycare[dcId])
+                + $"\n\n<b>Item level in Daycare:</b> {dcLevel} (this item)";
+            return false;
+        }
+
         [HarmonyPrefix, HarmonyPatch(typeof(LoadoutDisplayController), "OnPointerEnter")]
         private static bool LoadoutDisplayController_OnPointerEnter_prefix(LoadoutDisplayController __instance)
         {

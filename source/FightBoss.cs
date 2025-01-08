@@ -64,8 +64,11 @@ namespace jshepler.ngu.mods
             if (character.challenges.blindChallenge.inChallenge)
                 return;
 
-            __instance.attackText.text += $"\n(my dmg / boss hp): {_dmgDonePct:f1}%";
-            __instance.defenseText.text += $"\n(boss dmg / my hp): {_dmgTakenPct:f1}%";
+            if (!Hardcore.IsHardcoreGame)
+            {
+                __instance.attackText.text += $"\n(my dmg / boss hp): {_dmgDonePct:f1}%";
+                __instance.defenseText.text += $"\n(boss dmg / my hp): {_dmgTakenPct:f1}%";
+            }
         }
 
         // removes "bossText.text = "Fight Boss"
@@ -142,6 +145,9 @@ namespace jshepler.ngu.mods
         private static WaitUntil _waitUntilNotFighting = new WaitUntil(() => Plugin.Character.bossController.isFighting == false);
         internal static IEnumerator RunFight()
         {
+            if (Hardcore.IsHardcoreGame)
+                yield break;
+
             if (CanNuke)
             {
                 Plugin.Character.bossController.startNuke();

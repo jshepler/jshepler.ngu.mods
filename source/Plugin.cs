@@ -6,6 +6,7 @@ using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace jshepler.ngu.mods
 {
@@ -168,24 +169,6 @@ namespace jshepler.ngu.mods
             return cm.InstructionEnumeration();
         }
 
-        [HarmonyPrefix, HarmonyPatch(typeof(MainMenuController), "updateMiscText")]
-        private static bool MainMenuController_updateMiscText_prefix(MainMenuController __instance)
-        {
-            var build = __instance.character.getVersionAsString();
-            __instance.buildText.text = $"<b>Build {build}</b>(jshepler mods {PluginInfo.PLUGIN_VERSION})";
-            __instance.buildText.resizeTextForBestFit = true;
-            return false;
-        }
-
-        [HarmonyPrefix, HarmonyPatch(typeof(VersionNumbering), "Start")]
-        private static bool VersionNumbering_Start_prefix(VersionNumbering __instance)
-        {
-            var build = __instance.character.getVersionAsString();
-            __instance.versionNumber.text = $"<b>Build {build}</b>\n(jshepler mods {PluginInfo.PLUGIN_VERSION})";
-            __instance.versionNumber.resizeTextForBestFit = true;
-            return false;
-        }
-
         internal static void ShowNotification(string text, float seconds = 3f)
         {
             Character?.tooltip.showTooltip(text, seconds);
@@ -209,6 +192,23 @@ namespace jshepler.ngu.mods
         internal static void HideTooltip()
         {
             Character?.tooltip.hideTooltip();
+        }
+
+        private static Text _tooltipText;
+        [HarmonyPostfix, HarmonyPatch(typeof(HoverTooltip), "Start")]
+        private static void HoverTooltip_Start_postfix(Text ___tooltipText)
+        {
+            _tooltipText = ___tooltipText;
+        }
+
+        internal static void SetTooltipFont(Font font)
+        {
+            _tooltipText.font = font;
+        }
+
+        internal static void ResetTooltipFont()
+        {
+            _tooltipText.font = Fonts.LiberationSans_Regular;
         }
 
         internal static Coroutine BeginCoroutine(IEnumerator routine)
