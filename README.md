@@ -872,7 +872,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 219. shift-click the buy muffin button to buy a muffin with 1 billion seeds
 
-220. can play music when idling/manualing titans, you can use whatever musing you want:
+220. can play music when idling/manualing titans, you can use whatever music you want:
      - must be mp3 files
      - must be placed in config folder
      - filenames must start with this pattern `(Tx)` where `x` is the titan number, e.g. `(T5) Thrill of the Hunt.mp3`
