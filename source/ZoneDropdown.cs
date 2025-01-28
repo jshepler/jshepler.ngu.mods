@@ -171,5 +171,18 @@ namespace jshepler.ngu.mods
 
             return maxZone;
         }
+
+        internal static int GetMaxReachableZone(bool includeTitans = false)
+        {
+            var maxZone = getMaxUnlockedZone();
+            if (maxZone == null)
+                return -1; // is possible just after rebirth before any bosses are fought
+
+            var maxZoneId = maxZone.id;
+            while (Zones.TitanZoneIds.Contains(maxZoneId))
+                maxZoneId--;
+
+            return maxZoneId;
+        }
     }
 }

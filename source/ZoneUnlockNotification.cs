@@ -29,10 +29,7 @@ namespace jshepler.ngu.mods
             if (!character.challenges.inChallenge || character.challenges.laserSwordChallenge.inChallenge || character.bossID < 4)
                 return;
 
-            var maxZone = character.adventureController.zoneDropdown.options.Count - 2;
-            while (GameData.Zones.TitanZoneIds.Contains(maxZone))
-                maxZone--;
-
+            var maxZone = ZoneDropdown.GetMaxReachableZone();
             if (character.adventure.zone >= maxZone)
                 return;
 
