@@ -133,7 +133,7 @@ namespace jshepler.ngu.mods
 
         // this removes an extra line-feed that's only on the "BEAST SPAWN READY" line, it bothered me
         // game also has a bug that shows T10 for wrong boss, effective boss id should be 777 (sad boss 175) instead of 727 (sad boss 125)
-        [HarmonyTranspiler, HarmonyPatch(typeof(ButtonShower), "showTitanTimer")]
+        [HarmonyTranspiler, HarmonyPriority(2), HarmonyPatch(typeof(ButtonShower), "showTitanTimer")]
         private static IEnumerable<CodeInstruction> ButtonShower_showTitanTimer_transpiler(IEnumerable<CodeInstruction> instructions)
         {
             var oldString = "\n<b>THE BEAST SPAWN READY</b>\n";

@@ -1,11 +1,14 @@
 ﻿using HarmonyLib;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace jshepler.ngu.mods
 {
     [HarmonyPatch]
     internal class ConvertPotions
     {
+        private const long MUFFIN_SEEDS_COST = 1000000000L;
+
         [HarmonyPrefix, HarmonyPatch(typeof(ArbitraryController), "startUseEnergyPotion1")]
         private static bool ArbitraryController_startUseEnergyPotion1_prefix(ArbitraryController __instance)
         {
@@ -106,6 +109,39 @@ namespace jshepler.ngu.mods
             __instance.character.allArbitrary.updateMenu();
 
             return false;
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(ArbitraryController), "startMacguffinBooster1AP")]
+        private static bool ArbitraryController_startMacguffinBooster1AP_prefix(ArbitraryController __instance, UnityAction ___noAction)
+        {
+            if (!Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift))
+                return true;
+
+            var character = __instance.character;
+            if (!character.achievements.achievementComplete[145])
+            {
+                Plugin.ShowOverrideNotification("You haven't even unlocked MacGuffins yet! Don't bother trying to buy this til you do. It's for your own good.", 3f);
+                return false;
+            }
+
+            if (character.yggdrasil.seeds < MUFFIN_SEEDS_COST)
+            {
+                Plugin.ShowOverrideNotification($"You do not have {character.display(MUFFIN_SEEDS_COST)} seeds!");
+                return false;
+            }
+
+            UnityAction yesAction = buyMuffinWithSeeds;
+            __instance.box.displayBox($"Are you sure you want to buy MacGuffin Muffin for {character.display(MUFFIN_SEEDS_COST)} seeds?", yesAction, ___noAction);
+
+            return false;
+        }
+
+        private static void buyMuffinWithSeeds()
+        {
+            Plugin.Character.yggdrasil.seeds -= MUFFIN_SEEDS_COST;
+            Plugin.Character.arbitrary.macGuffinBooster1Count++;
+            Plugin.ShowNotification("You've successfully bought MacGuffin Muffin with seeds!", 2f);
+            Plugin.Character.allArbitrary.updateMenu();
         }
     }
 }

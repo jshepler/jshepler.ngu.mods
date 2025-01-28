@@ -113,6 +113,7 @@ namespace jshepler.ngu.mods
 
                     if(_altIsDown)
                         text += $"\n\n<b>Variance Range (rarity):</b> {relMinRarVar:+0.##;-0.##}% to {relMaxRarVar:+0.##;-0.##}%"
+                            + $"\n\n<b>Tier Factor:</b> x{calcTierFactor(card):r}"
                             + $"\n\n<b>Min Bonus:</b> {minBonus * 100f:#,##0.##}%"
                             + $"\n   <b>(in rarity):</b> {minRarityBonus * 100f:#,##0.##}%"
                             + $"\n\n<b>Max Bonus:</b> {maxBonus * 100f:#,##0.##}%"
@@ -153,11 +154,17 @@ namespace jshepler.ngu.mods
         private static float calcVariance(cardBonus bonusType, int cardTier, int totalCost, float cardEffect)
         {
             var C = _constants[bonusType];
-            return ((cardEffect / totalCost) - C.Item3) / (C.Item4 * Mathf.Pow(cardTier, C.Item1) * Mathf.Pow(C.Item2, cardTier));
+            return ((cardEffect / totalCost) - C.Item3) / (C.Item4 * Mathf.Pow(cardTier, C.quadFactor) * Mathf.Pow(C.expFactor, cardTier));
+        }
+
+        private static float calcTierFactor(Card card)
+        {
+            var C = _constants[card.bonusType];
+            return 1f * Mathf.Pow(card.tier, C.quadFactor) * Mathf.Pow(C.expFactor, card.tier);
         }
 
         // pulled from CardsController.calculateXEffect methods
-        private static Dictionary<cardBonus, (float, float, float, float)> _constants = new()
+        private static Dictionary<cardBonus, (float quadFactor, float expFactor, float, float)> _constants = new()
         {
             { cardBonus.energyNGUSpeed, (1.2f, 1.03f, 0.0003f, 0.001f) },
             { cardBonus.magicNGUSpeed, (0.8f, 1.08f, 0.0002f, 0.001f) },

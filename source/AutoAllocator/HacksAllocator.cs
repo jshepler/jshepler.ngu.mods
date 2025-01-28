@@ -73,17 +73,15 @@ namespace jshepler.ngu.mods.AutoAllocator
             if (!_hacksController.character.hacks.autoAdvance)
                 return;
 
-            int nextId;
-            for (var x = 0; x < NUMBER_OF_HACKS - 1; x++) //  -1 to skip THE END hack
+            var count = base.Length - 1; //  -1 to skip THE END hack
+            for (var x = 0; x < count; x++) 
             {
-                nextId = (id + x) % (NUMBER_OF_HACKS - 1);
-                if (!IsTargetReached(nextId))
-                {
-                    if (!this[nextId])
-                        this[nextId] = true;
+                var nextId = (id + x) % count;
+                if (IsTargetReached(nextId) || this[nextId])
+                    continue;
 
-                    break;
-                }
+                this[nextId] = true;
+                break;
             }
         }
 

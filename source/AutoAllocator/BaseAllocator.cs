@@ -52,6 +52,7 @@ namespace jshepler.ngu.mods.AutoAllocator
             }
         }
 
+        internal int Length => _isEnabled.Length;
         internal IEnumerable<int> EnabledIDs => _isEnabled.SelectWhere(b => b, (b, i) => i);
         internal void DisableAll() => EnabledIDs.Do(i => this[i] = false);
         internal void SetEnabled(IEnumerable<int> ids) => _isEnabled.Do((b, i) => this[i] = ids.Contains(i));

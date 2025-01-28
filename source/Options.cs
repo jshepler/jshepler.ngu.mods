@@ -22,6 +22,8 @@ namespace jshepler.ngu.mods
             Cards.AlwaysYeetCSV = Config.Bind("Cards", "AutoYeet.AlwaysYeet", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "set in-game via F1 popup on cards screen");
             Cards.AutoProtectChonkers = Config.Bind("Cards", "AutoProtectChonkers", true, "vanilla game always protects chonkers when spawned - this makes it an option");
 
+            Colors.LootItemNames = Config.Bind("Colors", "LootItemNames", "#000000", "hex RGB color string for loot item names in combat log");
+
             CheckForNewVersion.Enabled = Config.Bind("CheckForNewVersion", "Enabled", true, "checks for new version when loading a save and every hour after");
             CustomResolution.Width = Config.Bind("CustomResolution", "Width", 0, "custom resolution width, 0 = disabled");
             CustomResolution.Height = Config.Bind("CustomResolution", "Height", 0, "custom resolution height, 0 = disabled");
@@ -45,6 +47,7 @@ namespace jshepler.ngu.mods
             OverrideCulture.Locale = Config.Bind("OverrideCulture", "Locale", "en-US", "locale string used if OverrideCulture.Enabled is true; examples: de-DE, fr-FR");
             ResourceNames.ShowFullName = Config.Bind("ResourceNames", "ShowFullName", ShowFullResourceName.None, "Which of the top-left bars to show full names instead of first letter");
 
+            PotionWarning.ExpireSeconds = Config.Bind("PotionWarning", "ExpireSeconds", 60f, "when potion timer drops below this number of seconds, the Sellout Shop button flashes red; 0 = disabled");
             PruneSaves.DaysToKeep = Config.Bind("PruneSaves", "DaysToKeep", 0, "When quick/auto saving, will delete saves older than value; 0 = disabled");
             Questing.AlwaysRandom = Config.Bind("Questing", "AlwaysRandom", false, "If true, new quests will always be random instead of targeting current zone");
             Questing.AutoButter = Config.Bind("Questing", "AutoButter", false, "If true, will automatically use butter when starting a major quest");
@@ -310,6 +313,16 @@ namespace jshepler.ngu.mods
         internal static class ResourceNames
         {
             internal static ConfigEntry<ShowFullResourceName> ShowFullName;
+        }
+
+        internal static class PotionWarning
+        {
+            internal static ConfigEntry<float> ExpireSeconds;
+        }
+
+        internal static class Colors
+        {
+            internal static ConfigEntry<string> LootItemNames;
         }
     }
 }

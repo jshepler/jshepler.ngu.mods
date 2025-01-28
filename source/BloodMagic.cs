@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.Linq;
 using HarmonyLib;
 
@@ -35,7 +36,8 @@ namespace jshepler.ngu.mods
                 + $"\n<b>Total Blood Invested: </b>{__instance.character.display(bloodInvested)}";
 
             var curBonus = bloodToLootBonus(bloodInvested);
-            var totalBlood = bloodInvested + bm.bloodPoints;
+            var autoCount = getAutoCastCount();
+            var totalBlood = bloodInvested + (bm.bloodPoints / Math.Max(1, autoCount));
             var newBonus = bloodToLootBonus(totalBlood);
             ___message += $"\n\n<b>Total bonus if used now:</b> {newBonus:#,##0.#}% (+{(newBonus - curBonus):#,##0.#}%)";
 
@@ -44,7 +46,7 @@ namespace jshepler.ngu.mods
                 var nextBonus = newBonus + 1;
                 var nextTotalBlood = lootBonusToBlood(nextBonus);
                 var bloodRemaining = nextTotalBlood - totalBlood;
-                var secondsRemaining = bloodRemaining / _totalBPS;
+                var secondsRemaining = bloodRemaining / (_totalBPS / Math.Max(1, autoCount));
 
                 ___message += $"\n   ({nextBonus:#,##0.#}% in {NumberOutput.timeOutput(secondsRemaining)})";
             }
@@ -69,7 +71,8 @@ namespace jshepler.ngu.mods
                 + $"\n<b>Total Blood Invested: </b>{__instance.character.display(bloodInvested)}";
 
             var curBonus = bloodToGoldBonus(bloodInvested);
-            var totalBlood = bloodInvested + bm.bloodPoints;
+            var autoCount = getAutoCastCount();
+            var totalBlood = bloodInvested + (bm.bloodPoints / Math.Max(1, autoCount));
             var newBonus = bloodToGoldBonus(totalBlood);
             ___message += $"\n\n<b>Total bonus if used now:</b> {newBonus:#,##0.#}% (+{(newBonus - curBonus):#,##0.#}%)";
 
@@ -79,7 +82,7 @@ namespace jshepler.ngu.mods
                 var nextBonus = newBonus + 1;
                 var nextTotalBlood = goldBonusToBlood(nextBonus);
                 var bloodRemaining = nextTotalBlood - totalBlood;
-                var secondsRemaining = bloodRemaining / _totalBPS;
+                var secondsRemaining = bloodRemaining / (_totalBPS / Math.Max(1, autoCount));
 
                 ___message += $"\n   ({nextBonus:#,##0.#}% in {NumberOutput.timeOutput(secondsRemaining)})";
             }
@@ -136,6 +139,23 @@ namespace jshepler.ngu.mods
         private static double goldBonusToBlood(long goldBonus)
         {
             return MINBLOOD_GOLD * Math.Pow(2.0, Math.Sqrt(goldBonus) - 1);
+        }
+
+        private static int getAutoCastCount()
+        {
+            var count = 0;
+            var bm = Plugin.Character.bloodMagic;
+
+            if (bm.goldAutoSpell)
+                count++;
+
+            if (bm.lootAutoSpell)
+                count++;
+
+            if (bm.rebirthAutoSpell)
+                count++;
+
+            return count;
         }
     }
 }

@@ -29,9 +29,7 @@ namespace jshepler.ngu.mods
         };
 
         private static Func<int, bool> _hasDropped = itemId => Plugin.Character.inventory.itemList.itemDropped[itemId];
-
         private static Func<int, bool> _showItem = itemId => Options.DropTableTooltip.UnknownItems.Value != Options.DropTableTooltip.UnknownItemDisplay.Hide || _hasDropped(itemId);
-
         private static Func<int, string> _name = itemId =>
         {
             if (!_hasDropped(itemId) && Options.DropTableTooltip.UnknownItems.Value == Options.DropTableTooltip.UnknownItemDisplay.Blur)
@@ -51,6 +49,12 @@ namespace jshepler.ngu.mods
 
         private static int _offset = 0;
         private static bool _altIsDown => Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+        private static bool _shiftIsDown => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+
+        private static readonly float _rootedCharm = Mathf.Pow(2f, 1f / 3f);
+        private static readonly float _rootedCharmWithBlueHeart = Mathf.Pow(2.2f, 1f / 3f);
+        private static float rootedCharmMulti => Plugin.Character.inventory.itemList.blueHeartComplete ? _rootedCharmWithBlueHeart : _rootedCharm;
+        private static bool isCharmActive => Plugin.Character.arbitrary.lootcharm1Time.totalseconds > 0.0;
 
         [HarmonyPostfix, HarmonyPatch(typeof(BestiaryController), "Start")]
         private static void BestiaryController_Start_postfix(BestiaryController __instance)
@@ -65,6 +69,7 @@ namespace jshepler.ngu.mods
                 if (!Plugin.Character.InMenu(Menu.Adventure))
                     return;
 
+                // diffrent from alt is down, this is the frame when alt is released
                 if (Input.GetKeyUp(KeyCode.LeftAlt) || Input.GetKeyUp(KeyCode.RightAlt))
                     _offset = 0;
 
@@ -135,7 +140,7 @@ namespace jshepler.ngu.mods
         private static bool AdventureController_zoneDescriptions_prefix(AdventureController __instance, ref string ___message)
         {
             if (Options.DropTableTooltip.Enabled.Value == false
-                || !Input.GetKey(KeyCode.LeftAlt)
+                || !_altIsDown
                 || __instance.zone >= DropTable.Zones.Count
                 || __instance.zone < 0)
                 return true;
@@ -157,18 +162,23 @@ namespace jshepler.ngu.mods
             var rooted = _zoneId >= 20;
             _dcMulti = rooted ? character.lootFactorRooted() : character.lootFactor();
 
+            if (_shiftIsDown && !isCharmActive)
+                _dcMulti *= rooted ? rootedCharmMulti : 2f;
+
+            var color = _shiftIsDown ? "blue" : "black";
             var text = $"<b>Drop Table For {controller.zoneName(_zoneId)}</b>"
-                + $"\n\n<b>Total DC Modifier{(rooted ? " (rooted)" : string.Empty)}:</b> {_dcM(_dcMulti)}";
+                + $"\n\n<b>Total DC Modifier{(rooted ? " (rooted)" : string.Empty)}:</b> <color={color}>{_dcM(_dcMulti)}</color>";
 
             var enemies = controller.enemyList[_zoneId];
-            var normCount = enemies.Count(e => e.enemyType == enemyType.normal);
-            var bossCount = enemies.Count(e => e.enemyType == enemyType.boss);
+            var eCount = enemies.Count;
+            var nCount = enemies.Count(e => e.enemyType == enemyType.normal);
+            var bCount = enemies.Count(e => e.enemyType == enemyType.boss);
 
             if (zone.NormalDrops != null)
-                text += $"\n\n<b>Normal Drops:</b> {(normCount / (float)enemies.Count) * 100f:0.##}%{DropsString(zone.NormalDrops)}";
+                text += $"\n\n<b>Normal Drops:</b> {nCount}/{eCount} ({(nCount / (float)eCount) * 100f:0.##}%){DropsString(zone.NormalDrops)}";
 
             if (zone.BossDrops != null)
-                text += $"\n\n<b>Boss Drops:</b> {(bossCount / (float)enemies.Count) * 100f:0.##}%{DropsString(zone.BossDrops)}";
+                text += $"\n\n<b>Boss Drops:</b> {bCount}/{eCount} ({(bCount / (float)eCount) * 100f:0.##}%){DropsString(zone.BossDrops)}";
 
             if (zone.TitanV1Drops != null)
             {
@@ -210,7 +220,7 @@ namespace jshepler.ngu.mods
                 // if boss = 60, then odds are 3 in 243 (58, 59, 60) = 3/243 = 0.01234567 = 1.23%
 
                 var dc = Math.Min((Plugin.Character.bossID - 57) / 243f, 1f);
-                var color = dc < 1f ? "red" : "green";
+                color = dc < 1f ? _shiftIsDown ? "blue" : "red" : "green";
                 var name = _name((int)Items.Tutorial_Flubber);
                 text += $"\n\n<b>Secret Drop:</b>\n<b><color={color}>{_dcP(dc)}</color></b> for {name}";
             }
@@ -252,13 +262,15 @@ namespace jshepler.ngu.mods
                     return null;
             }
 
-            var dc = Plugin.Character.beastQuestController.questDropChance();
-            var color = dc >= 1.0f ? "green" : "red";
             var name = _name((int)drop.QuestItem);//.Substring(40);
             if (name != "????")
                 name = name.Substring(40);
 
-            return $"\n\n<b>Quest Item:</b>\n<b><color={color}>{_dcP(dc)}</color></b> for {name}";
+            var dc = Plugin.Character.beastQuestController.questDropChance();
+            var color = dc >= 1.0f ? "green" : "red";
+            var text = $"\n\n<b>Quest Item:</b>\n<b><color={color}>{_dcP(dc)}</color></b> for {name}";
+
+            return text;
         }
 
         private static string DropsString(DropGroup group, bool isTitan = false)
@@ -282,7 +294,7 @@ namespace jshepler.ngu.mods
 
                 var moddedDC = idc.BaseDC * _dcMulti + idc.BonuseDC;
                 var dc = Math.Min(moddedDC, idc.MaxDC);
-                var color = dc == idc.MaxDC ? "green" : "red";
+                var color = dc == idc.MaxDC ? "green" : _shiftIsDown ? "blue" : "red";
                 var showMax = idc.MaxDC < 1f && dc < idc.MaxDC;
                 text += $"\n<b><color={color}>{_dcP(dc)}</color></b>{(showMax ? " (max: " + _dcP(idc.MaxDC) + ")" : string.Empty)} for ";
 

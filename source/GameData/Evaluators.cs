@@ -8,8 +8,6 @@ namespace jshepler.ngu.mods.GameData
         internal static long TitanPPP(int zoneId) { return (long)(titanPPP(zoneId) * titanVersionMulti(zoneId)); }
         internal static long TitanAP(int zoneId) { return Plugin.Character.checkAPAdded(titanAP(zoneId)); }
 
-        internal static int[] TitanZoneIds = [6, 8, 11, 14, 16, 19, 23, 26, 30, 34, 38, 42];
-
         internal static long TitanExp(int zoneId)
         {
             var maxKillsWithBonus = Plugin.Character.adventure.itopod.perkLevel[34] * 3;

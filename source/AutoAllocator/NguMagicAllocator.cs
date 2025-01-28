@@ -47,6 +47,25 @@ namespace jshepler.ngu.mods.AutoAllocator
             return _allNGU.NGUMagic[id].HitTarget();
         }
 
+        internal override void OnTargetReached(int id)
+        {
+            base.OnTargetReached(id);
+
+            if (!Plugin.Character.NGU.autoAdvance)
+                return;
+
+            var count = base.Length;
+            for (var x = 0; x < count; x++)
+            {
+                var nextId = (id + x) % count;
+                if (IsTargetReached(nextId) || this[nextId])
+                    continue;
+
+                this[nextId] = true;
+                break;
+            }
+        }
+
         [HarmonyPostfix, HarmonyPatch(typeof(AllNGUController), "Start")]
         private static void AllNGUController_Start_postfix(AllNGUController __instance)
         {

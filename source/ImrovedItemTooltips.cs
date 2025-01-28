@@ -234,6 +234,8 @@ namespace jshepler.ngu.mods
         private static WaitForSeconds _waiter = new WaitForSeconds(0.1f);
         private static IEnumerator ShowTooltip(Equipment item, Action updateTooltipMessage, Func<string> getTooltipMessage)
         {
+            var character = Plugin.Character;
+
             while (true)
             {
                 updateTooltipMessage();
@@ -243,18 +245,21 @@ namespace jshepler.ngu.mods
                     text += BuildDaycareString(item);
 
                 if (_appendDualWieldText)
-                    text += $"\n\n<b>Dual-Wield Effectiveness:</b> {Plugin.Character.inventoryController.weapon2Factor() * 100f:0}%";
+                    text += $"\n\n<b>Dual-Wield Effectiveness:</b> {character.inventoryController.weapon2Factor() * 100f:0}%";
 
                 if (item.isMacGuffin())
-                    text += $"\n\n<b>Time Factor:</b> {Plugin.Character.inventoryController.macGuffinBonusTimeFactor()}";
+                {
+                    var muff = character.arbitrary.macGuffinBooster1Time.totalseconds > 0.0 || character.arbitrary.macGuffinBooster1InUse;
+                    text += $"\n\n<b>Time Factor:</b> {character.inventoryController.macGuffinBonusTimeFactor()}{(muff ? " (muffin active)" : string.Empty)}";
+                }
 
-                if (item.id == 92 && item.level > 0 && Plugin.Character.settings.yggdrasilOn)
+                if (item.id == 92 && item.level > 0 && character.settings.yggdrasilOn)
                     text += $"\n\n<b>Gain <color=blue>{(int)(item.level * (1f + item.level / 100f))}</color> seeds if consumed now</b>";
 
                 if (Input.GetKey(KeyCode.LeftAlt))
                     text += BuildItemSourcesString(item);
 
-                Plugin.Character.tooltip.showOverrideTooltip(text);
+                character.tooltip.showOverrideTooltip(text);
                 yield return _waiter;
             }
         }

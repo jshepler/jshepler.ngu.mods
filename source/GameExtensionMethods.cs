@@ -324,6 +324,22 @@ namespace jshepler.ngu.mods
             return l;
         }
 
+        internal static long RoundToLong(this float num)
+        {
+            if (num >= long.MaxValue)
+                return long.MaxValue;
+
+            return long.Parse($"{num:0}");
+        }
+
+        internal static long RoundToLong(this double num)
+        {
+            if (num >= long.MaxValue)
+                return long.MaxValue;
+
+            return long.Parse($"{num:0}");
+        }
+
         #endregion
 
         internal static Menu CurrentMenu(this Character character)

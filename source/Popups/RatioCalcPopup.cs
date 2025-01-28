@@ -391,7 +391,10 @@ namespace jshepler.ngu.mods.Popups
             var cap = _levelsNeeded.cap;
             var cost = capCost(cap);
             while (cost > exp)
-                cost = capCost(--cap);
+            {
+                cap -= 250;
+                cost = capCost(cap);
+            }
 
             if (cost <= 0L || cap <= 0L)
                 return;
@@ -570,8 +573,8 @@ namespace jshepler.ngu.mods.Popups
             set => Plugin.Character.realExp = value;
         }
 
-        private static PCB _baseEnergy => new((long)_ep, _ec, _eb);
-        private static PCB _baseMagic => new((long)_mp, _mc, _mb);
-        private static PCB _baseRes3 => new((long)_rp, _rc, _rb);
+        private static PCB _baseEnergy => new(_ep.RoundToLong(), _ec, _eb);
+        private static PCB _baseMagic => new(_mp.RoundToLong(), _mc, _mb);
+        private static PCB _baseRes3 => new(_rp.RoundToLong(), _rc, _rb);
     }
 }

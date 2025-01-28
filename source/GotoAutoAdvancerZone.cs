@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace jshepler.ngu.mods
 {
-    [HarmonyPatch]
+    //[HarmonyPatch]
     internal class GotoAutoAdvancerZone
     {
         [HarmonyPrefix, HarmonyPatch(typeof(ZoneForwardClick), "goToMaxZone", new Type[0])]

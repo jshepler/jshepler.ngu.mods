@@ -5,6 +5,7 @@ using System.Reflection;
 using HarmonyLib;
 using jshepler.ngu.mods.Popups;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace jshepler.ngu.mods
 {
@@ -33,7 +34,7 @@ namespace jshepler.ngu.mods
                 var getEffectNameMethod = typeof(InventoryController).GetMethod("effectName", BindingFlags.Instance | BindingFlags.NonPublic);
                 var getEffectName = (specType t) => (string)getEffectNameMethod.Invoke(Plugin.Character.inventoryController, [t]);
                 var types = Enum.GetValues(typeof(specType)).Cast<specType>();
-                _effNames = types.ToDictionary(t => t, t => getEffectName(t).ToLowerInvariant());
+                _effNames = types.ToDictionary(t => t, t => getEffectName(t).ToLowerInvariant().Replace("butts", "{0}"));
             };
         }
 
@@ -42,7 +43,9 @@ namespace jshepler.ngu.mods
             if (!Plugin.Character.InMenu(Menu.Inventory))
                 return;
 
-            if (!_showInput && Input.GetKeyDown(KeyCode.S))
+            if (!_showInput && Input.GetKeyDown(KeyCode.S)
+                // ignore the s if entering a loadout name - currentSelectedGameObject won't be null in that case
+                && EventSystem.current.currentSelectedGameObject == null)
             {
                 var sf = Plugin.Character.tooltip.canvas.scaleFactor;
                 _window = new Rect(324 * sf, 282 * sf, 200 * sf, 26);
@@ -125,7 +128,11 @@ namespace jshepler.ngu.mods
             __instance.image.color = hasMatch(itemId) ? Color.white : Color.gray;
         }
 
+        private static MethodInfo _getEffectName = typeof(InventoryController).GetMethod("effectName", BindingFlags.Instance | BindingFlags.NonPublic);
+        private static string getEffectName(specType t) => (string)_getEffectName.Invoke(Plugin.Character.inventoryController, [t]);
+        private static bool specHasMatch(specType t, string search) => getEffectName(t).ToLowerInvariant().Contains(search);
         private static ItemNameDesc _data;
+
         private static bool hasMatch(int itemId)
         {
             if (_data == null)
@@ -134,19 +141,18 @@ namespace jshepler.ngu.mods
             if (_searchString == string.Empty)
                 return false;
 
-            if (_data.itemName[itemId].ToLowerInvariant().Contains(_searchString))
+            var ss = _searchString.ToLowerInvariant();
+
+            if (_data.itemName[itemId].ToLowerInvariant().Contains(ss))
                 return true;
 
-            //if (_data.itemDesc[id].ToLowerInvariant().Contains(_searchString))
-            //    return true;
-
-            if (_effNames[_data.specType1[itemId]].Contains(_searchString))
+            if (specHasMatch(_data.specType1[itemId], ss))
                 return true;
 
-            if (_effNames[_data.specType2[itemId]].Contains(_searchString))
+            if (specHasMatch(_data.specType2[itemId], ss))
                 return true;
 
-            if (_effNames[_data.specType3[itemId]].Contains(_searchString))
+            if (specHasMatch(_data.specType3[itemId], ss))
                 return true;
 
             return false;

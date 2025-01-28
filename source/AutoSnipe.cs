@@ -64,8 +64,8 @@ namespace jshepler.ngu.mods
         private static void Update(object sender, EventArgs e)
         {
             // F1 pressed this frame, only in Adventure screen, not in safe zone, not in tower
-            if (Input.GetKeyDown(KeyCode.F1) && Plugin.Character.menuID == 3 && Controller.zone >= 0 && Controller.zone < 1000)
-                ToggleRunning();
+            //if (Input.GetKeyDown(KeyCode.F1) && Plugin.Character.menuID == 3 && Controller.zone >= 0 && Controller.zone < 1000)
+            //    ToggleRunning();
 
             if (!_running)
                 return;

@@ -45,6 +45,25 @@ namespace jshepler.ngu.mods.AutoAllocator
             return _controllers[id].HitTarget();
         }
 
+        internal override void OnTargetReached(int id)
+        {
+            base.OnTargetReached(id);
+
+            if (!Plugin.Character.advancedTraining.autoAdvance)
+                return;
+
+            var count = base.Length;
+            for (var x = 0; x < count; x++)
+            {
+                var nextId = (id + x) % count;
+                if (IsTargetReached(nextId) || this[nextId])
+                    continue;
+
+                this[nextId] = true;
+                break;
+            }
+        }
+
         [HarmonyPostfix, HarmonyPatch(typeof(AdvancedTrainingController), "Start")]
         private static void AdvantedTrainingController_Start_postfix(AdvancedTrainingController __instance)
         {

@@ -40,7 +40,7 @@ namespace jshepler.ngu.mods.GameData
             { FruitId.FoPb, (true, true, true) },
             { FruitId.FoAP, (false, false, true) },
             { FruitId.FoN, (true, true, true) },
-            { FruitId.FoR, (true, false, true) },
+            { FruitId.FoR, (false, true, true) },
             { FruitId.FoMa, (false, true, true) },
             { FruitId.FoPd, (true, true, true) },
             { FruitId.Melon, (true, false, true) },

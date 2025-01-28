@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using UnityEngine;
@@ -21,7 +20,8 @@ namespace jshepler.ngu.mods
             }
 
             var character = Plugin.Character;
-            var disp = character.display;
+            var tec = character.totalCapEnergy();
+            var disp = (double d) => $"{character.display(d)} <color=blue>({d / tec * 100.0:0.##}%)</color>";
 
             var labels = new List<string>();
             var values = new List<string>();
@@ -30,35 +30,35 @@ namespace jshepler.ngu.mods
                    + character.training.defenseEnergy.Sum();
             if (bt > 0)
             {
-                labels.Add("Basic Training");
+                labels.Add("BT");
                 values.Add(disp(bt));
             }
 
             var augs = character.augments.augs.Sum(a => a.augEnergy + a.upgradeEnergy);
             if (augs > 0)
             {
-                labels.Add("Augments");
+                labels.Add("Augs");
                 values.Add(disp(augs));
             }
 
             var at = character.advancedTraining.energy.Sum();
             if (at > 0)
             {
-                labels.Add("Adv Training");
+                labels.Add("AT");
                 values.Add(disp(at));
             }
 
             var tm = character.machine.speedEnergy;
             if (tm > 0)
             {
-                labels.Add("Time Machine");
+                labels.Add("TM");
                 values.Add(disp(tm));
             }
 
             var wand = character.wandoos98.wandoosEnergy;
             if (wand > 0)
             {
-                labels.Add("Wandoos");
+                labels.Add("Wand");
                 values.Add(disp(wand));
             }
 
@@ -80,7 +80,6 @@ namespace jshepler.ngu.mods
             if (labels.Count > 0)
             {
                 var maxLen = labels.Max(l => l.Length);
-                var totalLen = maxLen + values.Max(v => v.Length) + 2;
                 text += labels.Zip(values, (l, v) => $"<b>{l.PadLeft(maxLen)}:</b> {v}").Join(s => s, "\n");
             }
 
@@ -100,7 +99,8 @@ namespace jshepler.ngu.mods
             }
 
             var character = Plugin.Character;
-            var disp = character.display;
+            var tmc = character.totalCapMagic();
+            var disp = (double d) => $"{character.display(d)} <color=blue>({d / tmc * 100.0:0.##}%)</color>";
 
             var labels = new List<string>();
             var values = new List<string>();
@@ -108,21 +108,21 @@ namespace jshepler.ngu.mods
             var tm = character.machine.goldMultiMagic;
             if (tm > 0)
             {
-                labels.Add("Time Machine");
+                labels.Add("TMe");
                 values.Add(disp(tm));
             }
 
             var bm = character.bloodMagic.ritual.Sum(r => r.magic);
             if (bm > 0)
             {
-                labels.Add("Blood Magic");
+                labels.Add("BM");
                 values.Add(disp(bm));
             }
 
             var wand = character.wandoos98.wandoosMagic;
             if (wand > 0)
             {
-                labels.Add("Wandoos");
+                labels.Add("Wand");
                 values.Add(disp(wand));
             }
 
@@ -144,7 +144,6 @@ namespace jshepler.ngu.mods
             if (labels.Count > 0)
             {
                 var maxLen = labels.Max(l => l.Length);
-                var totalLen = maxLen + values.Max(v => v.Length) + 2;
                 text += labels.Zip(values, (l, v) => $"<b>{l.PadLeft(maxLen)}:</b> {v}").Join(s => s, "\n");
             }
 
@@ -164,7 +163,8 @@ namespace jshepler.ngu.mods
             }
 
             var character = Plugin.Character;
-            var disp = character.display;
+            var trc = character.totalCapRes3();
+            var disp = (double d) => $"{character.display(d)} <color=blue>({d / trc * 100.0:0.##}%)</color>";
 
             var labels = new List<string>();
             var values = new List<string>();
@@ -190,7 +190,6 @@ namespace jshepler.ngu.mods
             if (labels.Count > 0)
             {
                 var maxLen = labels.Max(l => l.Length);
-                var totalLen = maxLen + values.Max(v => v.Length) + 2;
                 text += labels.Zip(values, (l, v) => $"<b>{l.PadLeft(maxLen)}:</b> {v}").Join(s => s, "\n");
             }
 

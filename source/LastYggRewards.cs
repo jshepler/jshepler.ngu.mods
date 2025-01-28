@@ -34,8 +34,10 @@ namespace jshepler.ngu.mods
         private static void FruitController_showTooltip_postfix(FruitController __instance, ref string ___message)
         {
             var fruitId = __instance.id;
-            var text = _texts[fruitId];
+            if (fruitId < 0 || fruitId >= _texts.Length)
+                return;
 
+            var text = _texts[fruitId];
             if (!__instance.validID(fruitId) || string.IsNullOrEmpty(text))
                 return;
 
@@ -62,9 +64,9 @@ namespace jshepler.ngu.mods
         {
             var name = Plugin.Character.yggdrasilController.fruitName[fruitId];
             var mod = Fruits.ModifedBy[(FruitId)fruitId];
-            var ngu = mod.NGU ? Plugin.TEXT_GREEN : Plugin.TEXT_RED;
-            var yield = mod.YIELD ? Plugin.TEXT_GREEN : Plugin.TEXT_RED;
-            var fh = mod.FH ? Plugin.TEXT_GREEN : Plugin.TEXT_RED;
+            var ngu = mod.NGU ? "blue" : "#cccccc";
+            var yield = mod.YIELD ? "blue" : "#cccccc";
+            var fh = mod.FH ? "blue" : "#cccccc";
 
             return $"{name} [<color={ngu}>NGU</color> <color={yield}>YIELD</color> <color={fh}>FH</color>]";
         }

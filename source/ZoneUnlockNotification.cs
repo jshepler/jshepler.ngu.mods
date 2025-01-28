@@ -30,7 +30,7 @@ namespace jshepler.ngu.mods
                 return;
 
             var maxZone = character.adventureController.zoneDropdown.options.Count - 2;
-            while (GameData.Evaluators.TitanZoneIds.Contains(maxZone))
+            while (GameData.Zones.TitanZoneIds.Contains(maxZone))
                 maxZone--;
 
             if (character.adventure.zone >= maxZone)

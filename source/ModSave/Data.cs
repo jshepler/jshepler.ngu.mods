@@ -30,7 +30,7 @@ namespace jshepler.ngu.mods.ModSave
 
         internal static string[] LastYggRewards
         {
-            get => Get<string[]>("LastYggRewards", new string[21]);
+            get => Get("LastYggRewards", new string[21]);
             set => Set("LastYggRewards", value);
         }
 
@@ -326,6 +326,24 @@ namespace jshepler.ngu.mods.ModSave
         {
             get => Get<int[][]>("PCBRatios", [[1, 37500, 1], [1, 37500, 1], [1, 37500, 1]]);
             set => Set("PCBRatios", value);
+        }
+
+        internal static int Deaths_Normal
+        {
+            get => Get("Deaths_Normal", 0);
+            set => Set("Deaths_Normal", value);
+        }
+
+        internal static int Deaths_Evil
+        {
+            get => Get("Deaths_Evil", 0);
+            set => Set("Deaths_Evil", value);
+        }
+
+        internal static int Deaths_Sadistic
+        {
+            get => Get("Deaths_Sadistic", 0);
+            set => Set("Deaths_Sadistic", value);
         }
 
         // REMINDER: NO TYPES DEFINED IN MODS ELSE NOT LOADABLE IN VANILLA

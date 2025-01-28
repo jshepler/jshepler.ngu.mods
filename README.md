@@ -197,6 +197,8 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
     current bars: Basic Training, Augments, Advanced Training, Time Machine, Blood Magic Rituals, Wandoos, NGUs, Hacks
 
+    follows auto advance for: AT, NGUs, and Hacks
+
 32. alt-shift-click enables auto-allocate on multiple bars: all ngu energy, all ngu magic, augment+upgrade pair, basic training offense/defense pair (if sync training enabled), TM pair, wandoows pair
 
 33. directly modify loadouts without having to change currently equipped gear:
@@ -387,7 +389,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 77. auto-sniping: skips normal enemies on adventure screen, if < 50% health after boss dies (or if player dies) stays in safe zone until full health
 
-    go to desired zone and press F1 (or right-click idle button) to toggle auto-snipe (changes border of the Idle Mode button to red)
+    go to desired zone and right-click idle button to toggle auto-snipe (changes border of the Idle Mode button to red)
 
     there's a config option to snipe specified target when in specified zone, instead of that zone's bosses
 
@@ -462,6 +464,12 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
     (has options in config file to control when/how some items are displayed)
 
+    hold shift to show what the DCs would be if activated a charm
+
+    press left/right arrow keys to change which zone is being viewed
+
+    can also view drop table via bestiary - hold alt when hovering over an enemy
+
 87. fixed bug with clock zone's drops - it's supposed to have a chance to drop A Busted Copy of Wandoos 98
 
 88. on the start screen, added timestamps to the autosave and steam cloud details
@@ -479,7 +487,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
      - on GCD (grey)
      - ready (green)
 
-92. fixed zone dropdown bug that prevented selecting safe zone
+92. ~~fixed zone dropdown bug that prevented selecting safe zone~~ (replaced by mod 215)
 
 93. adds hotkeys to do an merge all (shift-m) and boost all (shift-b)
 
@@ -740,9 +748,11 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 179. fixes game bug where "Welcome to Sadistic Difficulty" perk wasn't included in stats breakdown for augs and NGUs
 
 180. adds [NGU YIELD FH] to fruit tooltips to as a reminder of which bonuses affect that fruit
-      - NGU = NGU YGGDRASIL
-      - YIELD = Yggdrasil Yield bonus from equipment + quirk 92
-      - FH = First Harvest, perk 51
+     - NGU = NGU YGGDRASIL
+     - YIELD = Yggdrasil Yield bonus from equipment + quirk 92
+     - FH = First Harvest, perk 51
+     - if bonus doesn't apply, it'll be grey
+     - if bonus does apply, it'll be blue
 
 181. right-clicking the E/M/R3 stats (upper-left of game screen) does the same as pressing the r, t, and f keys
 
@@ -806,7 +816,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
      hold alt to see current progress and progress per tick - useful in seeing the effect of floats on wishes that are "too slow"
 
-197. shows current time factor for guffs and beards on their tooltips
+197. shows current time factor for guffs and beards on their tooltips; guffs also show indication if muffin is active
 
 198. on the tooltip for A Giant Seed (item 92), shows how many seeds you'll gain if consumed
 
@@ -840,3 +850,37 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 211. fix game bug that wasn't displaying total PP gained on misc stats screen
 
 212. fix game but that would show empty tooltip on loadout items that were in daycare
+
+213. warning indication of when potions are about to expire
+     - sellout shop button flashes red when less than configred time is remaining
+     - time set in cfg file, default is 60 seconds
+
+214. boss required for titans are shown on the adventure button's tooltip
+
+215. replaced code that builds zone dropdown list
+     - shows boss required to unlock zone
+     - shows all zones in current difficulty
+     - zones that you haven't ever unlocked are displayed as ???? but can still see boss required
+     - zones that you haven't reached in current rebirth are disabled
+     - **real fix for not being able to select safe zone** - replaces mod 92
+
+216. tracks player deaths and is displayed on misc stats (info 'n stuff) page
+
+217. blood ritual tooltips now show what the gold per second and blood per second would be if max magic is allocated
+
+218. loot item names in combat log are in bold and can be colored via cfg option, default is #000000 (black)
+
+219. shift-click the buy muffin button to buy a muffin with 1 billion seeds
+
+220. can play music when idling/manualing titans, you can use whatever musing you want:
+     - must be mp3 files
+     - must be placed in config folder
+     - filenames must start with this pattern `(Tx)` where `x` is the titan number, e.g. `(T5) Thrill of the Hunt.mp3`
+     - some titans have guardians, you can play different file by appending `g` to the titan number, e.g. `(T6g) Stockade Blockade.mp3`
+     - if don't have a file for the guardian, will play the file for that titan instead
+     - if no matching file found, nothing happens - no music is played
+     - discord user Natalie has made theme music for a few titans:
+        - [(T1) Nightmare Sauce.mp3](https://discord.com/channels/406611885312704512/554159938990243871/1306328980474953738)
+        - [(T5) Thrill of the Hunt.mp3](https://discord.com/channels/406611885312704512/554159938990243871/1292907304038957138)
+        - [(T6) Your Heroic Quest.mp3](https://discord.com/channels/406611885312704512/554159938990243871/1329495242872852584)
+        - [(T6g) Stockade Blockade.mp3](https://discord.com/channels/406611885312704512/554159938990243871/1329495242872852584)
