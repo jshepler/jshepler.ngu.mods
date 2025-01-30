@@ -48,24 +48,21 @@ namespace jshepler.ngu.mods
             for (var x = 0; x <= maxZoneIdInDifficulty; x++)
             {
                 var zone = Zones.Zone[x];
-                var line = $"{zone.name}";
+                var line = $"{zone.bossId}: {zone.name}";
 
-                if (diff == difficulty.normal
-                    || (diff == difficulty.evil && x > 20)
-                    || (diff == difficulty.sadistic && x > 31))
-                    line = $"{zone.bossId}: {line}";
-
-                if (x == zoneId)
-                    list.Add($"<b>{line}</b>");
+                if ((diff == difficulty.evil && x < 21) || (diff == difficulty.sadistic && x < 32))
+                    line = zone.name;
 
                 else if (zone.bossId > highestBossDefeated)
-                    list.Add($"<color=grey>{zone.bossId}: ?????</color>");
+                    line = $"<color=grey>{zone.bossId}: ?????</color>";
 
                 else if (zone.id > maxUnlockedZoneId)
-                    list.Add($"<color=grey>{line}</color>");
+                    line = $"<color=grey>{zone.bossId}: {zone.name}</color>";
 
-                else
-                    list.Add(line);
+                if (x == zoneId)
+                    line = $"<b>{line}</b>";
+
+                list.Add(line);
             }
 
             _currentZoneValue = zoneId switch

@@ -12,7 +12,14 @@ namespace jshepler.ngu.mods
             HarmonyPatch(typeof(ItemNameDesc), "makeTitanLevelledLoot")]
         private static void ItemNameDesc_makeLoot_postfix(int id, ref string __result)
         {
-            __result = $"<b><color={Options.Colors.LootItemNames.Value}>{__result}</color></b>";
+            var index = 0;
+
+            // when LootDrop spits out quest item names, it does a Substring(40) to skip over "<b><color=blue>[QUEST ITEM]</color></b>\n"
+            if ((id >= 278 && id <= 287))
+                index = 40;
+
+            var newResult = __result.Insert(index, $"<b><color={Options.Colors.LootItemNames.Value}>") + " </color></b>";
+            __result = newResult;
         }
     }
 }
