@@ -1,5 +1,6 @@
 ﻿using System.CodeDom;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection.Emit;
 using HarmonyLib;
 using UnityEngine;
@@ -222,6 +223,37 @@ namespace jshepler.ngu.mods
             var curPage = __instance.curPage;
             for (var x = 0; x < _yggButtons.Length; x++)
                 _yggButtons[x].image.color = (x == curPage) ? Plugin.ButtonColor_Yellow : Color.white;
+        }
+
+
+        // highlight current beard button
+        // Canvas/Beard Canvas/Beard Menu + AllBeardController/Beard 0-6
+        private static Button[] _beardButtons;
+
+        [HarmonyPostfix, HarmonyPatch(typeof(BeardController), "Start")]
+        private static void BeardController_Start_postfix()
+        {
+            var menu = GameObject.Find("Canvas/Beard Canvas/Beard Menu + AllBeardController").transform;
+            _beardButtons =
+            [
+                menu.Find("Beard 0").GetComponent<Button>(),
+                menu.Find("Beard 1").GetComponent<Button>(),
+                menu.Find("Beard 2").GetComponent<Button>(),
+                menu.Find("Beard 3").GetComponent<Button>(),
+                menu.Find("Beard 4").GetComponent<Button>(),
+                menu.Find("Beard 5").GetComponent<Button>(),
+                menu.Find("Beard 6").GetComponent<Button>(),
+            ];
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(BeardController), "updateBeardDisplay")]
+        private static void BeardController_updateBeardDisplay_postfix(BeardController __instance)
+        {
+            if (!__instance.character.InMenu(Menu.Beards))
+                return;
+
+            for (var x = 0; x < _beardButtons.Length; x++)
+                _beardButtons[x].image.color = (x == __instance.id) ? Plugin.ButtonColor_Yellow : Color.white;
         }
 
 

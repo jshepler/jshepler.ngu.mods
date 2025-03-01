@@ -69,7 +69,8 @@ namespace jshepler.ngu.mods
             if (ppt < 1e-8f)
                 return double.MaxValue;
 
-            var ttl = (1.0 - wish.Progress) / ppt / 50.0;
+            //var ttl = (1.0 - wish.Progress) / ppt / 50.0;
+            var ttl = 1.0 / ppt / 50.0;
             return ttl;
         }
     }

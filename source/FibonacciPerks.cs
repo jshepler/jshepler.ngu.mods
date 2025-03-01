@@ -22,7 +22,7 @@ namespace jshepler.ngu.mods
                 { 144, "+5% Chance for +1 level on Loot!" },
                 { 233, "+10% QP Rewards" },
                 { 377, "377% Attack/Def Multiplier" },
-                { 610, "No More Quest Assignment RNG!" },
+                { 610, "Quests Are Always 50 Items!" },
                 { 987, "+5% Bonus EXP Gains" },
                 { 1597, "FIBONACCI KITTY ART" }
             };

@@ -48,15 +48,12 @@ namespace jshepler.ngu.mods
             if (!character.InMenu(Menu.EXP_Energy))
                 return;
 
-            if (character.settings.special1Bought && character.settings.special2Bought)
-                _e_specialOffersText.SetActive(false);
+            _e_specialOffersText.SetActive(!(character.settings.special1Bought && character.settings.special2Bought));
 
-            if (character.energySpeed >= 50f)
-            {
-                _e_purchText.SetActive(false);
-                _e_speed01Button.SetActive(false);
-                _e_speed1Button.SetActive(false);
-            }
+            var show = character.energySpeed < 50f;
+            _e_purchText.SetActive(show);
+            _e_speed01Button.SetActive(show);
+            _e_speed1Button.SetActive(show);
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(MagicPurchases), "updateMagicPurchases")]
@@ -66,12 +63,10 @@ namespace jshepler.ngu.mods
             if (!character.InMenu(Menu.EXP_Magic))
                 return;
 
-            if (character.magic.magicBarSpeed >= 50f)
-            {
-                _m_purchText.SetActive(false);
-                _m_speed01Button.SetActive(false);
-                _m_speed1Button.SetActive(false);
-            }
+            var show = character.magic.magicBarSpeed < 50f;
+            _m_purchText.SetActive(show);
+            _m_speed01Button.SetActive(show);
+            _m_speed1Button.SetActive(show);
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(Resource3Purchases), "updateRes3Purchases")]
@@ -81,12 +76,10 @@ namespace jshepler.ngu.mods
             if (!character.InMenu(Menu.EXP_R3))
                 return;
 
-            if (character.res3.res3BarSpeed >= 50f)
-            {
-                _r3_purchText.SetActive(false);
-                _r3_speed01Button.SetActive(false);
-                _r3_speed1Button.SetActive(false);
-            }
+            var show = character.res3.res3BarSpeed < 50f;
+            _r3_purchText.SetActive(show);
+            _r3_speed01Button.SetActive(show);
+            _r3_speed1Button.SetActive(show);
         }
     }
 }

@@ -25,7 +25,7 @@ namespace jshepler.ngu.mods.CapCalculators
             return result >= long.MaxValue ? long.MaxValue : (long)result;
         }
 
-        protected override double GetProgressPerTick(long r, long L)
+        protected override double GetProgressPerTick(double r, double L)
         {
             return p / d * (r / 50000) * h * m * c / L / s;
         }

@@ -53,8 +53,10 @@ namespace jshepler.ngu.mods
 
             var secondsPerDrop = 1f / ppt / 50f;
             var secondsForQuest = secondsPerDrop * character.beastQuest.targetDrops;
-            var avgDropsPerQuest = character.adventure.itopod.perkLevel[94] >= 610 ? 50 : 55;
-            var avgQuestsPerDay = 86400f / (secondsPerDrop * avgDropsPerQuest);
+
+            var hasFib610 = character.adventure.itopod.perkLevel[94] >= 610;
+            var questsPerDrop = hasFib610 ? 50 : 55;
+            var questsPerDay = 86400f / (secondsPerDrop * questsPerDrop);
 
             var timePerDrop = NumberOutput.timeOutput(secondsPerDrop);
             var totalTime = NumberOutput.timeOutput(secondsForQuest);
@@ -77,7 +79,7 @@ namespace jshepler.ngu.mods
             var text = $"\n\nTime per drop: {timePerDrop}"
                 + altText
                 + $"\nTotal quest time: {totalTime}"
-                + $"\nAverage quests per day: {avgQuestsPerDay:0.#}\n";
+                + $"\n{(hasFib610 ? "Q" : "Average q")}uests per day: {questsPerDay:0.#}\n";
 
             return text;
         }

@@ -4,6 +4,7 @@ using System.Reflection.Emit;
 using HarmonyLib;
 using jshepler.ngu.mods.GameData;
 using UnityEngine;
+using UnityEngine.TextCore;
 
 namespace jshepler.ngu.mods
 {
@@ -16,13 +17,14 @@ namespace jshepler.ngu.mods
         private static bool AdventureController_constructDropdown_prefix(AdventureController __instance)
         {
             var zoneId = __instance.zone;
-            var diff = __instance.character.settings.rebirthDifficulty;
+            var character = __instance.character;
+            var diff = character.settings.rebirthDifficulty;
 
             var highestBossDefeated = diff switch
             {
-                difficulty.normal => __instance.character.highestBoss,
-                difficulty.evil => __instance.character.highestHardBoss,
-                _ => __instance.character.highestSadisticBoss
+                difficulty.normal => character.highestBoss,
+                difficulty.evil => character.highestHardBoss,
+                _ => character.highestSadisticBoss
             };
 
             var maxZoneIdInDifficulty = diff switch
@@ -53,7 +55,8 @@ namespace jshepler.ngu.mods
                 if ((diff == difficulty.evil && x < 21) || (diff == difficulty.sadistic && x < 32))
                     line = zone.name;
 
-                else if (zone.bossId > highestBossDefeated)
+                else if (zone.bossId > highestBossDefeated
+                    || (x == 45 && !character.adventure.ratTitanDefeated)) // tippi killed required to unlock traitor's zone
                     line = $"<color=grey>{zone.bossId}: ?????</color>";
 
                 else if (zone.id > maxUnlockedZoneId)
@@ -122,7 +125,8 @@ namespace jshepler.ngu.mods
             if (zone > 0)
             {
                 var z = Zones.Zone[zone - 1];
-                if (__instance.character.effectiveBossID() < z.effectiveBossId)
+                if (__instance.character.effectiveBossID() < z.effectiveBossId
+                    || (zone == 45 && !__instance.character.adventure.ratTitanDefeated)) // tippi kill required to unlock/select traitor's zone
                 {
                     __instance.dropdown.SetValueWithoutNotify(_currentZoneValue);
                     return false;

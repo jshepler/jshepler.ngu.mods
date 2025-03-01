@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using UnityEngine;
+using UnityEngine.TextCore;
 
 namespace jshepler.ngu.mods
 {
@@ -25,17 +26,19 @@ namespace jshepler.ngu.mods
             if (!character.settings.diggersOn || character.highestBoss < 30)
                 return;
 
-            var canUpgrade = false;
-            for (var x = 0; x < character.diggers.diggers.Count; x++)
-            {
-                if (_controller.upgradeCost(x) > character.realGold)
-                    continue;
-
-                canUpgrade = true;
-                break;
-            }
-
+            var canUpgrade = CanUpgradeAnyDigger();
             __instance.diggers.image.color = canUpgrade ? Plugin.ButtonColor_Yellow : Color.white;
+        }
+
+        internal static bool CanUpgradeAnyDigger()
+        {
+            var character = Plugin.Character;
+
+            for (var x = 0; x < character.diggers.diggers.Count; x++)
+                if (_controller.upgradeCost(x) <= character.realGold)
+                    return true;
+
+            return false;
         }
 
         private static void UpgradeAll()

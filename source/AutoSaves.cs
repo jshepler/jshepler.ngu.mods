@@ -13,6 +13,7 @@ namespace jshepler.ngu.mods
     internal class AutoSaves
     {
         internal static string GameName = null;
+        private static bool _switchingDifficulties = false;
 
         private static string ModifiedPersistentDataPath()
         {
@@ -40,7 +41,9 @@ namespace jshepler.ngu.mods
                     if (Plugin.Character.settings.dailySaveRewardTime.totalseconds >= 82800.0)
                     {
                         Plugin.Character.settings.dailySaveRewardTime.reset();
-                        Plugin.ShowOverrideNotification($"You (tried) to manually save your file today! Here's {Plugin.Character.addAP(200)} AP as a bribe!");
+                        var ap = Plugin.Character.addAP(200);
+                        TrackAPGained.TrackGain(ap, TrackAPGained.APSource.DailySave);
+                        Plugin.ShowOverrideNotification($"You (tried) to manually save your file today! Here's {ap} AP as a bribe!");
                     }
 
                     if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
@@ -57,10 +60,34 @@ namespace jshepler.ngu.mods
             };
         }
 
+        [HarmonyPrefix, HarmonyPatch(typeof(Rebirth), "startNormalRebirth")]
+        private static void Rebirth_startNormalRebirth_prefix()
+        {
+            DoSave("JumpToNormal");
+            _switchingDifficulties = true;
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(Rebirth), "startHardRebirth")]
+        private static void Rebirth_startHardRebirth_prefix()
+        {
+            DoSave("JumpToEvil");
+            _switchingDifficulties = true;
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(Rebirth), "startSadisticRebirth")]
+        private static void Rebirth_startSadisticRebirth_prefix()
+        {
+            DoSave("JumpToSadistic");
+            _switchingDifficulties = true;
+        }
+
         [HarmonyPrefix, HarmonyPatch(typeof(Rebirth), "engage", typeof(bool))]
         private static void Rebirth_engage_bool_prefix(bool hardReset, Rebirth __instance)
         {
-            DoSave(hardReset ? "Challenge" : "Rebirth");
+            if(!_switchingDifficulties)
+                DoSave(hardReset ? "Challenge" : "Rebirth");
+
+            _switchingDifficulties = false;
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(PitController), "engage")]

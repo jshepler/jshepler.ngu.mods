@@ -133,6 +133,8 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 13. alters tooltips for "Blood Spaghetti" and "Counterfeit Gold" spells to show amount gained when clicked (like Iron Pill does)
 
 14. calculates amount of advanced training needed to autokill titans and displays in the Adventure button's tooltip
+    - shows number of remaining kills for T5 AK requirement
+    - shows number of remaining optional kills for T9+ AK
 
 15. fixes bug with Target boxes on the advanced training page to allow user to continue changing value when bar completes
 
@@ -185,19 +187,29 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 27. right-click on questing button adds quest items from inventory and completes the quest if target amount met
 
-28. allow target inputs to accept/display scientific and engineering notations, based on number display style in settings
-
-    currently: Advanced Training, NGUs
+28. replaces input parser to allow sci/eng notation, with or without the '+' (e.g. can do 1e9 instead of 1e+9)
+    - also honors current culture's decimal seperator character (e.g. , instead of .)
+    - currently for: EMR3 input box at top of screen, target boxes for AT and NGUs
 
 29. added boss # to displayed "Highest Boss Multiplier" on time machine page (mostly as an exercise of transpiler patch injecting delegate call)
 
 30. added display of digger gps drain diff between current and next level - because the current net gps needs to be enough to cover the diff, not the total
 
-31. toggle auto-allocate resources per bar (shift-click the + button) - idle resources evenly split between enabled bars, disables when hit target
-
-    current bars: Basic Training, Augments, Advanced Training, Time Machine, Blood Magic Rituals, Wandoos, NGUs, Hacks
-
-    follows auto advance for: AT, NGUs, and Hacks
+31. auto-allocator - shift-click the + button to toggle, changes button to ++ to indicate being enabled
+    - every tick, evenly splits idle resources between the enabled allocators up to cap
+    - if cap gets reduced, excess resource will get returned to idle to be distributed to other enabled allocators
+    - if resource is de-allocated (hits target, press r/t/f key, rebirth, etc), allocator is turned off
+    - alt-shift-click will toggle the allocators on all bars on current screen (e.g. all eNGUs)
+    - current bars: BT, augs, AT, TM, BM, Wandoos, NGUs, Hacks, Wishes
+    - BT: if the setting "Sync Training" is enabled, will toggle the appropriate other skill
+    - augs: alt-shift-click only does the aug+upgrade pair instead of all bars
+    - hacks: alt-shift-click toggles all hacks, not just the ones on current page
+    - wishes: 
+        - shift-click toggles the allocator for the one resource on the one wish
+        - alt-shift-click toggles the allocators for the one resource on all slotted wishes
+        - ctrl-alt-shift-click toggles the allocators for all 3 resources on all slotted wishes
+        - shift-clicking the resume button (F1 popup) will resume plus enable (not toggle) the allocators for all 3 resources on the resumed wishes
+        - if a wish that has an enabled allocator finishes and auto advance is enabled (F1 popup), the allocator will get moved to the next wish started (even if finished offline) 
 
 32. alt-shift-click enables auto-allocate on multiple bars: all ngu energy, all ngu magic, augment+upgrade pair, basic training offense/defense pair (if sync training enabled), TM pair, wandoows pair
 
@@ -265,7 +277,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 50. add tab navigation to various fields, supports shift-tab and wrap-around (tabbing past first/last field, wraps to other end)
 
-    currently: augment targets, advanced training targets, time machine targets, NGUs targets, digger levels, Hacks targets, EMR3 custom purchase amounts
+    currently: augment targets, advanced training targets, time machine targets, NGUs targets, digger levels, Hacks targets, EMR3 custom purchase amounts, rich jerks custom purchase amounts
 
 51. shift-click cap button to get a popup of buttons for the partial caps 10-50%, click to allocate that amount
 
@@ -394,6 +406,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
     there's a config option to snipe specified target when in specified zone, instead of that zone's bosses
 
 78. on the rebirth screen, the rebirth button will be red if there is "Crap to do before rebirthing"
+    - adds a check for if any digger can be upgraded (increase max level)
 
 79. removed "not less than 10k" limit on buy custom energy/magic cap, lowest is what you can get for 1 exp (e.g. 250 energy cap)
 
@@ -452,7 +465,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
     - poop per day
     - guffs per day
     - the optimal floor even if > max floor
-    - AT power needed for optimal floors: next, next 50th (next exp increase), next boost (e.g. when boost drops change from 1k to 2k)
+    - ADV power needed for optimal floors: next, next 50th (next exp increase), next boost (e.g. when boost drops change from 1k to 2k)
 
     time to next PP uses 2 calcs: one for when floor \<= optimal floor and another > optimal floor
 
@@ -586,8 +599,8 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 126. tracks some resources gained this/last rebirth:
       - EXP shown on `Spend EXP` button tooltip
       - AP shown on `4G's SELLOUT SHOP` button tooltip
-      - PP shown on `I.T.O.P.O.D PERKS` button tooltip (adventure screen)
-      - QP shown on `Questing` button tooltip
+      - PP shown on the PP icon's tooltip (perks screen)
+      - QP shown on QP icon's tooltip (quirks screen)
       - seeds shown on seeds icon tooltip (ygg screen)
       - poop shown on poop icon tooltip (ygg screen)
 
@@ -689,10 +702,9 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
       - enable/disable auto yeet/sort
       - set sort by: rarity first, bonus type first, mayo efficiency, bonus variance
       - set sort direction
-      - set max rarity to yeet
-      - set max efficiency to yeet (overrides max rarity)
-      - select bonus(es) to always yeet
-      - enable/disable automatically protecting chonker cards
+      - set auto yeet option: max rarity, max efficiency, max variance
+      - select which card(s) to always yeet regardless of rarity, efficiency, or variance
+      - enable/disable automatically protecting chonker cards (vanilla always protects, this makes it optional)
       - enabled or not, can press the s/y keys to sort/yeet cards
 
 159. blood gain modifiers breakdown to `Stats Breakdown - Misc`
@@ -701,6 +713,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
      - EXP sources on the `Spend EXP` button tooltip
      - PP sources on the PP gained this/last rebirth tooltip, on the Perks page over the PP icon top-right
      - QP sources on the QP gained this/last rebirth tooltip, on the Quirks page over the QP icon top-right
+     - AP sources on the `4G's Sellout Shop` button tooltip
 
 161. LSC reminder - under certain conditions, the `Challenges` button on the `Rebirth` screen will highlight yellow:
       - Laser Sword Challenge is unlocked
@@ -884,3 +897,19 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
         - [(T5) Thrill of the Hunt.mp3](https://discord.com/channels/406611885312704512/554159938990243871/1292907304038957138)
         - [(T6) Your Heroic Quest.mp3](https://discord.com/channels/406611885312704512/554159938990243871/1329495242872852584)
         - [(T6g) Stockade Blockade.mp3](https://discord.com/channels/406611885312704512/554159938990243871/1329495242872852584)
+
+221. hold alt on the cards screen to change the current mayo amounts to show the total mayo needed for all the cards in the deck
+
+222. shows number of open inventory spaces on the inventory button (ignores merge slots) and changes the button to yellow if < 6 open slots or red if 0 open slots
+
+223. 5 of the ygg fruits have levels that vanilla doesn't show and those levels are used in the bonus calc, this mod adds those levels (and the math) to their tooltips
+
+224. cfg option to show sci/eng notation numbers as suffix numbers when below configured threshold
+
+225. the tooltip on "Total Digger Levels Bonus" now shows the total digger levels
+
+226. replaced beard levels/bonus display with new layout that includes perm level and total bonus
+
+227. adds hp regen to boss hp bar tooltip (fight boss screen)
+
+228. fixes game bug with daily spin tier 0, the 500 AP reward could never be awarded

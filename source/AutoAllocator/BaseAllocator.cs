@@ -31,7 +31,7 @@ namespace jshepler.ngu.mods.AutoAllocator
             return TextComponents[id];
         }
 
-        protected void UpdateText(int id)
+        protected virtual void UpdateText(int id)
         {
             var tc = GetTextComponent(id);
             if(tc) tc.text = _isEnabled[id] ? "++" : "+";

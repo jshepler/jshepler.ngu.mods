@@ -340,6 +340,47 @@ namespace jshepler.ngu.mods
             return long.Parse($"{num:0}");
         }
 
+        // provided by discord user Erunion
+        internal static float MinimumAdditional(this float current)
+        {
+            float next = current.NextFloat();
+
+            // This difference should always be a power of two
+            float difference = next - current;
+            Plugin.LogInfo($"diff: {difference:r}");
+            if (difference <= 1.0f)
+                return 1.0f;
+
+            // while difference is the actual difference between the values, anything
+            // more than half of that difference should round up to the next value
+            var min = difference / 2.0f + 1.0f;
+            Plugin.LogInfo($"min: {min:r}");
+
+            return min;
+        }
+
+        // provided by discord user Erunion
+        internal static float NextFloat(this float value)
+        {
+            var bits = FloatToInt32Bits(value);
+            var next = Int32BitsToFloat(bits + 1);
+            Plugin.LogInfo($"v: {value:r}, b: {bits}, n: {next:r}");
+
+            return next;
+        }
+
+        // 32bit versions of BitConverter.DoubleToInt64Bits and .Int64BitsToDouble
+        // because .net framework doesn't have a 32bit versions
+        private static unsafe int FloatToInt32Bits(float value)
+        {
+            return *(int*)(&value);
+        }
+
+        private static unsafe float Int32BitsToFloat(int value)
+        {
+            return *(float*)(&value);
+        }
+
         #endregion
 
         internal static Menu CurrentMenu(this Character character)

@@ -2,20 +2,38 @@
 using System.Globalization;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Text.RegularExpressions;
 using HarmonyLib;
 
 namespace jshepler.ngu.mods
 {
     [HarmonyPatch]
-    internal class AllowScientificNotationInput
+    internal class InputParser
     {
         private static MethodInfo longParse = typeof(long).GetMethod("Parse", [typeof(string)]);
-        private static long ParseScientificNotation(string s) => string.IsNullOrWhiteSpace(s) ? 0L : long.Parse(s, NumberStyles.Float | NumberStyles.AllowThousands);
+        //private static long ParseScientificNotation(string s) => string.IsNullOrWhiteSpace(s) ? 0L : long.Parse(s, NumberStyles.Float | NumberStyles.AllowThousands);
+
+
+        
+        // resource input box at top of screen
+        [HarmonyPrefix, HarmonyPatch(typeof(EnergyInputController), "validateInput")]
+        private static bool EnergyInputController_validateInput_prefix(EnergyInputController __instance)
+        {
+            var text = __instance.energyRequested.text.ToLower();
+            var value = parseLong(text);
+            if (value < 1)
+                value = 1;
+
+            __instance.energyMagicInput = value;
+            __instance.character.settings.inputAmount = value;
+            __instance.energyRequested.text = __instance.character.display(value);
+
+            return false;
+        }
 
 
 
         // advanced training
-
         [HarmonyPostfix, HarmonyPatch(typeof(AdvancedTrainingController), "Start")]
         private static void AdvancedTrainingController_Start_postfix(AdvancedTrainingController __instance)
         {
@@ -29,7 +47,7 @@ namespace jshepler.ngu.mods
             return new CodeMatcher(instructions)
                 .MatchForward(false, new CodeMatch(OpCodes.Call, longParse))
                 .RemoveInstruction()
-                .Insert(Transpilers.EmitDelegate(ParseScientificNotation))
+                .Insert(Transpilers.EmitDelegate(parseLong))
                 .InstructionEnumeration();
         }
 
@@ -47,7 +65,6 @@ namespace jshepler.ngu.mods
 
 
         // NGUs
-
         [HarmonyPostfix, HarmonyPatch(typeof(NGUController), "Start")]
         private static void NGUController_Start_postfix(NGUController __instance)
         {
@@ -68,7 +85,7 @@ namespace jshepler.ngu.mods
             return new CodeMatcher(instructions)
                 .MatchForward(false, new CodeMatch(OpCodes.Call, longParse))
                 .RemoveInstruction()
-                .Insert(Transpilers.EmitDelegate(ParseScientificNotation))
+                .Insert(Transpilers.EmitDelegate(parseLong))
                 .InstructionEnumeration();
         }
 
@@ -118,6 +135,59 @@ namespace jshepler.ngu.mods
             };
 
             return false;
+        }
+
+
+
+        // modified version of EnergyInputController.validateInput()
+        // in vanilla, using a culture that uses commas as decimal seperators doesn't work as they get removed before parsing - use current culture's decimal seperator character
+        // also, it can't parse 1e6, has to be 1e+6 - allow 1e6
+        private static long parseLong(string text)
+        {
+            text = Regex.Replace(text, @"(\d)e(\d)", "$1e+$2");
+
+            // only do the custom parsing if the text can't be parsed as-is
+            // the specified NumberStyles allows parsing sci/eng notation
+            if (!ulong.TryParse(text, NumberStyles.Float | NumberStyles.AllowThousands, null, out var parsed))
+            {
+                var suffixMulti = 1UL;
+
+                text = text.Replace("uadrillion", "").Replace("rillion", "").Replace("illion", "");
+                if (text.EndsWith("k"))
+                    suffixMulti = 1000UL;
+                else if (text.EndsWith("m"))
+                    suffixMulti = 1000000UL;
+                else if (text.EndsWith("b"))
+                    suffixMulti = 1000000000UL;
+                else if (text.EndsWith("t"))
+                    suffixMulti = 1000000000000UL;
+                else if (text.EndsWith("q"))
+                    suffixMulti = 1000000000000000UL;
+
+                var decimalSeperator = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
+                text = Regex.Replace("0" + text, $"[^0-9{decimalSeperator}]", string.Empty);
+
+                // no clue why 4G was checking for multiples, but keeping it anyway and using current culture intead of assuming '.'
+                if (text.Split(decimalSeperator[0]).Length - 1 > 1)
+                {
+                    int num2 = text.Length - text.LastIndexOf(decimalSeperator);
+                    text = text.Replace(decimalSeperator, "");
+                    text = text.Insert(text.Length + 1 - num2, decimalSeperator);
+                }
+
+                if (ulong.TryParse(text, NumberStyles.Float | NumberStyles.AllowThousands, null, out parsed))
+                    parsed *= suffixMulti;
+
+                // if still fails to parse as ulong, fallback to double.Parse()
+                else
+                    parsed = (ulong)(double.Parse(text) * suffixMulti);
+            }
+
+            var value = parsed >= long.MaxValue ? long.MaxValue : (long)parsed;
+            if (value < 0)
+                value = 0;
+
+            return value;
         }
     }
 }

@@ -56,6 +56,10 @@ namespace jshepler.ngu.mods
 
         private static void ToggleRunning()
         {
+            // ignore ITOPOD
+            if (Controller.zone == 1000)
+                return;
+
             _running = !_running;
             _snipeZone = _running ? Controller.zone : -1;
             Controller.idleAttackMove.checkIdleAttackState();

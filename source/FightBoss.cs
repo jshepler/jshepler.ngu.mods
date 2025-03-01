@@ -22,6 +22,27 @@ namespace jshepler.ngu.mods
 
         private static GameObject _stopButton;
 
+        [HarmonyPrefix, HarmonyPatch(typeof(BossInfoDisplay), "OnPointerEnter")]
+        private static bool BossInfoDisplay_OnPointerEnter_prefix(BossInfoDisplay __instance)
+        {
+            var character = __instance.character;
+
+            if (character.bossID >= character.bossController.bossProperties.Count
+                || character.challenges.blindChallenge.inChallenge)
+                return false;
+
+            var numberFormat = __instance.numberFormat;
+
+            string message = $"{character.bossController.getBossName(character.bossID)} ({character.bossID + 1})"
+                + $"\nAttack: {numberFormat.suffixFormat(character.bossAttack)}"
+                + $"\nDefense: {numberFormat.suffixFormat(character.bossDefense)}"
+                + $"\nMax HP: {numberFormat.suffixFormat(character.bossMaxHP)}"
+                + $"\nRegen: {numberFormat.suffixFormat(character.bossRegen)}";
+
+            __instance.tooltip.showTooltip(message);
+            return false;
+        }
+
         [HarmonyPostfix, HarmonyPatch(typeof(ButtonShower), "Start")]
         private static void ButtonShower_Start_postfix(ButtonShower __instance)
         {

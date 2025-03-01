@@ -11,7 +11,7 @@ namespace jshepler.ngu.mods
             set => ModSave.Data.LastRebirthTime = value;
         }
 
-        [HarmonyPrefix, HarmonyPatch(typeof(Rebirth), "engage", [typeof(bool)])]
+        [HarmonyPrefix, HarmonyPatch(typeof(Rebirth), "engage", typeof(bool))]
         private static void Rebirth_engage_prefix()
         {
             LastRebirthTotalSeconds = Plugin.Character.rebirthTime.totalseconds;

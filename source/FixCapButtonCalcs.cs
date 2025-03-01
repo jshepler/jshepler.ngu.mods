@@ -34,6 +34,7 @@ namespace jshepler.ngu.mods
             idle -= allocate;
             character.idleEnergy = idle;
             character.NGU.skills[id].energy = allocate;
+            __instance.updateText();
 
             return false;
         }
@@ -63,6 +64,7 @@ namespace jshepler.ngu.mods
             idle -= allocate;
             character.magic.idleMagic = idle;
             character.NGU.magicSkills[id].magic = allocate;
+            __instance.updateText();
 
             return false;
         }
@@ -85,8 +87,8 @@ namespace jshepler.ngu.mods
             idle -= allocate;
             character.idleEnergy = idle;
             character.wandoos98.wandoosEnergy = allocate;
-
             __instance.updateText();
+
             return false;
         }
 
@@ -106,8 +108,8 @@ namespace jshepler.ngu.mods
             idle -= allocate;
             character.magic.idleMagic = idle;
             character.wandoos98.wandoosMagic = allocate;
-
             __instance.updateText();
+
             return false;
         }
 

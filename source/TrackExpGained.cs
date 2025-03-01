@@ -262,7 +262,7 @@ namespace jshepler.ngu.mods
 
             internal static Func<int, string> Name = i => i switch
             {
-                0 => "Bosses",
+                0 => "Fight Boss",
                 1 => "Titans",
                 2 => "ITOPOD",
                 3 => "Fruit",

@@ -16,9 +16,10 @@ namespace jshepler.ngu.mods
             Cards.AutoSortEnabled = Config.Bind("Cards", "AutoSort.Enabled", true, "if enabled, sorts cards as they are added");
             Cards.AutoSortBy = Config.Bind("Cards", "AutoSort.By", CardSortBy.RarityFirst, "RarityFirst: rarity, type, bonus; TypeFirst: type, rarity, bonus; Efficency: based on bonus/mayo");
             Cards.AutoSortDirection = Config.Bind("Cards", "AutoSort.Direction", CardSortDirection.Ascending, "the order cards are sorted");
-            Cards.AutoYeetEnabled = Config.Bind("Cards", "AutoYeet.Enabled", false, "if enabled, will yeet cards as they are added, at or below the configured max rarity");
-            Cards.MaxYeetRarity = Config.Bind("Cards", "AutoYeet.MaxYeetRarity", rarity.Crappy, "if AutoYeet is enabled, this is the max rarity that will get yeeted");
-            Cards.MaxYeetEfficiency = Config.Bind("Cards", "AutoYeet.MaxYeetEfficiency", 0f, "if set, overrides MaxYeetRarity and will yeet cards up to specified efficency, 0.0 to 1.0 (100%), 0 = disabled");
+            Cards.AutoYeetMode = Config.Bind("Cards", "AutoYeet.Mode", CardYeetMode.Rarity, "What is used to determine when to auto yeet a card");
+            Cards.MaxYeetRarity = Config.Bind("Cards", "AutoYeet.MaxYeetRarity", rarity.Crappy, "if AutoYeet.Mode is Rarity, this is a card's max rarity that will get yeeted");
+            Cards.MaxYeetEfficiency = Config.Bind("Cards", "AutoYeet.MaxYeetEfficiency", 0f, "if AutoYeet.Mode is Efficiency, this is a card's max mayo efficiency that will get yeeted");
+            Cards.MaxYeetVariance = Config.Bind("Cards", "AutoYeet.MaxYeetVariance", 0f, "if AutoYeet.Mode is Variance, this a card's max variance that will get yeeted, 0.8 to 1.2");
             Cards.AlwaysYeetCSV = Config.Bind("Cards", "AutoYeet.AlwaysYeet", "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0", "set in-game via F1 popup on cards screen");
             Cards.AutoProtectChonkers = Config.Bind("Cards", "AutoProtectChonkers", true, "vanilla game always protects chonkers when spawned - this makes it an option");
 
@@ -41,6 +42,7 @@ namespace jshepler.ngu.mods
             GameModes.Hardcore = Config.Bind("GameModes", "Hardcore", false, "enable to disable loading local saves and game ends when player dies - cloud save erased; MUST START NEW GAME TO GO INTO EFFECT");
             GameModes.PermaTC = Config.Bind("GameModes", "PermaTC", false, "enable to permanently spawn trolls every 2 minutes, every 5th a big troll; MUST START NEW GAME TO GO INTO EFFECT");
 
+            MixedNumberFormat.Threshold = Config.Bind("MixedNumberFormat", "Threshold", 0.0, "When in scientific/engineering notation and the value is less than this threshold, suffix will be used instead. 0 = disabled");
             NotificationToasts.Enabled = Config.Bind("NotificationToasts", "Enabled", true, "enable to separate \"timed tooltips\" into separate notifications as toasts");
             NotificationToasts.TopDown = Config.Bind("NotificationToasts", "TopDown", true, "if true, toasts are displayed top-right and go down; if false, toasts are displayed bottom-right and go up");
             OverrideCulture.Enabled = Config.Bind("OverrideCulture", "Enabled", false, "if enabled, uses the specified locale string to override your system's current culture for the game - ONLY AFFECTS NUMBER FORMATTING");
@@ -109,7 +111,8 @@ namespace jshepler.ngu.mods
                     Cards.AutoSortDirection.Value = (CardSortDirection)Enum.Parse(typeof(CardSortDirection), value);
 
                 if (orphaned.TryGetValue("AutoCards", "AutoYeet.Enabled", out value))
-                    Cards.AutoYeetEnabled.Value = value == "true";
+                    //Cards.AutoYeetEnabled.Value = value == "true";
+                    Cards.AutoYeetMode.Value = value == "false" ? CardYeetMode.Disabled : Cards.AutoYeetMode.Value;
 
                 if (orphaned.TryGetValue("AutoCards", "AutoYeet.MaxYeetRarity", out value))
                     Cards.MaxYeetRarity.Value = (rarity)Enum.Parse(typeof(rarity), value);
@@ -128,6 +131,9 @@ namespace jshepler.ngu.mods
 
                 if (orphaned.TryGetValue("FruitActivationIndicator", "Enabled", out value))
                     Yggdrasil.ActivationIndicator.Value = value == "true";
+
+                if (orphaned.TryGetValue("Cards", "AutoYeet.Enabled", out value))
+                    Cards.AutoYeetMode.Value = value == "false" ? CardYeetMode.Disabled : Cards.AutoYeetMode.Value;
 
                 orphaned.Clear();
                 Config.Save();
@@ -279,10 +285,13 @@ namespace jshepler.ngu.mods
             internal static ConfigEntry<bool> AutoSortEnabled;
             internal static ConfigEntry<CardSortBy> AutoSortBy;
             internal static ConfigEntry<CardSortDirection> AutoSortDirection;
-            internal static ConfigEntry<bool> AutoYeetEnabled;
+
+            internal static ConfigEntry<CardYeetMode> AutoYeetMode;
             internal static ConfigEntry<rarity> MaxYeetRarity;
             internal static ConfigEntry<float> MaxYeetEfficiency;
+            internal static ConfigEntry<float> MaxYeetVariance;
             internal static ConfigEntry<string> AlwaysYeetCSV;
+
             internal static ConfigEntry<bool> AutoProtectChonkers;
         }
 
@@ -323,6 +332,11 @@ namespace jshepler.ngu.mods
         internal static class Colors
         {
             internal static ConfigEntry<string> LootItemNames;
+        }
+
+        internal static class MixedNumberFormat
+        {
+            internal static ConfigEntry<double> Threshold;
         }
     }
 }

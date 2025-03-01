@@ -18,8 +18,8 @@ namespace jshepler.ngu.mods
         }
 
         private static int _maxWishSlots => Plugin.Character.wishesController.curWishSlots();
-        internal static IEnumerable<WishWrapper> RunningWishes => AllWishes.Where(w => w.Energy > 0 && w.Magic > 0 && w.Res3 > 0).Take(_maxWishSlots);
-        internal static IEnumerable<WishWrapper> PartiallyRunningWishes => AllWishes.Where(w => w.Energy > 0 || w.Magic > 0 || w.Res3 > 0).Take(_maxWishSlots);
+        internal static IEnumerable<WishWrapper> RunningWishes => AllWishes.Where(w => w.IsRunning).Take(_maxWishSlots);
+        internal static IEnumerable<WishWrapper> PartiallyRunningWishes => AllWishes.Where(w => w.HasAllocations).Take(_maxWishSlots);
         internal static IEnumerable<WishWrapper> CurValidUpgradesList => Plugin.Character.wishesController.curValidUpgradesList.Select(i => AllWishes[i]);
     }
 
@@ -58,5 +58,6 @@ namespace jshepler.ngu.mods
         }
 
         internal bool IsRunning => Energy > 0 && Magic > 0 && Res3 > 0;
+        internal bool HasAllocations => Energy > 0 || Magic > 0 || Res3 > 0;
     }
 }

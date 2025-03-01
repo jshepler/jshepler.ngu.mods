@@ -2,6 +2,7 @@
 using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.TextCore;
 using UnityEngine.UI;
 
 namespace jshepler.ngu.mods
@@ -10,7 +11,7 @@ namespace jshepler.ngu.mods
     internal class QuestItemCountOnButton
     {
         private static Character _character;
-        private static Text _questButtonTextComponenet;
+        //private static Text _questButtonTextComponenet;
         private static int _invItemCount = 0;
 
         [HarmonyPrepare]
@@ -29,7 +30,7 @@ namespace jshepler.ngu.mods
         private static void ButtonShower_Start_postfix(ButtonShower __instance)
         {
             _character = __instance.character;
-            _questButtonTextComponenet = __instance.beast.GetComponentInChildren<Text>();
+            //_questButtonTextComponenet = __instance.beast.GetComponentInChildren<Text>();
         }
 
         private static bool _questItemDropped = false;
@@ -83,25 +84,23 @@ namespace jshepler.ngu.mods
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(ButtonShower), "updateButtons")]
-        private static void ButtonShower_updateButtons_postifx(ButtonShower __instance)
+        private static void ButtonShower_updateButtons_postifx(ButtonShower __instance, Text ___beastText)
         {
-            _questButtonTextComponenet.text = "Questing";
+            //___beastText.text = "Questing";
             
             var quest = _character.beastQuest;
             if (!InManualQuest() || quest.curDrops >= quest.targetDrops)
-            {
                 return;
-            }
 
             var total = quest.curDrops + _invItemCount;
             var diff = quest.targetDrops - total;
 
             __instance.beast.image.color =
-                diff > 5 ? Color.white
+                diff > 5 || !__instance.character.arbitrary.hasQuestLight ? Color.white
                 : diff <= 0 ? Plugin.ButtonColor_Green
                 : Plugin.ButtonColor_Yellow;
 
-            _questButtonTextComponenet.text += $" {total}/{quest.targetDrops}";
+            ___beastText.text = $"Questing {total}/{quest.targetDrops}";
         }
 
         private static void SetInvItemCount()

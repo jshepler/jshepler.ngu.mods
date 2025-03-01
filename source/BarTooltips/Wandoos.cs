@@ -26,8 +26,9 @@ namespace jshepler.ngu.mods.BarTooltips
             var tpb = ppt == 0 ? 0 : Mathf.CeilToInt(1 / ppt);
             var capPct = ppt * 100f;
 
-            ___message += $"\n\n<b>% Allocated:</b> {capPct}%"
-                + $"\n   (ppt: {ppt:0.0000000} = {tpb}t/bar)";
+            if (!Plugin.Character.challenges.blindChallenge.inChallenge)
+                ___message += $"\n\n<b>% Allocated:</b> {capPct}%"
+                    + $"\n   (ppt: {ppt:0.0000000} = {tpb}t/bar)";
 
             __instance.tooltip.showTooltip(___message);
         }
@@ -52,8 +53,9 @@ namespace jshepler.ngu.mods.BarTooltips
             var tpb = ppt == 0 ? 0 : Mathf.CeilToInt(1 / ppt);
             var capPct = ppt * 100f;
 
-            ___message += $"\n\n<b>% Allocated:</b> {capPct}%"
-                + $"\n   (ppt: {ppt:0.0000000} = {tpb}t/bar)";
+            if (!Plugin.Character.challenges.blindChallenge.inChallenge)
+                ___message += $"\n\n<b>% Allocated:</b> {capPct}%"
+                    + $"\n   (ppt: {ppt:0.0000000} = {tpb}t/bar)";
 
             __instance.tooltip.showTooltip(___message);
         }

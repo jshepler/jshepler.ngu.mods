@@ -144,9 +144,9 @@ namespace jshepler.ngu.mods
             var oldBonus = character.yggdrasil.totalStatBonus();
             var newBonus = Math.Pow(character.yggdrasil.fruits[1].totalLevels + gainLevels, 1.5);
 
-            return $"+{character.display((newBonus - oldBonus) * 100f)}% to temp Attack/Defense bonus,"
-                + $"\n   going from {character.display(oldBonus * 100f)}% to {character.display(newBonus * 100f)}%"
-                + $"\n\n+{character.display(seeds)} seeds";
+            return $"+{character.display(gainLevels)} levels gained"
+                + $"\n+{character.display((newBonus - oldBonus) * 100f)}% Attack/Defense bonus,"
+                + $"\n+{character.display(seeds)} seeds";
         }
 
         private static string FoA(FruitController fc)
@@ -185,7 +185,8 @@ namespace jshepler.ngu.mods
 
             var modified = character.checkExpAdded(exp);
 
-            return $"+{character.display(modified)} EXP\n+{character.display(seeds)} seeds";
+            return $"+{character.display(modified)} EXP"
+                + $"\n+{character.display(seeds)} seeds";
         }
 
         private static string POM(FruitController fc)
@@ -204,11 +205,12 @@ namespace jshepler.ngu.mods
             var seeds = fc.seedReward(5, tierFactor, poopMulti);
 
             var character = fc.character;
-            var gainLuck = (long)Mathf.Ceil(character.yggdrasilController.baseSeedReward[5] * 0.7f * (float)tierFactor * poopMulti * character.NGUController.yggdrasilBonus() * character.yggdrasilYieldBonus() * character.adventureController.itopod.totalHarvestBonus(5));
+            var gainLevels = (long)Mathf.Ceil(character.yggdrasilController.baseSeedReward[5] * 0.7f * (float)tierFactor * poopMulti * character.NGUController.yggdrasilBonus() * character.yggdrasilYieldBonus() * character.adventureController.itopod.totalHarvestBonus(5));
             var oldBonus = 1f + character.yggdrasil.totalLuck * 0.0005f;
-            var newBonus = 1f + (character.yggdrasil.totalLuck + gainLuck) * 0.0005f;
+            var newBonus = 1f + (character.yggdrasil.totalLuck + gainLevels) * 0.0005f;
 
-            return $"+{(newBonus - oldBonus) * 100f:#,##0.##}% Drop Chance"
+            return $"+{character.display(gainLevels)} levels gained"
+                + $"\n+{(newBonus - oldBonus) * 100f:#,##0.##}% Drop Chance Bonus"
                 + $"\n+{character.display(seeds)} seeds";
         }
 
@@ -219,11 +221,12 @@ namespace jshepler.ngu.mods
             var seeds = fc.seedReward(6, tierFactor, poopMulti);
 
             var character = fc.character;
-            var gainBonus = (long)Mathf.Ceil(character.yggdrasilController.baseSeedReward[6] * tierFactor * poopMulti * character.NGUController.yggdrasilBonus() * character.yggdrasilYieldBonus() * character.adventureController.itopod.totalHarvestBonus(6));
+            var gainLevels = (long)Mathf.Ceil(character.yggdrasilController.baseSeedReward[6] * tierFactor * poopMulti * character.NGUController.yggdrasilBonus() * character.yggdrasilYieldBonus() * character.adventureController.itopod.totalHarvestBonus(6));
             var oldBonus = 1.0 + Math.Pow(character.yggdrasil.totalPermStatBonus, 2) * 0.0005;
-            var newBonus = 1.0 + Math.Pow(character.yggdrasil.totalPermStatBonus + gainBonus, 2) * 0.0005;
+            var newBonus = 1.0 + Math.Pow(character.yggdrasil.totalPermStatBonus + gainLevels, 2) * 0.0005;
 
-            return $"+{character.display((newBonus - oldBonus) * 100.0)}% Attack/Defense bonus"
+            return $"+{character.display(gainLevels)} levels"
+                + $"\n+{character.display((newBonus - oldBonus) * 100.0)}% Attack/Defense bonus"
                 + $"\n+{character.display(seeds)} seeds";
         }
 
@@ -237,7 +240,8 @@ namespace jshepler.ngu.mods
             var ap = (long)Mathf.Ceil(15 * tierFactor * poopMulti * character.adventureController.itopod.totalHarvestBonus(7));
             var modded = character.checkAPAdded(ap);
 
-            return $"+{character.display(modded)} AP\n+{character.display(seeds)} seeds";
+            return $"+{character.display(modded)} AP"
+                + $"\n+{character.display(seeds)} seeds";
         }
 
         private static string FoN(FruitController fc)
@@ -247,11 +251,12 @@ namespace jshepler.ngu.mods
             var seeds = fc.seedReward(8, tierFactor, poopMulti);
 
             var character = fc.character;
-            var gainBonus = (long)Mathf.Ceil(character.yggdrasilController.baseSeedReward[8] * tierFactor * poopMulti * character.NGUController.yggdrasilBonus() * character.yggdrasilYieldBonus() * character.adventureController.itopod.totalHarvestBonus(8));
+            var gainLevels = (long)Mathf.Ceil(character.yggdrasilController.baseSeedReward[8] * tierFactor * poopMulti * character.NGUController.yggdrasilBonus() * character.yggdrasilYieldBonus() * character.adventureController.itopod.totalHarvestBonus(8));
             var oldBonus = 1.0 + Math.Pow(character.yggdrasil.totalPermNumberBonus, 1.3) * 0.0005;
-            var newBonus = 1.0 + Math.Pow(character.yggdrasil.totalPermNumberBonus + gainBonus, 1.3) * 0.0005;
+            var newBonus = 1.0 + Math.Pow(character.yggdrasil.totalPermNumberBonus + gainLevels, 1.3) * 0.0005;
 
-            return $"+{character.display((newBonus - oldBonus) * 100f)}% NUMBER Bonus"
+            return $"+{character.display(gainLevels)} levels"
+                + $"\n+{character.display((newBonus - oldBonus) * 100f)}% NUMBER Bonus"
                 + $"\n+{character.display(seeds)} seeds";
         }
 
@@ -266,7 +271,8 @@ namespace jshepler.ngu.mods
             var pp = character.adventureController.itopod.progressToPP(ppp);
             ppp = character.adventureController.itopod.progressToRemainder(ppp);
 
-            return $"+{character.display(pp)} PP and {character.display(ppp)} progress to next PP"
+            return $"+{character.display(pp)} PP"
+                + $"\n+{character.display(ppp)} progress to next PP"
                 + $"\n+{character.display(seeds)} seeds";
         }
 
@@ -292,11 +298,12 @@ namespace jshepler.ngu.mods
             var seeds = fc.seedReward(11, tierFactor, poopMulti);
 
             var character = fc.character;
-            var gainBonus = (long)Mathf.Ceil(character.yggdrasilController.baseSeedReward[11] * tierFactor * poopMulti * character.NGUController.yggdrasilBonus() * character.yggdrasilYieldBonus() * character.adventureController.itopod.totalHarvestBonus(11));
+            var gainLevels = (long)Mathf.Ceil(character.yggdrasilController.baseSeedReward[11] * tierFactor * poopMulti * character.NGUController.yggdrasilBonus() * character.yggdrasilYieldBonus() * character.adventureController.itopod.totalHarvestBonus(11));
             var oldBonus = 1.0 + Math.Pow(character.yggdrasil.totalPermStatBonus2, 1.3) * 1E-06;
-            var newBonus = 1.0 + Math.Pow(character.yggdrasil.totalPermStatBonus2 + gainBonus, 1.3) * 1E-06;
+            var newBonus = 1.0 + Math.Pow(character.yggdrasil.totalPermStatBonus2 + gainLevels, 1.3) * 1E-06;
 
-            return $"+{(newBonus - oldBonus) * 100f:#,##0.##}% Attack/Defense bonus"
+            return $"+{character.display(gainLevels)} levels"
+                + $"\n+{(newBonus - oldBonus) * 100f:#,##0.##}% Attack/Defense bonus"
                 + $"\n+{character.display(seeds)} seeds";
         }
 
@@ -319,7 +326,7 @@ namespace jshepler.ngu.mods
             var levels = (long)Mathf.Ceil(tierFactor * 0.1f * poopMulti * character.yggdrasilYieldBonus() * character.adventureController.itopod.totalHarvestBonus(13));
             var capped = levels > int.MaxValue ? int.MaxValue : (int)levels;
 
-            return $"+{character.display(capped)} levels to ALL equipped MacGuffin fragments"
+            return $"+{character.display(capped)} levels to ALL equipped MacGuffins"
                 + $"\n+{character.display(seeds)} seeds";
         }
 
@@ -336,7 +343,8 @@ namespace jshepler.ngu.mods
 
             var qp = (long)Mathf.Ceil(3 * tier * poopMulti * character.yggdrasilYieldBonus() * qpFactor * character.adventureController.itopod.totalHarvestBonus(14));
 
-            return $"+{character.display(qp)} QP\n+{character.display(seeds)} seeds";
+            return $"+{character.display(qp)} QP"
+                + $"\n+{character.display(seeds)} seeds";
         }
 
         private static float poopBonus(int fruitId)

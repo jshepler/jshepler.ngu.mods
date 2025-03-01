@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System;
-using System.Linq;
+﻿using System.Linq;
 using HarmonyLib;
 using UnityEngine;
 
@@ -20,60 +18,6 @@ namespace jshepler.ngu.mods
                 __instance.goldText.text += $"\n<color=#990000><b>{character.display(effectiveGPS)}/s</b></color>";
             else
                 __instance.goldText.text += $"\n+{character.display(effectiveGPS)}/s";
-        }
-
-        // this is needed because the game assumes the number will never be < 0 and so large negative numbers wouldn't
-        // be displayed in scientific notation and I want to display negative net gps if consumption > incoming gps
-        [HarmonyPostfix, HarmonyPatch(typeof(NumberOutput), "sciFormat")]
-        private static void NumberOutput_sciFormat(ref double number, ref string __result)
-        {
-            __result = (System.Math.Abs(number) < 1000000.0) ? number.ToString("###,##0") : number.ToString("e3");
-        }
-
-        [HarmonyPrefix, HarmonyPatch(typeof(NumberOutput), "realSuffixFormat")]
-        private static bool NumberOutput_realSuffixFormat_prefix(ref double number, ref string __result, Dictionary<int, string> ___suffixString)
-        {
-            if (number >= 0)
-                return true;
-
-            var abs = Math.Abs(number);
-
-            if (abs < 1.0)
-                __result = number.ToString();
-
-            else if (abs < 1000000.0)
-                __result = number.ToString("###,##0");
-
-            else
-            {
-                var log = (int)Math.Floor(Math.Log(abs, 1000.0));
-                number /= Math.Pow(1000.0, log);
-
-                __result = $"{number:###.000}{___suffixString[log]}";
-            }
-
-            return false;
-        }
-
-        [HarmonyPrefix, HarmonyPatch(typeof(NumberOutput), "engineerFormat")]
-        private static bool NumberOutput_engineerFormat_prefix(ref double number, ref string __result)
-        {
-            if (number >= 0)
-                return true;
-
-            var abs = Math.Abs(number);
-
-            if (abs < 1000000.0)
-                __result = number.ToString("###,##0");
-
-            else
-            {
-                var num = Math.Floor(Math.Log10(abs) / 3.0) * 3.0;
-                number /= Math.Pow(10.0, num);
-                __result = number.ToString("###.000") + "E+" + num;
-            }
-
-            return false;
         }
 
         private static double calcEffectiveGPS(Character character)

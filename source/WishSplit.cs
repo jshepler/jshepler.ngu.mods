@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
+using jshepler.ngu.mods.AutoAllocator;
 using UnityEngine;
 
 namespace jshepler.ngu.mods
@@ -17,6 +18,9 @@ namespace jshepler.ngu.mods
         private static bool _wishListEnabled => Options.WishList.Enabled.Value;
         private static bool _wishListSingleLevelMode => Options.WishList.SingleLevelMode.Value;
         private static bool _wishR3CapEnabled => Options.WishR3Cap.Enabled.Value;
+
+        private static bool _shiftHeld => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+        private static bool _altHeld => Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
 
         private static long IdleEnergy
         {
@@ -36,7 +40,7 @@ namespace jshepler.ngu.mods
             set => Plugin.Character.res3.idleRes3 = value;
         }
 
-        private static Func<int, long> wishR3Cap => wishId =>
+        internal static long GetWishR3Cap(int wishId)
         {
             var wc = Plugin.Character.wishesController;
             var cap = Mathf.Ceil(
@@ -56,7 +60,7 @@ namespace jshepler.ngu.mods
                 return 1L;
 
             return (long)cap;
-        };
+        }
 
         [HarmonyPrepare]
         private static void prep(MethodBase original)
@@ -71,7 +75,7 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(WishPodUIController), "selectThisWish")]
         private static void WishPodUIController_selectThisWish_postfix(WishPodUIController __instance)
         {
-            if (!Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.RightAlt))
+            if (!_altHeld)
             {
                 ClearSelected();
                 return;
@@ -88,7 +92,7 @@ namespace jshepler.ngu.mods
             __instance.updateIcon();
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(WishPodUIController), "updateIcon")]
+        [HarmonyPostfix, HarmonyPriority(2), HarmonyPatch(typeof(WishPodUIController), "updateIcon")]
         private static void WishPodUIController_updateIcon_prefix(WishPodUIController __instance)
         {
             if (__instance.character.menuID != 53 || __instance.invalidID())
@@ -96,12 +100,19 @@ namespace jshepler.ngu.mods
 
             var id = __instance.id;
             var wish = __instance.character.wishes.wishes[id];
+            var isInList = WishList.IsInList(id, out var isBlackListed);
 
             if(_selectedIds.Contains(id))
                 __instance.wishIcon.color = Color.yellow;
 
+            else if (isBlackListed)
+                __instance.wishIcon.color = Plugin.ButtonColor_Red;
+
             else if (wish.level == 0 && wish.progress > 0)
                 __instance.wishIcon.color = Color.white;
+
+            if (isInList && !isBlackListed)
+                __instance.wishBorder.sprite = __instance.character.wishesController.goldBorder;
         }
 
         [HarmonyPrefix
@@ -110,7 +121,7 @@ namespace jshepler.ngu.mods
             , HarmonyPatch(typeof(WishesController), "addRes3", [])]
         private static bool WishesController_addResource_prefix(WishesController __instance)
         {
-            if (!Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.RightAlt))
+            if (!_altHeld || _shiftHeld)
             {
                 var wish = Wishes.AllWishes[__instance.curSelectedWish];
                 if (wish.Level >= wish.MaxLevel)
@@ -164,6 +175,11 @@ namespace jshepler.ngu.mods
             if (count == 0)
                 return;
 
+            // removeAllResources will trigger the disabling of any allocators - take a snapshot to restore later
+            var enabledE = WishEnergyAllocator.Instance.EnabledIDs.ToList();
+            var enabledM = WishMagicAllocator.Instance.EnabledIDs.ToList();
+            var enabledR3 = WishRes3Allocator.Instance.EnabledIDs.ToList();
+
             Plugin.Character.wishesController.removeAllResources();
 
             var eSplit = IdleEnergy / count;
@@ -182,6 +198,10 @@ namespace jshepler.ngu.mods
             }
 
             RedistributeR3();
+
+            WishEnergyAllocator.Instance.SetEnabled(enabledE);
+            WishMagicAllocator.Instance.SetEnabled(enabledM);
+            WishRes3Allocator.Instance.SetEnabled(enabledR3);
         }
 
         internal static void RedistributeR3()
@@ -190,7 +210,7 @@ namespace jshepler.ngu.mods
                 return;
 
             var runningWishes = Wishes.RunningWishes
-                .Select(w => new { w, cap = wishR3Cap(w.Id) })
+                .Select(w => new { w, cap = GetWishR3Cap(w.Id) })
                 .OrderBy(w => w.cap)
                 .ToList();
 

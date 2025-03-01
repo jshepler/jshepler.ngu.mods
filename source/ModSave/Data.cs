@@ -286,6 +286,18 @@ namespace jshepler.ngu.mods.ModSave
             set => Set("QPSourcesLastRB", value);
         }
 
+        internal static long[] APSourcesThisRB
+        {
+            get => Get("APSourcesThisRB", new long[TrackAPGained.SOURCE_COUNT]);
+            set => Set("APSourcesThisRB", value);
+        }
+
+        internal static long[] APSourcesLastRB
+        {
+            get => Get("APSourcesLastRB", new long[TrackAPGained.SOURCE_COUNT]);
+            set => Set("APSourcesLastRB", value);
+        }
+
         internal static float BaseAdvPowerGained
         {
             get => Get("BaseAdvPowerGained", 0f);

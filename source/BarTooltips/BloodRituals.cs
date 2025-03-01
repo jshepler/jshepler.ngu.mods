@@ -49,10 +49,11 @@ namespace jshepler.ngu.mods.BarTooltips
                 + (ppt == 0 ? $"\n   <b>with {display(magCap)} Magic:</b> {display(gpsMax)}" : string.Empty)
 
                 + $"\n\n<b>Blood Gained Per Second:</b> {display(bps)}"
-                + (ppt == 0 ? $"\n   <b>with {display(magCap)} Magic:</b> {display(bpsMax)}" : string.Empty)
+                + (ppt == 0 ? $"\n   <b>with {display(magCap)} Magic:</b> {display(bpsMax)}" : string.Empty);
 
-                + $"\n\n<b>% Allocated:</b> {capPct}%"
-                + $"\n   (ppt: {ppt:0.0000000} = {tpb}t/bar)";
+            if (!Plugin.Character.challenges.blindChallenge.inChallenge)
+                text += $"\n\n<b>% Allocated:</b> {capPct}%"
+                    + $"\n   (ppt: {ppt:0.0000000} = {tpb}t/bar)";
 
             __instance.tooltip.showTooltip(text);
             return false;

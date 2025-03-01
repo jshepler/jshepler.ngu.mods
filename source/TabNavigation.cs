@@ -18,7 +18,7 @@ namespace jshepler.ngu.mods
     // especially the wrap-around code when tabbing past the first/last field, so I put it on hold and tried a different approach.
     //
     // Building a list of fields as they are created, sort them in order of transform.position.y, allowed me to
-    // be very specific in the fields intead of relying on Unity to find the next/previous field on the screen.
+    // be very specific in the fields instead of relying on Unity to find the next/previous field on the screen.
 
     [HarmonyPatch]
     internal class TabNavigation
@@ -116,6 +116,12 @@ namespace jshepler.ngu.mods
             _fields.Add(Menu.EXP_R3, [__instance.powerInput, __instance.capInput, __instance.barInput]);
         }
 
+        [HarmonyPostfix, HarmonyPatch(typeof(StatBoostPurchases), "Start")]
+        private static void StatBoostPurchases_Start_postfix(StatBoostPurchases __instance)
+        {
+            _fields.Add(Menu.EXP_Misc, [__instance.attackInput, __instance.defenseInput]);
+        }
+
         private static void OnUpdate(object sender, EventArgs e)
         {
             if (_system == null || _system.currentSelectedGameObject == null || !Input.GetKeyDown(KeyCode.Tab))
@@ -125,22 +131,8 @@ namespace jshepler.ngu.mods
             if (current == null)
                 return;
 
-            if (!_sorted) sortLists();
-
-            //var list = Plugin.Character.CurrentMenu() switch
-            //{
-            //    Menu.Augments => _augFields,
-            //    Menu.AdvancedTraining => _atFields,
-            //    Menu.TimeMachine => _tmFields,
-            //    Menu.NGU_Energy => _eNguFields,
-            //    Menu.NGU_Magic => _mNguFields,
-            //    Menu.GoldDiggers => _diggerFields,
-            //    Menu.Hacks => _hacksFields,
-            //    _ => null
-            //};
-
-            //if (list == null)
-            //    return; // not in a supported menu
+            if (!_sorted)
+                sortLists();
 
             var menu = Plugin.Character.CurrentMenu();
             if (!_fields.ContainsKey(menu))
@@ -155,8 +147,11 @@ namespace jshepler.ngu.mods
             var goUp = Input.GetKey(KeyCode.LeftShift);
             index += goUp ? -1 : 1;
 
-            if (index < 0) index = list.Count - 1;
-            else if (index >= list.Count) index = 0;
+            if (index < 0)
+                index = list.Count - 1;
+
+            else if (index >= list.Count)
+                index = 0;
 
             // hacks page 2 only has 7 hacks, skip over 8th slot
             if(Plugin.Character.InMenu(Menu.Hacks)
@@ -171,22 +166,6 @@ namespace jshepler.ngu.mods
 
         private static void sortLists()
         {
-            // this works, just experimenting with different ways to sort
-            //var comparer = new FieldOrderComparer();
-            //_augFields = _augFields.OrderBy(i => i.transform.position, comparer).ToList();
-            //_atFields = _atFields.OrderBy(i => i.transform.position, comparer).ToList();
-            //_eNguFields = _eNguFields.OrderBy(i => i.transform.position, comparer).ToList();
-            //_mNguFields = _mNguFields.OrderBy(i => i.transform.position, comparer).ToList();
-            //_diggerFields = _diggerFields.OrderBy(i => i.transform.position, comparer).ToList();
-            //_hacksFields = _hacksFields.OrderBy(i => i.transform.position, comparer).ToList();
-
-            //_augFields.Sort(CompareFieldPosition);
-            //_atFields.Sort(CompareFieldPosition);
-            //_eNguFields.Sort(CompareFieldPosition);
-            //_mNguFields.Sort(CompareFieldPosition);
-            //_diggerFields.Sort(CompareFieldPosition);
-            //_hacksFields.Sort(CompareFieldPosition);
-
             foreach (var l in _fields.Values)
                 l.Sort(CompareFieldPosition);
 

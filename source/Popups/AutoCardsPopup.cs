@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using HarmonyLib;
 using UnityEngine;
 
@@ -8,7 +9,7 @@ namespace jshepler.ngu.mods.Popups
     internal class AutoCardsPopup : BasePopup
     {
         const int WIDTH = 670;
-        const int HEIGHT = 346;
+        const int HEIGHT = 295;//346;
 
         private static GUIStyle _windowStyle;
         private static GUIStyle _titleStyle;
@@ -19,6 +20,7 @@ namespace jshepler.ngu.mods.Popups
         private static string[] _disabledEnabled = ["Disabled", "Enabled"];
         private static string[] _sortBy = ["Rarity", "Type", "Efficiency", "Variance"];
         private static string[] _sortDirections = ["Ascending", "Descending"];
+        private static string[] _autoYeetModes = ["Disabled", "Efficency", "Variance", "Rarity"];
         private static string[] _rarities = ["Crappy", "Bad", "Meh", "Okay", "Good", "Great", "Hot Damn"];
 
         private static string[] _bonuses = ["END", "E-NGU", "M-NGU", "WAND", "AUGS", "TM", "HACKS", "WISHES", "A/D", "ADV", "DC", "GOLD", "DAYCR", "PP", "QP"];
@@ -46,10 +48,10 @@ namespace jshepler.ngu.mods.Popups
             set => Options.Cards.AutoSortDirection.Value = value;
         }
 
-        private static bool AutoYeetEnabled
+        private static CardYeetMode AutoYeetMode
         {
-            get => Options.Cards.AutoYeetEnabled.Value;
-            set => Options.Cards.AutoYeetEnabled.Value = value;
+            get => Options.Cards.AutoYeetMode.Value;
+            set => Options.Cards.AutoYeetMode.Value = value;
         }
 
         private static rarity MaxYeetRarity
@@ -63,6 +65,32 @@ namespace jshepler.ngu.mods.Popups
             get => Options.Cards.MaxYeetEfficiency.Value;
             set => Options.Cards.MaxYeetEfficiency.Value = value;
         }
+
+        private static string _maxYeetEfficiency;
+        //{
+        //    get => $"{MaxYeetEfficiency * 100f:0.##}";
+        //    set
+        //    {
+        //        if (float.TryParse(value, out var f))
+        //            MaxYeetEfficiency = f / 100f;
+        //    }
+        //}
+
+        private static float MaxYeetVariance
+        {
+            get => Options.Cards.MaxYeetVariance.Value;
+            set => Options.Cards.MaxYeetVariance.Value = value;
+        }
+
+        private static string _maxYeetVarience;
+        //{
+        //    get => $"{(1f - MaxYeetVariance) * 100f:0.#}";
+        //    set
+        //    {
+        //        if (float.TryParse(value, out var f))
+        //            MaxYeetVariance = Mathf.Clamp(f, -20f, 20f) / 100f + 1f;
+        //    }
+        //}
 
         private static bool[] AlwaysYeet
         {
@@ -92,6 +120,9 @@ namespace jshepler.ngu.mods.Popups
 
             _alwaysYeet = AlwaysYeet;
             Array.Copy(_alwaysYeet, _prevAlwaysYeet, 15);
+
+            _maxYeetEfficiency = $"{MaxYeetEfficiency * 100f:0.##}";
+            _maxYeetVarience = $"{(1f - MaxYeetVariance) * 100f:0.#}";
 
             base.Open();
         }
@@ -126,6 +157,7 @@ namespace jshepler.ngu.mods.Popups
             GUILayout.EndHorizontal();
 
             DrawAutoSort();
+            DrawAutoProtectChonkers();
             DrawAutoYeet();
 
             GUILayout.EndVertical();
@@ -182,17 +214,7 @@ namespace jshepler.ngu.mods.Popups
             GUILayout.EndHorizontal();
         }
 
-        private static string _maxYeetEff
-        {
-            get => $"{MaxYeetEfficiency * 100f:0.##}";
-            set
-            {
-                if (float.TryParse(value, out var f))
-                    MaxYeetEfficiency = f / 100f;
-            }
-        }
-
-        private static void DrawAutoYeet()
+        private static void DrawAutoProtectChonkers()
         {
             GUILayout.BeginVertical("box");
 
@@ -202,53 +224,83 @@ namespace jshepler.ngu.mods.Popups
             AutoProtectChonkers = GUILayout.SelectionGrid(AutoProtectChonkers ? 1 : 0, _disabledEnabled, 2, _buttonStyle) == 1;
             GUILayout.EndHorizontal();
 
-            GUILayout.BeginHorizontal();
-            GUILayout.Label($"Auto Yeet: {(AutoYeetEnabled ? "Enabled" : "Disabled")}");
-            GUILayout.FlexibleSpace();
-            AutoYeetEnabled = GUILayout.SelectionGrid(AutoYeetEnabled ? 1 : 0, _disabledEnabled, 2, _buttonStyle) == 1;
-            GUILayout.EndHorizontal();
+            GUILayout.EndVertical();
+        }
 
+        private static void DrawAutoYeet()
+        {
+            GUILayout.BeginVertical("box");
+
+            DrawAutoYeetModes();
+
+            if (AutoYeetMode == CardYeetMode.Efficiency)
+                DrawAutoYeetEfficency();
+            else if (AutoYeetMode == CardYeetMode.Rarity)
+                DrawAutoYeetRarities();
+            else if (AutoYeetMode == CardYeetMode.Variance)
+                DrawAutoYeetVariance();
+
+            GUILayout.EndVertical();
+
+            if(AutoYeetMode != CardYeetMode.Disabled)
+                DrawAlwaysYeet();
+        }
+
+        private static void DrawAutoYeetModes()
+        {
             GUILayout.BeginHorizontal();
-            GUILayout.Label("Max Efficiency to Yeet (0 = disabled, if > 0 disables max rarity): ");
-            _maxYeetEff = GUILayout.TextField(_maxYeetEff, _maxYeetEffTextStyle, GUILayout.Width(30f));
+            GUILayout.Label($"Auto Yeet Mode: {_autoYeetModes[(int)AutoYeetMode]}");
+            AutoYeetMode = (CardYeetMode)GUILayout.SelectionGrid((int)AutoYeetMode, _autoYeetModes, 4, _buttonStyle);
+            GUILayout.EndHorizontal();
+        }
+
+        private static void DrawAutoYeetEfficency()
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Max Mayo Efficiency to yeet (0 to 100): ");
+            _maxYeetEfficiency = GUILayout.TextField(_maxYeetEfficiency, _maxYeetEffTextStyle, GUILayout.Width(30f));
             GUILayout.Label("%");
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
-            GUILayout.EndVertical();
+            _maxYeetEfficiency = Regex.Replace(_maxYeetEfficiency, @"[^0-9.-]", string.Empty);
+            if (float.TryParse(_maxYeetEfficiency, out var f))
+                MaxYeetEfficiency = f / 100f;
+        }
 
-            if (MaxYeetEfficiency == 0f)
-                DrawAutoYeetRarities();
+        private static void DrawAutoYeetVariance()
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Max Variance to yeet (-20 to +20): ");
+            _maxYeetVarience = GUILayout.TextField(_maxYeetVarience, _maxYeetEffTextStyle, GUILayout.Width(30f));
+            GUILayout.Label("%");
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
 
-            DrawAlwaysYeet();
+            _maxYeetVarience = Regex.Replace(_maxYeetVarience, @"[^0-9.-]", string.Empty);
+            if (float.TryParse(_maxYeetVarience, out var f))
+                MaxYeetVariance = Mathf.Clamp(f, -20f, 20f) / 100f + 1f;
         }
 
         private static void DrawAutoYeetRarities()
         {
-            GUILayout.BeginVertical("box");
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Label($"Max Rarity to Yeet: {_rarities[(int)MaxYeetRarity]}");
-            GUILayout.EndHorizontal();
-
             GUILayout.BeginHorizontal();
             MaxYeetRarity = (rarity)GUILayout.SelectionGrid((int)MaxYeetRarity, _rarities, 7, _buttonStyle);
             GUILayout.EndHorizontal();
-
-            GUILayout.EndVertical();
         }
 
         private static void DrawAlwaysYeet()
         {
             var changed = false;
 
-            if (MaxYeetEfficiency == 0)
-                GUILayout.BeginVertical("box");
-            else
-                GUILayout.BeginVertical(_disabledYeetRarities);
+            //if (MaxYeetEfficiency == 0)
+            //    GUILayout.BeginVertical("box");
+            //else
+            //    GUILayout.BeginVertical(_disabledYeetRarities);
+            GUILayout.BeginVertical("box");
 
             GUILayout.BeginHorizontal();
-            GUILayout.Label("Always Yeet (ignores efficiency and rarity):");
+            GUILayout.Label($"Always Yeet (ignores {_autoYeetModes[(int)AutoYeetMode]}):");
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
@@ -274,16 +326,9 @@ namespace jshepler.ngu.mods.Popups
                     changed = true;
             }
             GUILayout.EndHorizontal();
-
-            //GUILayout.BeginHorizontal();
-            //GUILayout.BeginHorizontal("button", GUILayout.Width(90));
-            //_alwaysYeet[0] = GUILayout.Toggle(_alwaysYeet[0], _bonuses[0]);
-            //GUILayout.EndHorizontal();
-            //GUILayout.EndHorizontal();
-
             GUILayout.EndVertical();
 
-            if (changed)// || _alwaysYeet[0] != _prevAlwaysYeet[0])
+            if (changed)
             {
                 Array.Copy(_alwaysYeet, _prevAlwaysYeet, 15);
                 AlwaysYeet = _alwaysYeet;

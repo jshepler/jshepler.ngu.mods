@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
 using HarmonyLib;
+using jshepler.ngu.mods.AutoAllocator;
 using jshepler.ngu.mods.ModSave;
 using jshepler.ngu.mods.Popups;
 using UnityEngine;
@@ -23,9 +24,9 @@ namespace jshepler.ngu.mods
 
         private static bool _wishListEnabled => Options.WishList.Enabled.Value;
         private static bool _autoAdvance => Options.WishList.AutoAdvance.Value;
-        private static bool _singleLevelMode => Options.WishList.SingleLevelMode.Value;
         private static bool _blacklistMode => Options.WishList.BlacklistMode.Value;
         private static int _maxWishSlots => Plugin.Character.wishesController.curWishSlots();
+        private static bool _shiftIsDown => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
         private static int _offlineCount;
 
@@ -56,12 +57,17 @@ namespace jshepler.ngu.mods
 
             Plugin.OnOfflineProgressionComplete += (o, e) =>
             {
-                // select first visible wish when loading a save
+                // select first running/visible wish when loading a save
                 _controller.constructList();
                 if (_controller.curValidUpgradesList.Count > 0)
                 {
                     _controller.changePage(0);
-                    _controller.selectNewWish(_controller.curValidUpgradesList[0]);
+
+                    var firstRunningWish = Wishes.RunningWishes.FirstOrDefault(w => w.IsRunning);
+                    if (firstRunningWish != null)
+                        _controller.selectNewWish(firstRunningWish.Id);
+                    else
+                        _controller.selectNewWish(_controller.curValidUpgradesList[0]);
                 }
 
                 FillOpenWishSlots(_offlineCount);
@@ -86,7 +92,7 @@ namespace jshepler.ngu.mods
         [HarmonyPrefix, HarmonyPatch(typeof(WishesController), "selectNewWish")]
         private static bool WishesController_selectNewWish_pretfix(int id)
         {
-            if (!Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift))
+            if (!_shiftIsDown)
                 return true;
 
             if (_wishList.Contains(id))
@@ -97,7 +103,8 @@ namespace jshepler.ngu.mods
             return false;
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(WishPodUIController), "updateIcon")]
+        // handled in WishSplit.WishPodUIController_updateIcon_prefix
+        //[HarmonyPostfix, HarmonyPriority(1), HarmonyPatch(typeof(WishPodUIController), "updateIcon")]
         private static void WishPodUIController_updateIcon_prefix(WishPodUIController __instance)
         {
             if (__instance.character.menuID != 53 || __instance.invalidID())
@@ -111,6 +118,8 @@ namespace jshepler.ngu.mods
                     __instance.wishBorder.sprite = __instance.character.wishesController.goldBorder;
             }
         }
+
+
 
         // in WishesController.updateAllWishes(), when a wish reaches max level, removeAllResources is called;
         // this transpiler replaces the call to removeAllResources with a call to ClearAndStartNextWish below
@@ -131,6 +140,13 @@ namespace jshepler.ngu.mods
 
         internal static void ClearAndStartNextWish(int wishId)
         {
+            // removing resources will clear enabled allocators, but we need to know
+            // if it had any allocators on the wish so that they can be moved to the
+            // new wish
+            var allocE = WishEnergyAllocator.Instance[wishId];
+            var allocM = WishMagicAllocator.Instance[wishId];
+            var allocR3 = WishRes3Allocator.Instance[wishId];
+
             // this is what the transpiler above replaces - still need to do it
             _controller.removeAllResources(wishId);
 
@@ -147,8 +163,16 @@ namespace jshepler.ngu.mods
             }
 
             // if a new wish isn't started, then split resources into remaining wishes
-            if (!startNextWish())
+            var nextWishId = startNextWish();
+            if (nextWishId == -1)
                 WishSplit.SplitResources();
+
+            else
+            {
+                if (allocE) WishEnergyAllocator.Instance[nextWishId] = true;
+                if (allocM) WishMagicAllocator.Instance[nextWishId] = true;
+                if (allocR3) WishRes3Allocator.Instance[nextWishId] = true;
+            }
         }
 
         internal static void FillOpenWishSlots(int maxSlots = 4)
@@ -166,8 +190,16 @@ namespace jshepler.ngu.mods
                 return;
 
             for(var x = running; x < slotsToFill; x++)
-                if (!startNextWish())
+                if (startNextWish(false) == -1)
                     break;
+
+            if (_shiftIsDown)
+            {
+                var ids = Wishes.RunningWishes.Select(w => w.Id);
+                WishEnergyAllocator.Instance.SetEnabled(ids);
+                WishMagicAllocator.Instance.SetEnabled(ids);
+                WishRes3Allocator.Instance.SetEnabled(ids);
+            }
 
             _controller.updateMenu();
         }
@@ -178,35 +210,47 @@ namespace jshepler.ngu.mods
 
             var tracked = _lastRunning
                 .Select(id => Wishes.AllWishes[id])
-                .Where(w => w.Level < w.MaxLevel || !WishTargetReached(w))
+                .Where(w => w.Level < w.MaxLevel && !WishTargetReached(w))
                 .ToList();
 
             WishSplit.SplitResources(tracked);
             _controller.updateMenu();
+
+            if (_shiftIsDown)
+            {
+                var ids = tracked.Select(w => w.Id);
+                WishEnergyAllocator.Instance.SetEnabled(ids);
+                WishMagicAllocator.Instance.SetEnabled(ids);
+                WishRes3Allocator.Instance.SetEnabled(ids);
+                _controller.updateText();
+            }
         }
 
-        private static bool startNextWish()
+        private static int startNextWish(bool selectStartedWish = true)
         {
             if (!_autoAdvance)
-                return false;
+                return -1;
 
             var nextWish = getNextWish();
             if (nextWish == null)
-                return false;
+                return -1;
 
             var running = Wishes.RunningWishes.ToList();
 
             // this should never happen, but just in case...
             if (running.Count >= _maxWishSlots)
-                return false;
+                return -1;
 
             running.Add(nextWish);
             WishSplit.SplitResources(running);
 
-            _controller.selectNewWish(nextWish.Id);
-            _controller.updateMenu();
+            if (selectStartedWish)
+            {
+                _controller.selectNewWish(nextWish.Id);
+                _controller.updateMenu();
+            }
 
-            return true;
+            return nextWish.Id;
         }
 
         private static WishWrapper getNextWish()
@@ -416,6 +460,16 @@ namespace jshepler.ngu.mods
 
             var target = _wishTargets[index];
             return target > 0 && wish.Level >= target;
+        }
+
+        internal static bool IsInList(int wishId, out bool isBlackListed)
+        {
+            isBlackListed = false;
+            if (!_wishList.Contains(wishId))
+                return false;
+
+            isBlackListed = _blacklistMode;
+            return true;
         }
     }
 }

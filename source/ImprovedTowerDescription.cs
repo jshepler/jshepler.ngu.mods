@@ -187,25 +187,25 @@ namespace jshepler.ngu.mods
             _tooltipText += $"\n\n<b>Max Floor: </b> {maxFloor - 1}"
                 + $"\n<b>Optimal Floor:</b> {optimalFloor}";
 
-            var currentATP = character.advancedTraining.level[1];
-            _tooltipText += $"\n\n<b>Current AT Power:</b> {character.display(currentATP)}";
+            //var currentATP = character.advancedTraining.level[1];
+            //_tooltipText += $"\n\n<b>Current AT Power:</b> {character.display(currentATP)}";
 
             var nextOptimalFloorPower = getPowForOpt(optimalFloor + 1);
-            var nextOptimalATP = _atpNeeded(nextOptimalFloorPower);
+            //var nextOptimalATP = _atpNeeded(nextOptimalFloorPower);
             if (optimalFloor < 1599)
-                _tooltipText += $"\n<b>ATP for next opt:</b> {character.display(nextOptimalATP)}";
+                _tooltipText += $"\n\n<b>Power for next opt:</b> {character.display(nextOptimalFloorPower)}";
 
             var next50Floor = (Mathf.FloorToInt(optimalFloor / 50f) + 1) * 50;
             var next50FloorPower = next50Floor < 1600 ? getPowForOpt(next50Floor) : 0f;
-            var next50FloorATP = _atpNeeded(next50FloorPower);
+            //var next50FloorATP = _atpNeeded(next50FloorPower);
             if (next50Floor < 1600)
-                _tooltipText += $"\n<b>  ... next 50th ({next50Floor}):</b> {character.display(next50FloorATP)}";
+                _tooltipText += $"\n<b>  ... next 50th ({next50Floor}):</b> {character.display(next50FloorPower)}";
 
             var nextBoostFloor = _boostFloors.FirstOrDefault(f => f > optimalFloor);
             var nextBoostFloorPower = nextBoostFloor == 0 ? 0 : getPowForOpt(nextBoostFloor);
-            var nextBoostATP = _atpNeeded(nextBoostFloorPower);
+            //var nextBoostATP = _atpNeeded(nextBoostFloorPower);
             if(nextBoostFloor > 0)
-                _tooltipText += $"\n<b>  ... next boost ({nextBoostFloor}):</b> {character.display(nextBoostATP)}";
+                _tooltipText += $"\n<b>  ... next boost ({nextBoostFloor}):</b> {character.display(nextBoostFloorPower)}";
         }
 
         private static int[] _boostFloors = [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 700, 850, 1150];

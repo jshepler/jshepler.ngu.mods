@@ -41,9 +41,98 @@ namespace jshepler.ngu.mods
             if (!__instance.validID(fruitId) || string.IsNullOrEmpty(text))
                 return;
 
+            // these 5 fruits have levels and their respective bonuses are derived from these levels
+            // the wiki calls these "invisible levels" - make them visible
+            var ygg = __instance.character.yggdrasil;
+            if (fruitId == 1)
+                ___message += $"\n\n<b>Level:</b> {ygg.fruits[1].totalLevels:#,##0}"
+                    + "\n<size=10>(A/D Bonus = 1 + Level ^ 1.5)</size>";
+
+            else if (fruitId == 5)
+                ___message += $"\n\n<b>Level:</b> {ygg.totalLuck:#,##0}"
+                    + "\n<size=10>(DC Bonus = 1 + Level * 0.0005)</size>";
+
+            else if (fruitId == 6)
+                ___message += $"\n\n<b>Level:</b> {ygg.totalPermStatBonus:#,##0}"
+                    + "\n<size=10>(A/D Bonus = 1 + Level ^ 2 * 0.0005)</size>";
+
+            else if (fruitId == 8)
+                ___message += $"\n\n<b>Level:</b> {ygg.totalPermNumberBonus:#,##0}"
+                    + "\n<size=10>(Number Bonus = 1 + Level ^ 1.3 * 0.0005)</size>";
+
+            else if (fruitId == 11)
+                ___message += $"\n\n<b>Level:</b> {ygg.totalPermStatBonus2:#,##0}"
+                    + "\n<size=10>(A/D Bonus = 1 + Level ^ 1.3 * 0.000001)</size>";
+
             ___message += $"\n\n<b>Last Gained:</b>\n{text}";
             __instance.tooltip.showTooltip(___message);
         }
+
+        // to be consistent with permStatBonus() and permStatBonus2(), add 1 to convert from bonus to multiplier
+        // this method is only used in displaying the bonus at the bottom of the ygg screen
+        [HarmonyPostfix, HarmonyPatch(typeof(AllYggdrasil), "totalStatBonus")]
+        private static void AllYggdrasil_totalStatBonus_postfix(ref double __result)
+        {
+            __result += 1.0;
+        }
+
+        [HarmonyTranspiler, HarmonyPatch(typeof(FruitController), "consumePowerFruit")]
+        private static IEnumerable<CodeInstruction> FruitController_consumePowerFruit_transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var cm = new CodeMatcher(instructions)
+                .MatchForward(false, new CodeMatch(OpCodes.Ldstr, "You eat the fruit and icrease your Attack and Defense! Power Fruit α's multiplier increased from <b>"))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldloc_S, (byte)4))
+                .SetInstruction(Transpilers.EmitDelegate((long l) => $"You eat the fruit and increase your Attack and Defense! You gain +{l:#,##0} levels, increasing Power Fruit α's multiplier from <b>"));
+
+            return cm.InstructionEnumeration();//.DumpToLog();
+        }
+
+        [HarmonyTranspiler, HarmonyPatch(typeof(FruitController), "consumeLuckFruit")]
+        private static IEnumerable<CodeInstruction> FruitController_consumeLuckFruit_transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var cm = new CodeMatcher(instructions)
+                .MatchForward(false, new CodeMatch(OpCodes.Ldstr, "You eat the fruit and gain:\n+"))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldloc_3))
+                .SetInstruction(Transpilers.EmitDelegate((long l) => $"You eat the fruit and gain:\n+{l:#,##0} levels, resulting in +"));
+
+            return cm.InstructionEnumeration();//.DumpToLog();
+        }
+
+        [HarmonyTranspiler, HarmonyPatch(typeof(FruitController), "consumePermStatFruit")]
+        private static IEnumerable<CodeInstruction> FruitController_consumePermStatFruit_transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var cm = new CodeMatcher(instructions)
+                .MatchForward(false, new CodeMatch(OpCodes.Ldstr, "You eat the fruit. It tastes fruity. You also gain:\n+"))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldloc_3))
+                .SetInstruction(Transpilers.EmitDelegate((long l) => $"You eat the fruit. It tastes fruity. You also gain:\n+{l:#,##0} levels, resulting in +"));
+
+            return cm.InstructionEnumeration();//.DumpToLog();
+        }
+
+        [HarmonyTranspiler, HarmonyPatch(typeof(FruitController), "consumePermNumberFruit")]
+        private static IEnumerable<CodeInstruction> FruitController_consumePermNumberFruit_transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var cm = new CodeMatcher(instructions)
+                .MatchForward(false, new CodeMatch(OpCodes.Ldstr, "You eat the fruit. It tastes fruity. You also gain:\n+"))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldloc_3))
+                .SetInstruction(Transpilers.EmitDelegate((long l) => $"You eat the fruit. It tastes fruity. You also gain:\n+{l:#,##0} levels, resulting in +"));
+
+            return cm.InstructionEnumeration();//.DumpToLog();
+        }
+
+        [HarmonyTranspiler, HarmonyPatch(typeof(FruitController), "consumePermStatFruit2")]
+        private static IEnumerable<CodeInstruction> FruitController_consumePermStatFruit2_transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var cm = new CodeMatcher(instructions)
+                .MatchForward(false, new CodeMatch(OpCodes.Ldstr, "You put on an extra strong pair of shades and eat the fruit. The glasses melt onto your face causing unbearable pain, but you gain:\n+"))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldloc_3))
+                .SetInstruction(Transpilers.EmitDelegate((long l) => $"You put on an extra strong pair of shades and eat the fruit. The glasses melt onto your face causing unbearable pain, but you gain:\n+{l:#,##0} levels, resulting in +"));
+
+            return cm.InstructionEnumeration();//.DumpToLog();
+        }
+
+
+
 
         // appends [NGU YIELD FH] to the fruit name in the tooltip
         // NGU = ngu yield, YIELD = ygg yield from equipment (and quirk 92), FH = first harvest perk

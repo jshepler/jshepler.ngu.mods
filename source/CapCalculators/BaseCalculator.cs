@@ -15,7 +15,7 @@ namespace jshepler.ngu.mods.CapCalculators
         protected abstract void UpdateModifier();
         protected abstract double GetResource(long L);
         protected abstract long GetLevel(long r);
-        protected abstract double GetProgressPerTick(long r, long L);
+        protected abstract double GetProgressPerTick(double r, double L);
 
         internal virtual double ResourceFromLevel(long level)
         {
@@ -63,6 +63,7 @@ namespace jshepler.ngu.mods.CapCalculators
 
             // account for partial progress from current level to next level
             var totalTicks = Math.Ceiling((1.0 - progressToNextLevel) / GetProgressPerTick(resource, currentLevel + 1));
+            //Plugin.LogInfo($"totalTicks: {totalTicks:r}, progressToNextLevel: {progressToNextLevel:r}, ppt: {GetProgressPerTick(resource, currentLevel + 1)}");
             currentLevel++;
 
             var threshold = ResourceFromLevel(101);
@@ -73,6 +74,7 @@ namespace jshepler.ngu.mods.CapCalculators
             else
                 totalTicks += ticksMethod2(currentLevel, targetLevel, resource);
 
+            //Plugin.LogInfo($"totalTicks: {totalTicks}");
             return totalTicks / 50.0;
         }
 
@@ -112,6 +114,7 @@ namespace jshepler.ngu.mods.CapCalculators
             lastBreakpoint = currentLevel;
 
             var ticks = 0.0;
+            //Plugin.LogInfo($"bbLevel: {bbLevel}, levelsLeft: {levelsLeft}");
             while (levelsLeft > 0)
             {
                 var levels = breakpoint - lastBreakpoint;
@@ -121,14 +124,14 @@ namespace jshepler.ngu.mods.CapCalculators
 
                 ticks += (levels * ticksPerBar);
                 levelsLeft -= levels;
-                //Plugin.LogInfo($"levels: {levels}, totalTicks: {totalTicks}, levelsLeft: {levelsLeft}");
+                //Plugin.LogInfo($"levels: {levels}, ticks: {ticks}, levelsLeft: {levelsLeft}");
 
                 lastBreakpoint = breakpoint;
                 breakpoint += bbLevel;
                 ticksPerBar++;
             }
 
-            //Plugin.LogInfo($"returning: {NumberOutput.timeOutput(totalTicks / 50.0)}");
+            //Plugin.LogInfo($"ticks: {ticks:r} => {NumberOutput.timeOutput(ticks / 50.0)}\n\n");
             return ticks;
         }
     }

@@ -147,7 +147,7 @@ namespace jshepler.ngu.mods.AutoAllocator
 
         private static long CalcCapForLevel(int id, long level)
         {
-            var cap = Calculators.AugCalculators[id].ResourceFromLevel(level);
+            var cap = Calculators.AugCalculators[id].ResourceFromLevel(level) * 1.000002;
 
             //var extraSadDivider = _character.settings.rebirthDifficulty >= difficulty.sadistic ? _allAugsController.augments[id].sadisticDivider() : 1.0;
 

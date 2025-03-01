@@ -38,9 +38,12 @@ namespace jshepler.ngu.mods.BarTooltips
                 overCappedDuration = (capLevel - currentLevel) / 50f;
             }
 
-            var currentCap = Calculators.NGU_EnergyCalculators[id].ResourceFromLevel(currentLevel);
-            var capMessage = Tooltips.BuildCurrentCapText(currentCap, overCappedDuration, ppt);
-            ___message += $"\n\n{capMessage}";
+            if (!Plugin.Character.challenges.blindChallenge.inChallenge)
+            {
+                var currentCap = Calculators.NGU_EnergyCalculators[id].ResourceFromLevel(currentLevel);
+                var capMessage = Tooltips.BuildCurrentCapText(currentCap, overCappedDuration, ppt);
+                ___message += $"\n\n{capMessage}";
+            }
 
             __instance.tooltip.showTooltip(___message);
         }
@@ -74,9 +77,12 @@ namespace jshepler.ngu.mods.BarTooltips
                 overCappedDuration = (capLevel - currentLevel) / 50f;
             }
 
-            var currentCap = Calculators.NGU_MagicCalculators[id].ResourceFromLevel(currentLevel);
-            var capMessage = Tooltips.BuildCurrentCapText(currentCap, overCappedDuration, ppt);
-            ___message += $"\n\n{capMessage}";
+            if (!Plugin.Character.challenges.blindChallenge.inChallenge)
+            {
+                var currentCap = Calculators.NGU_MagicCalculators[id].ResourceFromLevel(currentLevel);
+                var capMessage = Tooltips.BuildCurrentCapText(currentCap, overCappedDuration, ppt);
+                ___message += $"\n\n{capMessage}";
+            }
 
             __instance.tooltip.showTooltip(___message);
         }

@@ -40,6 +40,7 @@ namespace jshepler.ngu.mods
         internal static event EventHandler onGUI; // have to use onGUI instead of OnGUI because OnGUI is the method unity calls
 
         internal static event EventHandler OnSaveLoaded;
+        internal static event EventHandler OnSaveLoaded2;
         internal static event EventHandler OnOfflineProgressionComplete;
         internal static event EventHandler OnPreSave;
         internal static event EventHandler OnGameStart;
@@ -120,6 +121,7 @@ namespace jshepler.ngu.mods
         private static void Character_addOfflineProgress_prefix()
         {
             OnSaveLoaded?.Invoke(null, EventArgs.Empty);
+            OnSaveLoaded2?.Invoke(null, EventArgs.Empty);
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(Character), "addOfflineProgress")]
@@ -134,6 +136,7 @@ namespace jshepler.ngu.mods
         private static void MainMenuController_startNewGame_postfix()
         {
             OnSaveLoaded?.Invoke(null, EventArgs.Empty);
+            OnSaveLoaded2?.Invoke(null, EventArgs.Empty);
             OnOfflineProgressionComplete?.Invoke(null, EventArgs.Empty);
         }
 

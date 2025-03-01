@@ -36,13 +36,16 @@ namespace jshepler.ngu.mods.BarTooltips
                 overCappedDuration = (capLevel - currentLevel) / 50f;
             }
 
-            var currentCap = Calculators.TM_EnergyCalculator.ResourceFromLevel(currentLevel + 1);
-            var capText = Tooltips.BuildCurrentCapText(currentCap, overCappedDuration, ppt);
-            ___message += $"\n\n{capText}";
+            if (!Plugin.Character.challenges.blindChallenge.inChallenge)
+            {
+                var currentCap = Calculators.TM_EnergyCalculator.ResourceFromLevel(currentLevel + 1);
+                var capText = Tooltips.BuildCurrentCapText(currentCap, overCappedDuration, ppt);
+                ___message += $"\n\n{capText}";
 
-            var bank = character.adventureController.itopod.totalBankedTimeMachine();
-            if(bank > 0f)
-                ___message += $"\n\n<b>Banked ({bank * 100f:0}%):</b> {character.display((long)(currentLevel * bank))}";
+                var bank = character.adventureController.itopod.totalBankedTimeMachine();
+                if (bank > 0f)
+                    ___message += $"\n\n<b>Banked ({bank * 100f:0}%):</b> {character.display((long)(currentLevel * bank))}";
+            }
 
             __instance.tooltip.showTooltip(___message);
         }
@@ -78,13 +81,16 @@ namespace jshepler.ngu.mods.BarTooltips
                 overCappedDuration = (capLevel - currentLevel) / 50f;
             }
 
-            var currentCap = Calculators.TM_MagicCalculator.ResourceFromLevel(currentLevel + 1);
-            var capText = Tooltips.BuildCurrentCapText(currentCap, overCappedDuration, ppt);
-            ___message += $"\n\n{capText}";
+            if (!Plugin.Character.challenges.blindChallenge.inChallenge)
+            {
+                var currentCap = Calculators.TM_MagicCalculator.ResourceFromLevel(currentLevel + 1);
+                var capText = Tooltips.BuildCurrentCapText(currentCap, overCappedDuration, ppt);
+                ___message += $"\n\n{capText}";
 
-            var bank = character.adventureController.itopod.totalBankedTimeMachine();
-            if (bank > 0f)
-                ___message += $"\n\n<b>Banked ({bank * 100f:0}%):</b> {character.display((long)(currentLevel * bank))}";
+                var bank = character.adventureController.itopod.totalBankedTimeMachine();
+                if (bank > 0f)
+                    ___message += $"\n\n<b>Banked ({bank * 100f:0}%):</b> {character.display((long)(currentLevel * bank))}";
+            }
 
             __instance.tooltip.showTooltip(___message);
         }

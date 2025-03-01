@@ -29,6 +29,20 @@ namespace jshepler.ngu.mods
             };
         }
 
+        [HarmonyPostfix, HarmonyPatch(typeof(RebirthReminders), "OnPointerEnter")]
+        private static void RebirthReminders_OnPointerEnter_postfix(RebirthReminders __instance, string ___message)
+        {
+            if (UpgradeAllDiggers.CanUpgradeAnyDigger())
+            {
+                var tt = __instance.tooltip;
+
+                if (___message == "There's nothing you need to do! Go ahead and rebirth!")
+                    tt.showTooltip("You have diggers that can be upgraded!");
+                else
+                    tt.showTooltip($"{___message}\nYou have diggers that can be upgraded!");
+            }
+        }
+
         private static IEnumerator SetButtonColors()
         {
             var wait1 = new WaitForSeconds(1);
@@ -69,6 +83,9 @@ namespace jshepler.ngu.mods
                 return true;
 
             if (character.yggdrasil.fruits.Any(f => f.harvestTier() >= 1))
+                return true;
+
+            if (UpgradeAllDiggers.CanUpgradeAnyDigger())
                 return true;
 
             return false;

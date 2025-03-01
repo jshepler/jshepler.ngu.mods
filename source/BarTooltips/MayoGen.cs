@@ -1,10 +1,39 @@
-﻿using HarmonyLib;
+﻿using System.Linq;
+using System.Reflection;
+using HarmonyLib;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace jshepler.ngu.mods.BarTooltips
 {
     [HarmonyPatch]
     internal class MayoGen
     {
+        private static bool _altIsDown = false;
+        private static Text _text;
+
+        [HarmonyPrepare]
+        private static void prep(MethodBase method)
+        {
+            if (method != null)
+                return;
+
+            _text = GameObject.Find("Canvas/Cards Canvas/Cards Menu/Mana Pod/Amount Title").GetComponent<Text>();
+
+            Plugin.OnUpdate += (o, e) =>
+            {
+                if (Plugin.Character == null)
+                    return;
+
+                var altIsDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+                if (_altIsDown != altIsDown)
+                {
+                    _altIsDown = altIsDown;
+                    Plugin.Character.cardsController.updateManaPods();
+                }
+            };
+        }
+
         [HarmonyPrefix, HarmonyPatch(typeof(CardsController), "showManaGenTooltip", [])]
         private static bool CardsController_showManaGenTooltip_postfix(CardsController __instance)
         {
@@ -47,6 +76,24 @@ namespace jshepler.ngu.mods.BarTooltips
 
             __instance.manaGenText.text = $"<b>Total Mayo /day: <color=blue>{mayoPerDay:#,##0.#}</color></b>";
             //__instance.manaGenText.resizeTextForBestFit = true;
+            return false;
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(CardsController), "updateManaAmount")]
+        private static bool CardsController_updateManaAmount_prefix(int manaID, CardsController __instance)
+        {
+            var character = __instance.character;
+
+            if (!character.InMenu(Menu.Cards))
+                return false;
+
+            _text.text = _altIsDown ? "<color=blue><b>DECK</b></color>" : "<b>Amount</b>";
+            if (!_altIsDown)
+                return true;
+
+            var total = character.cards.cards.Sum(c => c.manaCosts[manaID]);
+            __instance.manaUI[manaID].manaCount.text = $"<color=blue><b>{total}</b></color>";
+
             return false;
         }
     }

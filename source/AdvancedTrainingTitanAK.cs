@@ -78,6 +78,12 @@ namespace jshepler.ngu.mods
                 var color = haveIt ? "green" : "red";
                 sb.Append($"\n<color={color}>{req.name}:  T={character.display(neededAT.Toughness)}, P={character.display(neededAT.Power)}</color>");
 
+                if (req.effectiveBossId == 116 && character.adventure.boss5Kills < 3)
+                {
+                    var killsLeft = 7 - (character.adventure.waldoDefeats + character.adventure.boss5Kills);
+                    sb.Append($"\n   ({killsLeft} kill{(killsLeft == 1 ? string.Empty : "s")} left for AK)");
+                }
+
                 if (req.optionalKills > 0 && enemyKills < req.optionalKills && enemyKills > 0)
                 {
                     var killsLeft = req.optionalKills - enemyKills;

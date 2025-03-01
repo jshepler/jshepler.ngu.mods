@@ -22,7 +22,7 @@ namespace jshepler.ngu.mods.CapCalculators
             throw new NotImplementedException();
         }
 
-        protected override double GetProgressPerTick(long r, long L)
+        protected override double GetProgressPerTick(double r, double L)
         {
             var levelDivider = Math.Pow(1.0078, L - 1) * L;
             var ppt = r * p * b / (d * levelDivider);

@@ -9,16 +9,41 @@ namespace jshepler.ngu.mods
     internal class ResourceAllocationSummary
     {
         private static bool _altDown => Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+        private static bool _inBlind => Plugin.Character.challenges.blindChallenge.inChallenge;
 
-        [HarmonyPrefix, HarmonyPatch(typeof(Energy), "tooltipDisplay")]
-        private static bool Eneryg_tooltipDisplay_prefix()
+        [HarmonyPrefix,
+            HarmonyPatch(typeof(Energy), "tooltipDisplay"),
+            HarmonyPatch(typeof(MagicDisplay), "tooltipDisplay"),
+            HarmonyPatch(typeof(Resource3Display), "tooltipDisplay")]
+        private static bool tooltipDisplay_prefix()
         {
-            if (!_altDown)
+            if (!_altDown || _inBlind)
             {
                 Plugin.ResetTooltipFont();
                 return true;
             }
 
+            var text = $"{buildEnergySummary()}\n\n\n{buildMagicSummary()}";
+            if(Plugin.Character.res3.capRes3 >= 10000)
+                text += $"\n\n\n{buildRes3Summary()}";
+
+            Plugin.SetTooltipFont(Fonts.LiberationMono_Regular);
+            Plugin.ShowTooltip(text);
+
+            return false;
+        }
+
+        [HarmonyPostfix,
+            HarmonyPatch(typeof(Energy), "OnPointerExit"),
+            HarmonyPatch(typeof(MagicDisplay), "OnPointerExit"),
+            HarmonyPatch(typeof(Resource3Display), "OnPointerExit")]
+        private static void OnPointerExit_postfix()
+        {
+            Plugin.ResetTooltipFont();
+        }
+
+        private static string buildEnergySummary()
+        {
             var character = Plugin.Character;
             var tec = character.totalCapEnergy();
             var disp = (double d) => $"{character.display(d)} <color=blue>({d / tec * 100.0:0.##}%)</color>";
@@ -76,28 +101,18 @@ namespace jshepler.ngu.mods
                 values.Add(disp(wishes));
             }
 
-            var text = $"<color=#2E814A><b>Energy Allocation Summary</b></color>\n\n";
+            var text = $"<color=#2E814A><b>Energy Allocation Summary</b></color>\n---------------------------------\n";
             if (labels.Count > 0)
             {
                 var maxLen = labels.Max(l => l.Length);
                 text += labels.Zip(values, (l, v) => $"<b>{l.PadLeft(maxLen)}:</b> {v}").Join(s => s, "\n");
             }
 
-            Plugin.SetTooltipFont(Fonts.LiberationMono_Regular);
-            Plugin.ShowTooltip(text);
-
-            return false;
+            return text;
         }
 
-        [HarmonyPrefix, HarmonyPatch(typeof(MagicDisplay), "tooltipDisplay")]
-        private static bool MagicDisplay_tooltipDisplay_prefix()
+        private static string buildMagicSummary()
         {
-            if (!_altDown)
-            {
-                Plugin.ResetTooltipFont();
-                return true;
-            }
-
             var character = Plugin.Character;
             var tmc = character.totalCapMagic();
             var disp = (double d) => $"{character.display(d)} <color=blue>({d / tmc * 100.0:0.##}%)</color>";
@@ -108,7 +123,7 @@ namespace jshepler.ngu.mods
             var tm = character.machine.goldMultiMagic;
             if (tm > 0)
             {
-                labels.Add("TMe");
+                labels.Add("TM");
                 values.Add(disp(tm));
             }
 
@@ -140,28 +155,18 @@ namespace jshepler.ngu.mods
                 values.Add(disp(wishes));
             }
 
-            var text = $"<color=#275AAD><b>Magic Allocation Summary</b></color>\n\n";
+            var text = $"<color=#275AAD><b>Magic Allocation Summary</b></color>\n---------------------------------\n";
             if (labels.Count > 0)
             {
                 var maxLen = labels.Max(l => l.Length);
                 text += labels.Zip(values, (l, v) => $"<b>{l.PadLeft(maxLen)}:</b> {v}").Join(s => s, "\n");
             }
 
-            Plugin.SetTooltipFont(Fonts.LiberationMono_Regular);
-            Plugin.ShowTooltip(text);
-
-            return false;
+            return text;
         }
 
-        [HarmonyPrefix, HarmonyPatch(typeof(Resource3Display), "tooltipDisplay")]
-        private static bool Resource3Display_tooltipDisplay_prefix()
+        private static string buildRes3Summary()
         {
-            if (!_altDown)
-            {
-                Plugin.ResetTooltipFont();
-                return true;
-            }
-
             var character = Plugin.Character;
             var trc = character.totalCapRes3();
             var disp = (double d) => $"{character.display(d)} <color=blue>({d / trc * 100.0:0.##}%)</color>";
@@ -185,7 +190,7 @@ namespace jshepler.ngu.mods
 
             var title = $"{character.res3.res3Name} Allocation Summary";
             var color = "#" + character.res3.colourHexString();
-            var text = $"<color={color}><b>{title}</b></color>\n\n";
+            var text = $"<color={color}><b>{title}</b></color>\n---------------------------------\n";
 
             if (labels.Count > 0)
             {
@@ -193,19 +198,7 @@ namespace jshepler.ngu.mods
                 text += labels.Zip(values, (l, v) => $"<b>{l.PadLeft(maxLen)}:</b> {v}").Join(s => s, "\n");
             }
 
-            Plugin.SetTooltipFont(Fonts.LiberationMono_Regular);
-            Plugin.ShowTooltip(text);
-
-            return false;
-        }
-
-        [HarmonyPostfix,
-            HarmonyPatch(typeof(Energy), "OnPointerExit"),
-            HarmonyPatch(typeof(MagicDisplay), "OnPointerExit"),
-            HarmonyPatch(typeof(Resource3Display), "OnPointerExit")]
-        private static void OnPointerExit_postfix()
-        {
-            Plugin.ResetTooltipFont();
+            return text;
         }
     }
 }

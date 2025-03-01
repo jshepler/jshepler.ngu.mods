@@ -33,7 +33,7 @@ namespace jshepler.ngu.mods.CapCalculators
             return result >= long.MaxValue ? long.MaxValue : (long)result;
         }
 
-        protected override double GetProgressPerTick(long r, long L)
+        protected override double GetProgressPerTick(double r, double L)
         {
             //return p / d * r / L * e * k * m * n * g * h * q * w * c * b / s;
             return r / L * pptModifier;

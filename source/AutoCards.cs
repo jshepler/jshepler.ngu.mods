@@ -8,6 +8,7 @@ namespace jshepler.ngu.mods
 {
     internal enum CardSortBy { RarityFirst, TypeFirst, Efficiency, Variance }
     internal enum CardSortDirection { Descending = -1, Ascending = 1 }
+    internal enum CardYeetMode { Disabled, Efficiency, Variance, Rarity }
 
     [HarmonyPatch]
     internal class AutoCards
@@ -19,9 +20,10 @@ namespace jshepler.ngu.mods
         private static bool _autoSortEnabled => Options.Cards.AutoSortEnabled.Value;
         private static CardSortBy _autoSortBy => Options.Cards.AutoSortBy.Value;
         private static int _sortDirection => (int)Options.Cards.AutoSortDirection.Value;
-        private static bool _autoYeetEnabled => Options.Cards.AutoYeetEnabled.Value;
+        private static CardYeetMode _autoYeetMode => Options.Cards.AutoYeetMode.Value;
         private static rarity _maxYeetRarity => Options.Cards.MaxYeetRarity.Value;
         private static float _maxYeetEfficiency => Options.Cards.MaxYeetEfficiency.Value;
+        private static float _maxYeetVariance => Options.Cards.MaxYeetVariance.Value;
         private static bool _autoProtectChonkers => Options.Cards.AutoProtectChonkers.Value;
 
         private static AutoCardsPopup _popup;
@@ -34,7 +36,7 @@ namespace jshepler.ngu.mods
             if (_autoYeetInProgress)
                 return;
 
-            if (_autoYeetEnabled)
+            if (_autoYeetMode != CardYeetMode.Disabled)
             {
                 _autoYeetInProgress = true;
                 yeetCards();
@@ -104,8 +106,9 @@ namespace jshepler.ngu.mods
                 _autoYeetedCard = card;
 
                 if (alwaysYeet[(int)card.bonusType]
-                    || (_maxYeetEfficiency == 0f && card.cardRarity <= _maxYeetRarity)
-                    || (_maxYeetEfficiency > 0f && CardTooltip.GetCardEfficiency(card) <= _maxYeetEfficiency)
+                    || (_autoYeetMode == CardYeetMode.Efficiency && CardTooltip.GetCardEfficiency(card) <= _maxYeetEfficiency)
+                    || (_autoYeetMode == CardYeetMode.Variance && CardTooltip.GetCardVariance(card) <= _maxYeetVariance)
+                    || (_autoYeetMode == CardYeetMode.Rarity && card.cardRarity <= _maxYeetRarity)
                 )
                     character.cardsController.trashCard(index);
 
