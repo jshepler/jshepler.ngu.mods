@@ -148,21 +148,21 @@ namespace jshepler.ngu.mods
 
             // only do the custom parsing if the text can't be parsed as-is
             // the specified NumberStyles allows parsing sci/eng notation
-            if (!ulong.TryParse(text, NumberStyles.Float | NumberStyles.AllowThousands, null, out var parsed))
+            if (!double.TryParse(text, NumberStyles.Float | NumberStyles.AllowThousands, null, out var parsed))
             {
-                var suffixMulti = 1UL;
+                var suffixMulti = 1.0;
 
                 text = text.Replace("uadrillion", "").Replace("rillion", "").Replace("illion", "");
                 if (text.EndsWith("k"))
-                    suffixMulti = 1000UL;
+                    suffixMulti = 1000.0;
                 else if (text.EndsWith("m"))
-                    suffixMulti = 1000000UL;
+                    suffixMulti = 1000000.0;
                 else if (text.EndsWith("b"))
-                    suffixMulti = 1000000000UL;
+                    suffixMulti = 1000000000.0;
                 else if (text.EndsWith("t"))
-                    suffixMulti = 1000000000000UL;
+                    suffixMulti = 1000000000000.0;
                 else if (text.EndsWith("q"))
-                    suffixMulti = 1000000000000000UL;
+                    suffixMulti = 1000000000000000.0;
 
                 var decimalSeperator = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
                 text = Regex.Replace("0" + text, $"[^0-9{decimalSeperator}]", string.Empty);
@@ -175,18 +175,10 @@ namespace jshepler.ngu.mods
                     text = text.Insert(text.Length + 1 - num2, decimalSeperator);
                 }
 
-                if (ulong.TryParse(text, NumberStyles.Float | NumberStyles.AllowThousands, null, out parsed))
-                    parsed *= suffixMulti;
-
-                // if still fails to parse as ulong, fallback to double.Parse()
-                else
-                    parsed = (ulong)(double.Parse(text) * suffixMulti);
+                parsed = double.Parse(text) * suffixMulti;
             }
 
             var value = parsed >= long.MaxValue ? long.MaxValue : (long)parsed;
-            if (value < 0)
-                value = 0;
-
             return value;
         }
     }
