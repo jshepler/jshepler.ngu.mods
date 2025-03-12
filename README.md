@@ -79,6 +79,11 @@ This sends current hack stats from NGU to GO for the `Hacks` tab.
 
 This sends the hack goals from GO to NGU which sets hack targets.
 
+## sending wish stats from NGU to GO
+`javascript:fetch("http://localhost:8088/ngu/NGU2GO/wishstats").then(s=>s.json()).then(s=>{Object.assign(appState.wishstats,s),appHandlers.handleSettings("wishstats",nguStats)});`
+
+This sends current wish stats from NGU to GO for the `Wishes` tab.
+
 # Twitch Integration
 
 ## setup

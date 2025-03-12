@@ -38,6 +38,11 @@ namespace jshepler.ngu.mods.WebService.GO
                     context.Response.SendResponse(HttpStatusCode.OK, json, ContentTypes.JSON);
                     return () => Plugin.ShowOverrideNotification("NGU2GO: equipped");
 
+                case "wishstats":
+                    json = Wishes.BuildWishStats();
+                    context.Response.SendResponse(HttpStatusCode.OK, json, ContentTypes.JSON);
+                    return () => Plugin.ShowOverrideNotification("NGU2GO: wish stats");
+
                 default:
                     context.Response.SendResponse(HttpStatusCode.BadRequest, $"unknown resource: {resource}");
                     return () => Plugin.ShowOverrideNotification($"NGU2GO: unknown resource: {resource}");
