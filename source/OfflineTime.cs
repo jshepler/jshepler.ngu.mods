@@ -31,8 +31,19 @@ namespace jshepler.ngu.mods
         {
             if (SkipOfflineProgress)
             {
+                __instance.splashScreen.message = "Offline Progress Skipped By Player\n\n";
+                __instance.splashScreen.openScreen();
                 SkipOfflineProgress = false;
+
                 return false;
+            }
+
+            if (__instance.challenges.levelChallenge10k.inChallenge
+                || __instance.challenges.trollChallenge.inChallenge
+                || __instance.challenges.hour24Challenge.inChallenge
+                || timeElapsed <= 0)
+            {
+                return true;
             }
 
             if (timeElapsed > 0)
@@ -43,6 +54,9 @@ namespace jshepler.ngu.mods
                 inv.mergeTime.setTime((inv.mergeTime.totalseconds + timeElapsed) % ictrl.autoMergeTime());
                 inv.boostTime.setTime((inv.boostTime.totalseconds + timeElapsed) % ictrl.autoBoostTime());
             }
+
+            TrackTimePlayedPerDifficulty.AddTime(timeElapsed, true);
+            TrackTimePlayedPerDifficulty.CheckTime();
 
             return true;
         }

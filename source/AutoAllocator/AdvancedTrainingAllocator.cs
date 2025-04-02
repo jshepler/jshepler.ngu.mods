@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using UnityEngine;
+using jshepler.ngu.mods.CapCalculators;
 using UnityEngine.UI;
 
 namespace jshepler.ngu.mods.AutoAllocator
@@ -94,10 +94,10 @@ namespace jshepler.ngu.mods.AutoAllocator
             var id = __instance.id;
             var wandoosOn = _character.settings.wandoos98On;
 
-            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+            if (Plugin.ShiftIsDown)
             {
 
-                if (Input.GetKey(KeyCode.LeftAlt))
+                if (Plugin.AltIsDown)
                     Enumerable.Range(0, wandoosOn ? 5 : 3).Do(i => Instance[i] = !Instance[i]);
 
                 else
@@ -106,9 +106,9 @@ namespace jshepler.ngu.mods.AutoAllocator
                 return false;
             }
 
-            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+            if (Plugin.ControlIsDown)
             {
-                if (Input.GetKey(KeyCode.LeftAlt))
+                if (Plugin.AltIsDown)
                 {
                     Instance.DisableAll();
                     Enumerable.Range(0, wandoosOn ? 5 : 3).Do(i => OverCap(i));
@@ -122,7 +122,7 @@ namespace jshepler.ngu.mods.AutoAllocator
                 return false;
             }
 
-            if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
+            if (Plugin.AltIsDown)
             {
                 Instance.DisableAll();
                 SplitEnergy();
@@ -133,13 +133,25 @@ namespace jshepler.ngu.mods.AutoAllocator
             return true;
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(AdvancedTrainingController), "removeEnergy")]
-        private static void AdvancedTrainingController_removeEnergy_postfix(AdvancedTrainingController __instance)
+        [HarmonyPrefix, HarmonyPatch(typeof(AdvancedTrainingController), "removeEnergy")]
+        private static bool AdvancedTrainingController_removeEnergy_prefix(AdvancedTrainingController __instance)
         {
+            if (Plugin.ControlIsDown)
+            {
+                if (Plugin.AltIsDown)
+                    Enumerable.Range(0, 5).Do(setTimeTarget);
+                else
+                    setTimeTarget(__instance.id);
+
+                return false;
+            }
+
             Instance[__instance.id] = false;
 
-            if (Input.GetKey(KeyCode.LeftShift))
+            if (Plugin.ShiftIsDown)
                 __instance.removeAllEnergy();
+
+            return true;
         }
 
         private static long CalcCapForLevel(int id, long level)
@@ -212,6 +224,38 @@ namespace jshepler.ngu.mods.AutoAllocator
 
                 c.updateText();
             }
+        }
+
+        private static void setTimeTarget(int id)
+        {
+            var controller = _controllers[id];
+            var calc = Calculators.AdvancedTrainingCalculators[id];
+            var resource = _character.advancedTraining.energy[id];
+            if (resource == 0)
+                resource = _character.totalCapEnergy();
+
+            var runTimeSeconds = _character.input.energyMagicInput * 60;
+            if (runTimeSeconds > 172800)
+            {
+                Plugin.ShowNotification("Max time allowed is 2 days");
+                return;
+            }
+
+            var ticksRemaining = runTimeSeconds * 50;
+            var targetLevel = controller.CurrentLevel();
+
+            while (ticksRemaining > 0)
+            {
+                var ttl = calc.TicksToLevel(resource, targetLevel + 1);
+                if (ttl > ticksRemaining)
+                    break;
+
+                ticksRemaining -= ttl;
+                targetLevel++;
+            }
+
+            controller.target.text = targetLevel.ToString();
+            controller.checkTargetInput();
         }
     }
 }

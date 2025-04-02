@@ -5,7 +5,6 @@ namespace jshepler.ngu.mods.GameData.DropConditions
     internal class SetCompleteDropCondition : BaseDropCondition
     {
         private ItemSets _itemSet;
-        private static ItemList il;
 
         internal SetCompleteDropCondition(ItemSets itemSet)
         {
@@ -14,8 +13,7 @@ namespace jshepler.ngu.mods.GameData.DropConditions
 
         internal override bool IsConditionMet()
         {
-            if (il == null)
-                il = Plugin.Character.inventory.itemList;
+            var il = Plugin.Character.inventory.itemList;
 
             return _itemSet switch
             {

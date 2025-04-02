@@ -20,13 +20,13 @@ namespace jshepler.ngu.mods
         private static long _qpBefore = 0;
         private static int _lastQuestSource;
 
-        private static long _qpLastRB
+        internal static long QPGainedLastRB
         {
             get => ModSave.Data.QPGainedLastRB;
             set => ModSave.Data.QPGainedLastRB = value;
         }
 
-        private static long _qpThisRB
+        private static long QPGainedThisRB
         {
             get => ModSave.Data.QPGainedThisRB;
             set => ModSave.Data.QPGainedThisRB = value;
@@ -78,8 +78,8 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(Rebirth), "engage", typeof(bool))]
         private static void Rebirth_engage_postfix()
         {
-            _qpLastRB = _qpThisRB;
-            _qpThisRB = 0L;
+            QPGainedLastRB = QPGainedThisRB;
+            QPGainedThisRB = 0L;
 
             _sourcesLastRB = _sourcesThisRB;
             _sourcesThisRB = new long[SOURCE_COUNT];
@@ -97,7 +97,7 @@ namespace jshepler.ngu.mods
         {
             var gained = _curQP - _qpBefore;
             _sourcesThisRB[_lastQuestSource] += gained;
-            _qpThisRB += gained;
+            QPGainedThisRB += gained;
         }
 
         [HarmonyPrefix,
@@ -127,7 +127,7 @@ namespace jshepler.ngu.mods
         {
             var gained = _curQP - _qpBefore;
             _sourcesThisRB[QPSource.Titans] += gained;
-            _qpThisRB += gained;
+            QPGainedThisRB += gained;
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(FruitController), "consumeQPFruit")]
@@ -141,7 +141,7 @@ namespace jshepler.ngu.mods
         {
             var gained = _curQP - _qpBefore;
             _sourcesThisRB[QPSource.Fruit] += gained;
-            _qpThisRB += gained;
+            QPGainedThisRB += gained;
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(BeastQuestPerkController), "Start")]
@@ -185,8 +185,8 @@ namespace jshepler.ngu.mods
             while (true)
             {
                 if (!_altIsDown)
-                    text = $"<b>QP gained this rebirth:</b> {character.display(_qpThisRB)}"
-                        + $"\n<b>QP gained last rebirth:</b> {character.display(_qpLastRB)}";
+                    text = $"<b>QP gained this rebirth:</b> {character.display(QPGainedThisRB)}"
+                        + $"\n<b>QP gained last rebirth:</b> {character.display(QPGainedLastRB)}";
 
                 else
                 {
@@ -200,20 +200,20 @@ namespace jshepler.ngu.mods
                     {
                         var sourceThisRB = _sourcesThisRB[source];
                         if (sourceThisRB > 0)
-                            dataThisRB.Add((QPSource.Name(source), sourceThisRB, _qpThisRB == 0 ? 0f : (float)sourceThisRB / _qpThisRB));
+                            dataThisRB.Add((QPSource.Name(source), sourceThisRB, QPGainedThisRB == 0 ? 0f : (float)sourceThisRB / QPGainedThisRB));
 
                         var sourceLastRB = _sourcesLastRB[source];
                         if (sourceLastRB > 0)
-                            dataLastRB.Add((QPSource.Name(source), sourceLastRB, _qpLastRB == 0 ? 0f : (float)sourceLastRB / _qpLastRB));
+                            dataLastRB.Add((QPSource.Name(source), sourceLastRB, QPGainedLastRB == 0 ? 0f : (float)sourceLastRB / QPGainedLastRB));
                     }
 
-                    var otherThisRB = _qpThisRB - sumThisRB;
+                    var otherThisRB = QPGainedThisRB - sumThisRB;
                     if (otherThisRB > 0)
-                        dataThisRB.Add(("Other", otherThisRB, _qpThisRB == 0 ? 0f : (float)otherThisRB / _qpThisRB));
+                        dataThisRB.Add(("Other", otherThisRB, QPGainedThisRB == 0 ? 0f : (float)otherThisRB / QPGainedThisRB));
 
-                    var otherLastRB = _qpLastRB - sumLastRB;
+                    var otherLastRB = QPGainedLastRB - sumLastRB;
                     if (otherLastRB > 0)
-                        dataLastRB.Add(("Other", otherLastRB, _qpLastRB == 0 ? 0f : (float)otherLastRB / _qpLastRB));
+                        dataLastRB.Add(("Other", otherLastRB, QPGainedLastRB == 0 ? 0f : (float)otherLastRB / QPGainedLastRB));
 
                     dataThisRB.Sort(sorter);
                     dataLastRB.Sort(sorter);
@@ -221,8 +221,8 @@ namespace jshepler.ngu.mods
                     var sourcesThisRB = dataThisRB.Join(d => $"   <b>{d.Item1}:</b> {display(d.Item2)} <color=blue>({d.Item3 * 100f:0.#}%)</color>", "\n");
                     var sourcesLastRB = dataLastRB.Join(d => $"   <b>{d.Item1}:</b> {display(d.Item2)} <color=blue>({d.Item3 * 100f:0.#}%)</color>", "\n");
 
-                    text = $"<b>QP gained this rebirth:</b> {character.display(_qpThisRB)}\n{sourcesThisRB}"
-                        + $"\n\n<b>QP gained last rebirth:</b> {character.display(_qpLastRB)}\n{sourcesLastRB}";
+                    text = $"<b>QP gained this rebirth:</b> {character.display(QPGainedThisRB)}\n{sourcesThisRB}"
+                        + $"\n\n<b>QP gained last rebirth:</b> {character.display(QPGainedLastRB)}\n{sourcesLastRB}";
                 }
 
                 Plugin.ShowTooltip(text);

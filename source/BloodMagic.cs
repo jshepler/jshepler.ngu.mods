@@ -2,6 +2,8 @@
 using System.Collections.Specialized;
 using System.Linq;
 using HarmonyLib;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace jshepler.ngu.mods
 {
@@ -109,6 +111,12 @@ namespace jshepler.ngu.mods
 
             Plugin.OnPreSave += (o, e) => ModSave.Data.BM_IronPill_LastGained = field.Value;
             Plugin.OnSaveLoaded += (o, e) => field.Value = ModSave.Data.BM_IronPill_LastGained;
+
+            // left clicking number's "Auto Spell" text is suppoed to toggle the checkbox,
+            // like it does for DC and gold, but it's missing this flag being set
+            GameObject.Find("Canvas/Blood Magic Spells Canvas/Blood Magic Spells Menu /Auto Spell Button/Text")
+                .GetComponent<Text>()
+                .raycastTarget = true;
         }
 
         // AllBloodMagicController.lootBonus()

@@ -1,6 +1,5 @@
 ﻿using HarmonyLib;
 using jshepler.ngu.mods.CapCalculators;
-using UnityEngine;
 using UnityEngine.UI;
 
 namespace jshepler.ngu.mods.AutoAllocator
@@ -55,22 +54,22 @@ namespace jshepler.ngu.mods.AutoAllocator
         {
             var id = __instance.id;
 
-            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+            if (Plugin.ShiftIsDown)
             {
                 Instance[id] = !Instance[id];
 
-                if (Input.GetKey(KeyCode.LeftAlt))
+                if (Plugin.AltIsDown)
                     Allocators.Energy[Allocators.Feature.Augment][id] = Instance[id];
 
                 return false;
             }
 
-            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+            if (Plugin.ControlIsDown)
             {
                 Instance[id] = false;
                 OverCap(id);
 
-                if (Input.GetKey(KeyCode.LeftAlt))
+                if (Plugin.AltIsDown)
                 {
                     Allocators.Energy[Allocators.Feature.Augment][id] = false;
                     AugmentAllocator.OverCap(id);
@@ -82,13 +81,25 @@ namespace jshepler.ngu.mods.AutoAllocator
             return true;
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(AugmentController), "removeEnergyUpgrade")]
-        private static void AugmentController_removeEnergyUpgrade_postfix(AugmentController __instance)
+        [HarmonyPrefix, HarmonyPatch(typeof(AugmentController), "removeEnergyUpgrade")]
+        private static bool AugmentController_removeEnergyUpgrade_prefix(AugmentController __instance)
         {
+            if (Plugin.ControlIsDown)
+            {
+                setTimeTarget(__instance.id);
+
+                if (Plugin.AltIsDown)
+                    AugmentAllocator.setTimeTarget(__instance.id);
+
+                return false;
+            }
+
             Instance[__instance.id] = false;
 
-            if(Input.GetKey(KeyCode.LeftShift))
+            if(Plugin.ShiftIsDown)
                 __instance.character.idleEnergy += __instance.character.augments.augs[__instance.id].removeEnergyUpgrade(long.MaxValue);
+
+            return true;
         }
 
         private static long CalcCapForLevel(int id, long level)
@@ -158,6 +169,40 @@ namespace jshepler.ngu.mods.AutoAllocator
 
             Instance.Allocate(id, cap);
             _character.idleEnergy -= cap;
+        }
+
+        internal static void setTimeTarget(int id)
+        {
+            var controller = _allAugsController.augments[id];
+            var aug = _character.augments.augs[id];
+            var calc = Calculators.AugUpgradeCalculators[id];
+
+            var resource = aug.upgradeEnergy;
+            if (resource == 0)
+                resource = _character.totalCapEnergy();
+
+            var runTimeSeconds = _character.input.energyMagicInput * 60;
+            if (runTimeSeconds > 172800)
+            {
+                Plugin.ShowNotification("Max time allowed is 2 days");
+                return;
+            }
+
+            var ticksRemaining = runTimeSeconds * 50;
+            var targetLevel = aug.upgradeLevel;
+
+            while (ticksRemaining > 0)
+            {
+                var ttl = calc.TicksToLevel(resource, targetLevel + 1);
+                if (ttl > ticksRemaining)
+                    break;
+
+                ticksRemaining -= ttl;
+                targetLevel++;
+            }
+
+            controller.upgradeTarget.text = targetLevel.ToString();
+            controller.checkUpgradeTargetInput();
         }
     }
 }

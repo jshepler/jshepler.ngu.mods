@@ -66,6 +66,7 @@ namespace jshepler.ngu.mods.Popups
             set => Options.Cards.MaxYeetEfficiency.Value = value;
         }
 
+        private static string _efficiencyMulti2ModifierString => $"{MaxYeetEfficiency * 100f:0.##}";
         private static string _maxYeetEfficiency;
         //{
         //    get => $"{MaxYeetEfficiency * 100f:0.##}";
@@ -82,6 +83,7 @@ namespace jshepler.ngu.mods.Popups
             set => Options.Cards.MaxYeetVariance.Value = value;
         }
 
+        private static string _varianceMulti2BonusString => $"{(MaxYeetVariance - 1f) * 100f:0.#}";
         private static string _maxYeetVarience;
         //{
         //    get => $"{(1f - MaxYeetVariance) * 100f:0.#}";
@@ -121,8 +123,8 @@ namespace jshepler.ngu.mods.Popups
             _alwaysYeet = AlwaysYeet;
             Array.Copy(_alwaysYeet, _prevAlwaysYeet, 15);
 
-            _maxYeetEfficiency = $"{MaxYeetEfficiency * 100f:0.##}";
-            _maxYeetVarience = $"{(1f - MaxYeetVariance) * 100f:0.#}";
+            _maxYeetEfficiency = _efficiencyMulti2ModifierString;
+            _maxYeetVarience = _varianceMulti2BonusString;
 
             base.Open();
         }
@@ -234,7 +236,7 @@ namespace jshepler.ngu.mods.Popups
             DrawAutoYeetModes();
 
             if (AutoYeetMode == CardYeetMode.Efficiency)
-                DrawAutoYeetEfficency();
+                DrawAutoYeetEfficiency();
             else if (AutoYeetMode == CardYeetMode.Rarity)
                 DrawAutoYeetRarities();
             else if (AutoYeetMode == CardYeetMode.Variance)
@@ -254,32 +256,56 @@ namespace jshepler.ngu.mods.Popups
             GUILayout.EndHorizontal();
         }
 
-        private static void DrawAutoYeetEfficency()
+        private static bool _hadFocus_maxYeetEfficiency = false;
+        private static void DrawAutoYeetEfficiency()
         {
             GUILayout.BeginHorizontal();
             GUILayout.Label("Max Mayo Efficiency to yeet (0 to 100): ");
+            GUI.SetNextControlName("maxYeetEfficiency");
             _maxYeetEfficiency = GUILayout.TextField(_maxYeetEfficiency, _maxYeetEffTextStyle, GUILayout.Width(30f));
             GUILayout.Label("%");
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
-            _maxYeetEfficiency = Regex.Replace(_maxYeetEfficiency, @"[^0-9.-]", string.Empty);
-            if (float.TryParse(_maxYeetEfficiency, out var f))
-                MaxYeetEfficiency = f / 100f;
+            _maxYeetEfficiency = Regex.Replace(_maxYeetEfficiency, @"[^0-9.,]", string.Empty);
+
+            var hasFocus = GUI.GetNameOfFocusedControl() == "maxYeetEfficiency";
+            if (hasFocus != _hadFocus_maxYeetEfficiency)
+            {
+                if (!hasFocus && float.TryParse(_maxYeetEfficiency, out var f))
+                {
+                    MaxYeetEfficiency = Mathf.Clamp(f, 0, 100) / 100f;
+                    _maxYeetEfficiency = _efficiencyMulti2ModifierString;
+                }
+
+                _hadFocus_maxYeetEfficiency = hasFocus;
+            }
         }
 
+        private static bool _hadFocus_maxYeetVarience = false;
         private static void DrawAutoYeetVariance()
         {
             GUILayout.BeginHorizontal();
             GUILayout.Label("Max Variance to yeet (-20 to +20): ");
+            GUI.SetNextControlName("maxYeetVarience");
             _maxYeetVarience = GUILayout.TextField(_maxYeetVarience, _maxYeetEffTextStyle, GUILayout.Width(30f));
             GUILayout.Label("%");
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
-            _maxYeetVarience = Regex.Replace(_maxYeetVarience, @"[^0-9.-]", string.Empty);
-            if (float.TryParse(_maxYeetVarience, out var f))
-                MaxYeetVariance = Mathf.Clamp(f, -20f, 20f) / 100f + 1f;
+            _maxYeetVarience = Regex.Replace(_maxYeetVarience, @"[^0-9.,-]", string.Empty);
+
+            var hasFocus = GUI.GetNameOfFocusedControl() == "maxYeetVarience";
+            if (hasFocus != _hadFocus_maxYeetVarience)
+            {
+                if (!hasFocus && float.TryParse(_maxYeetVarience, out var f))
+                {
+                    MaxYeetVariance = Mathf.Clamp(f, -20f, 20f) / 100f + 1f;
+                    _maxYeetVarience = _varianceMulti2BonusString;
+                }
+
+                _hadFocus_maxYeetVarience = hasFocus;
+            }
         }
 
         private static void DrawAutoYeetRarities()

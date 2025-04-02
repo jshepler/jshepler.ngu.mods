@@ -79,6 +79,11 @@ This sends current hack stats from NGU to GO for the `Hacks` tab.
 
 This sends the hack goals from GO to NGU which sets hack targets.
 
+## sending wish stats from NGU to GO
+`javascript:fetch("http://localhost:8088/ngu/NGU2GO/wishstats").then(s=>s.json()).then(s=>{let t=appState.wishstats;Object.assign(t,s),appHandlers.handleSettings("wishstats",t)});`
+
+This sends current wish stats from NGU to GO for the `Wishes` tab.
+
 # Twitch Integration
 
 ## setup
@@ -321,9 +326,14 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 60. copy/paste wish allocations: allocate EMR3 to a wish, press control-c to copy, select another wish, press control-v to paste the allocations
 
-61. added right-click costs and levels gained to perk and quirk tooltips
+61. improved perk and quirk tooltips:
+    - shows how much PP/QP will be used when right-clicking and what level/bonus it will be
+    - shows PP/QP to next level and max level
+    - shows estimated days to next level and max level
 
 62. added shift-right-click on fib perk to only buy up to next unlock
+    - tooltip shows how much PP will be spent to gain next bonus if shift-right-click
+    - if not enough PP yet, will show much PP remaining and est days to get it
 
 63. right-click on the enter ITOPOD button to directly enter the tower, skipping the popup
 
@@ -462,10 +472,12 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
     - EXP per drop
     - EXP per day
     - AP per day
+
+    in alt tooltip (hold alt):
     - poop per day
     - guffs per day
     - the optimal floor even if > max floor
-    - ADV power needed for optimal floors: next, next 50th (next exp increase), next boost (e.g. when boost drops change from 1k to 2k)
+    - AT power and adventure power needed for optimal floors: next, next 50th (next exp increase), next boost (e.g. when boost drops change from 1k to 2k)
 
     time to next PP uses 2 calcs: one for when floor \<= optimal floor and another > optimal floor
 
@@ -545,6 +557,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
      - transfer ngu stats from NGU to GO's NGUs tab (em cap, em ngu speed, quirks, blue heart, and current levels for all NGUs)
      - transfer hack stats from NGU to GO's hacks tab (rpower, rcap, hack speed, current level and reducer counts for all hacks)
      - transfer hack goals from GO's hacks tab to NGU hacks' targets
+     - transfer wish stats from NGO to GO's wishes tab (EMR3-PC, wish speed, and blue heart)
 
     **requires adding bookmarklets to your browser - see [GO integration bookmarklets](https://github.com/jshepler/jshepler.ngu.mods?tab=readme-ov-file#go-integration-bookmarklets) above**
 
@@ -645,7 +658,11 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
       - 24 EMR3 potion alphas to 1 potion delta
       - 24 lucky charms to 1 super lucky charm
 
-138. shift-click the + button next to a hack's target to set that hack's hard cap
+138. shift-click the + button next to a hack's target to previous milestone
+
+     alt-click to set target to hard cap
+ 
+     alt-shift-click to set all targets to hard cap
 
 139. pressing shift-F5 will do a clean quick save - doesn't include any save data from my mods (~~useful for loading into GO~~ no longer needed)
 
@@ -744,13 +761,14 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 173. combat helper for the traitor (T14) - shows IC (invincible counter), GR (growth rate), GC (grow count)
 
-174. shows time per major quest generated and number per day on the quests screen, under the current timer for next major quest
+174. shows time per major quest generated, number per day, and time to full bank on the quests screen, under the current timer for next major quest
 
 175. on the cards screen, replaces the mayo generator number running/max with total mayo generated per day
 
-176. time targets for NGUs - calculates and sets target level for that NGU to run for x minutes
+176. time targets for augs, AT, TM, NGUs - calculates and sets target level where time to target is at (or close to) specified time
       - set number of minutes in the resource input box at the top of the screen
-      - ctrl-click the cap button next to desired NGU or ctrl-click the cap all button to set targets for all
+      - ctrl-click the - button to set the target for that bar
+      - alt-ctrl-click any of the - buttons to set the targets for all the bars (except augs, which only do the aug+upgrade pair)
 
 177. help to prevent accidentally allocating resources to hidden wishes - by default, when the game is launched, wish 0 is pre-selected and is probably being filtered out
       - when loading a save, the first visible wish will be pre-selected
@@ -781,7 +799,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 186. shift-click the `Clear Wish` button on the wishes screen to clear all resources from all wishes
 
-187. removed name restrictions for res3 name - any character allowed, not just letters and spaces
+187. removed restrictions for r3 name - any character allowed, not just letters and spaces, but still requires at least 1 character
 
 188. highlights the page button for current page in various menus
 
@@ -823,11 +841,15 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 195. shows hack bonus summary in a tooltip when hovering over the WTF button on hacks page
 
+     hold alt to see the times to targets with total time
+
 196. wish tooltips show resource allocation as a % of cap, where 100% = min wish time (e.g. 4 hours)
 
      if over 100%, you have more than you need to min wish time
 
-     hold alt to see current progress and progress per tick - useful in seeing the effect of floats on wishes that are "too slow"
+     hold alt to see current progress, progress per tick, and min progress per tick - useful in seeing the effect of floats on wishes that are "too slow"
+
+     min progress per tick is the smallest value needed to gain any progress at all - based on current progress value, will change at higher progress
 
 197. shows current time factor for guffs and beards on their tooltips; guffs also show indication if muffin is active
 
@@ -913,3 +935,9 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 227. adds hp regen to boss hp bar tooltip (fight boss screen)
 
 228. fixes game bug with daily spin tier 0, the 500 AP reward could never be awarded
+
+229. GPS breakdown to stat breakdowns - misc adventure; basically the same that's shown on the TM screen but in a nice list with total
+
+230. fixed game bug when clicking a digger's cap button would often result in 1 level lower than it could
+
+231. fixed game bug that preventing being able to click the "Auto Spell" text for blood number to toggle the checkbox

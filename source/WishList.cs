@@ -90,10 +90,16 @@ namespace jshepler.ngu.mods
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(WishesController), "selectNewWish")]
-        private static bool WishesController_selectNewWish_pretfix(int id)
+        private static bool WishesController_selectNewWish_pretfix(int id, WishesController __instance)
         {
             if (!_shiftIsDown)
                 return true;
+
+            if (Wishes.AllWishes[id].IsLocked)
+            {
+                __instance.displayLockedMessage(id);
+                return false;
+            }
 
             if (_wishList.Contains(id))
                 removeWish(id);
@@ -262,7 +268,7 @@ namespace jshepler.ngu.mods
 
             var wish = getNextWishFromList();
             if (wish == null)
-                wish = Wishes.CurValidUpgradesList.FirstOrDefault(w => w.Level < w.MaxLevel && !w.IsRunning && (!_blacklistMode || !_wishList.Contains(w.Id)));
+                wish = Wishes.CurValidUpgradesList.FirstOrDefault(w => w.Level < w.MaxLevel && !w.IsRunning && !w.IsLocked && (!_blacklistMode || !_wishList.Contains(w.Id)));
 
             return wish;
         }

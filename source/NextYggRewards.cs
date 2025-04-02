@@ -355,7 +355,8 @@ namespace jshepler.ngu.mods
             if (!fruit.usePoop)
                 return 1f;
 
-            if (character.settings.poopOnlyMaxTier && fruit.harvestTier() < fruit.maxTier)
+            var currentTier = character.yggdrasilController.fruits[fruitId].harvestTier(fruitId);
+            if (character.settings.poopOnlyMaxTier && currentTier < fruit.maxTier)
                 return 1f;
 
             return character.allArbitrary.poopModifier();

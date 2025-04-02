@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.TextCore;
 
 namespace jshepler.ngu.mods.BarTooltips
 {
@@ -38,7 +39,7 @@ namespace jshepler.ngu.mods.BarTooltips
             if (hack.level < hack.target)
             {
                 var r3 = hack.res3 > 0 ? hack.res3 : character.totalCapRes3();
-                var secondsToTarget = _calc[id].TimeToTarget(hack.level, hack.target, r3, hack.progress);
+                var secondsToTarget = GetSecondsToTarget(id);
                 text += $"\n<b>Time to Target:</b> {NumberOutput.timeOutput(secondsToTarget)}";
             }
 
@@ -78,6 +79,16 @@ namespace jshepler.ngu.mods.BarTooltips
             }
 
             __instance.tooltip.showTooltip(text);
+        }
+
+        internal static double GetSecondsToTarget(int id)
+        {
+            var character = Plugin.Character;
+            var hack = character.hacks.hacks[id];
+            var r3 = character.totalCapRes3();
+            var seconds = _calc[id].TimeToTarget(hack.level, hack.target, r3, hack.progress);
+
+            return seconds;
         }
 
         internal static long GetReducerCount(Character character, int id)

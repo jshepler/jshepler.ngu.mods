@@ -38,6 +38,11 @@ namespace jshepler.ngu.mods.WebService.GO
                     context.Response.SendResponse(HttpStatusCode.OK, json, ContentTypes.JSON);
                     return () => Plugin.ShowOverrideNotification("NGU2GO: equipped");
 
+                case "wishstats":
+                    json = BuildWishStats();
+                    context.Response.SendResponse(HttpStatusCode.OK, json, ContentTypes.JSON);
+                    return () => Plugin.ShowOverrideNotification("NGU2GO: wish stats");
+
                 default:
                     context.Response.SendResponse(HttpStatusCode.BadRequest, $"unknown resource: {resource}");
                     return () => Plugin.ShowOverrideNotification($"NGU2GO: unknown resource: {resource}");
@@ -109,6 +114,23 @@ namespace jshepler.ngu.mods.WebService.GO
             root.Add("magic", magic);
             root.Add("quirk", quirks);
             root.Add("blueHeart", character.inventory.itemList.itemMaxxed[(int)GameData.Items.Heart_Blue]);
+
+            return root.ToString();
+        }
+
+        private static string BuildWishStats()
+        {
+            var character = Plugin.Character;
+
+            var root = new JSONObject();
+            root.Add("blueHeart", character.inventory.itemList.itemMaxxed[(int)GameData.Items.Heart_Blue]);
+            root.Add("epow", character.totalEnergyPower());
+            root.Add("ecap", character.totalCapEnergy());
+            root.Add("mpow", character.totalMagicPower());
+            root.Add("mcap", character.totalCapMagic());
+            root.Add("rpow", character.totalRes3Power());
+            root.Add("rcap", character.totalCapRes3());
+            root.Add("wishspeed", character.wishesController.totalWishSpeedBonuses());
 
             return root.ToString();
         }

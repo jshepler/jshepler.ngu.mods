@@ -12,29 +12,37 @@ namespace jshepler.ngu.mods
         [HarmonyTranspiler, HarmonyPatch(typeof(StatsDisplay), "displayMisc")]
         private static IEnumerable<CodeInstruction> StatsDisplay_displayMisc_Transpiler(IEnumerable<CodeInstruction> instructions)
         {
-            var statsBreakdownField = typeof(StatsDisplay).GetField("statsBreakdown");
-            var statValueField = typeof(StatsDisplay).GetField("statValue");
-            var setTextMethod = typeof(Text).GetProperty("text").GetSetMethod();
+            var statsBreakdown = typeof(StatsDisplay).GetField("statsBreakdown");
+            var statValue = typeof(StatsDisplay).GetField("statValue");
+            var setText = typeof(Text).GetProperty("text").GetSetMethod();
 
-            var matcher = new CodeMatcher(instructions);
-            var newInstructions = matcher
-                .MatchForward(false // false = leave cursor at start of matches, true = move cursor to end of matches
-                    // statsBreakdown.text = ""
+            var cm = new CodeMatcher(instructions)
+
+                // prepend boosts, TM EM speed, BM
+                .MatchForward(false
                     , new CodeMatch(OpCodes.Ldarg_0)
-                    , new CodeMatch(OpCodes.Ldfld, statsBreakdownField)
-                    , new CodeMatch(OpCodes.Ldstr, string.Empty)
-                    , new CodeMatch(OpCodes.Callvirt, setTextMethod)
-                    // statValue.text = ""
-                    , new CodeMatch(OpCodes.Ldarg_0)
-                    , new CodeMatch(OpCodes.Ldfld, statValueField)
-                    , new CodeMatch(OpCodes.Ldstr, string.Empty)
-                    , new CodeMatch(OpCodes.Callvirt, setTextMethod))
+                    , new CodeMatch(OpCodes.Ldfld, statsBreakdown))
                 .Advance(1) // leave the first Ldarg_0 to pass as argument to delegate below
                 .RemoveInstructions(7)
                 .Insert(Transpilers.EmitDelegate(PrependMiscStats))
-                .InstructionEnumeration();
 
-            return newInstructions;
+                // modifiy daycare kitty happiness to indicate that it's the speed breakdown, then insert the time breakdown
+                .MatchForward(false, new CodeMatch(OpCodes.Ldstr, "\n\n<b>Base Kitty Happiness</b> "))
+                .SetOperandAndAdvance("\n\n<b>Base Kitty Happiness (speed):</b> ")
+
+                .MatchForward(false, new CodeMatch(OpCodes.Ldstr, "\n<b>Total Kitty Happiness:</b> "))
+                .SetOperandAndAdvance("\n<b>Total Kitty Happiness (speed):</b> ")
+
+                .MatchForward(true, new CodeMatch(OpCodes.Callvirt, setText), new CodeMatch(OpCodes.Ldarg_0))
+                .MatchForward(false, new CodeMatch(OpCodes.Callvirt, setText))
+                .Advance(1)
+                .Insert(new CodeInstruction(OpCodes.Ldarg_0)
+                    , new CodeInstruction(OpCodes.Ldfld, statsBreakdown)
+                    , new CodeInstruction(OpCodes.Ldarg_0)
+                    , new CodeInstruction(OpCodes.Ldfld, statValue)
+                    , Transpilers.EmitDelegate(InsertDaycareTimeBreakdown));
+
+            return cm.InstructionEnumeration();
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(StatsDisplay), "displayMisc")]
@@ -199,6 +207,49 @@ namespace jshepler.ngu.mods
             statsValues += $"\n  {display(totalBloogGainMulti * 100f)}%";
 
             return (statsText, statsValues);
+        }
+
+        private static void InsertDaycareTimeBreakdown(Text statsBreakdown, Text statValue)
+        {
+            var character = Plugin.Character;
+            var statText = "\n\n<b>Base Kitty Happiness (time):</b> ";
+            var valueText = "\n\n  100%";
+            var totalModifier = 1f;
+
+            var blindCompletions = character.allChallenges.blindChallenge.completions();
+            if (blindCompletions > 0)
+            {
+                var blindModifier = 1f - 0.05f - blindCompletions * 0.01f;
+                totalModifier *= blindModifier;
+
+                statText += "\n<b>Normal Blind Challenge:</b> ";
+                valueText += $"\nx {blindModifier * 100f}%";
+            }
+
+            var perk27 = character.adventure.itopod.perkLevel[27];
+            var perk28 = character.adventure.itopod.perkLevel[28];
+            if (perk27 > 0 || perk28 > 0)
+            {
+                var perkModifier = 1f - perk27 * character.adventureController.itopod.effectPerLevel[27];
+                perkModifier *= 1f - perk28 * character.adventureController.itopod.effectPerLevel[28];
+                totalModifier *= perkModifier;
+
+                statText += "\n<b>Perks Modifier:</b> ";
+                valueText += $"\nx {perkModifier * 100f}%";
+            }
+
+            if (character.arbitrary.hasDaycareSpeed)
+            {
+                totalModifier *= 0.9f;
+                statText += "\n<b>AP Purchase:</b> ";
+                valueText += "\nx 90%";
+            }
+
+            statText += "\n<b>Total Kitty Happiness (time):</b> ";
+            valueText += $"\n  {totalModifier * 100f}%";
+
+            statsBreakdown.text += statText;
+            statValue.text += valueText;
         }
 
         private static (string, string) BuildMayoGenRate(Character character)

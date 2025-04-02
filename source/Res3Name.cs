@@ -12,7 +12,11 @@ namespace jshepler.ngu.mods
 			if (character.res3.capRes3 < 10000)
 				return true;
 
-			character.res3.res3Name = __instance.input.text;
+			var name = __instance.input.text;
+			if (string.IsNullOrEmpty(name))
+				name = "Butts";
+
+			character.res3.res3Name = name;
 			__instance.updateInputText();
 
 			return false;

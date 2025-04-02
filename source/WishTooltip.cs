@@ -8,7 +8,7 @@ using UnityEngine;
 namespace jshepler.ngu.mods
 {
     [HarmonyPatch]
-    internal class WishTotalTime
+    internal class WishTooltip
     {
         private static Character _character;
         private static WishesController _controller;
@@ -118,11 +118,21 @@ namespace jshepler.ngu.mods
             if (altDown)
             {
                 var prog = _wish(id).Progress;
-                text += $"\n\n<b>Progress:</b> {prog * 100f:00.0000000000000}%"
-                    + $"\n     per tick: {curPPT * 100f:00.0000000############}%";
+                text += $"\n\n<b>Progress:</b> {prog * 100f:00.00000000000000000}%"
+                    + $"\n     per tick: {curPPT * 100f:00.00000000000000000}%"
+                    + $"\n           min: {getMinPPT(prog) * 100f:00.00000000000000000}%";
             }
 
             return text;
+        }
+
+        private static float getMinPPT(float curProgress)
+        {
+            var next = curProgress.NextFloat();
+            var halfDiff = (next - curProgress) / 2f;
+            var min = halfDiff.NextFloat();
+
+            return min;
         }
     }
 }

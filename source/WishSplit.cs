@@ -82,6 +82,11 @@ namespace jshepler.ngu.mods
             }
 
             var id = __instance.id;
+            if (Wishes.AllWishes[id].IsLocked)
+            {
+                Plugin.Character.wishesController.displayLockedMessage(id);
+                return;
+            }
 
             if (_selectedIds.Contains(id))
                 _selectedIds.Remove(id);
@@ -140,6 +145,9 @@ namespace jshepler.ngu.mods
             else
                 wishes = Wishes.PartiallyRunningWishes;
 
+            WishEnergyAllocator.Instance.DisableAll();
+            WishMagicAllocator.Instance.DisableAll();
+            WishRes3Allocator.Instance.DisableAll();
             SplitResources(wishes.ToList());
 
             ClearSelected();

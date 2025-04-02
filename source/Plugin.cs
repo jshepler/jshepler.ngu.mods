@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection.Emit;
 using BepInEx;
 using BepInEx.Logging;
@@ -49,6 +50,10 @@ namespace jshepler.ngu.mods
         internal static Character Character = null;
         internal static bool GameHasStarted = false;
         internal static bool GameHasFocus = true;
+
+        internal static bool AltIsDown => Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
+        internal static bool ControlIsDown => Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+        internal static bool ShiftIsDown => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
         private void Awake()
         {

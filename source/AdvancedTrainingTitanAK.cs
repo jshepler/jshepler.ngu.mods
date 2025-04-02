@@ -76,7 +76,9 @@ namespace jshepler.ngu.mods
 
                 var haveIt = neededAT <= currentAT;
                 var color = haveIt ? "green" : "red";
-                sb.Append($"\n<color={color}>{req.name}:  T={character.display(neededAT.Toughness)}, P={character.display(neededAT.Power)}</color>");
+                var p = float.IsInfinity(neededAT.Power) ? " UNREACHABLE" : character.display(neededAT.Power);
+                var t = float.IsInfinity(neededAT.Toughness) ? " UNREACHABLE" : character.display(neededAT.Toughness);
+                sb.Append($"\n<color={color}>{req.name}:  T={t}, P={p}</color>");
 
                 if (req.effectiveBossId == 116 && character.adventure.boss5Kills < 3)
                 {

@@ -17,13 +17,13 @@ namespace jshepler.ngu.mods
         private static int _nextSource = -1;
         private static bool _altIsDown = false;
 
-        private static long _ppLastRB
+        internal static long PPGainedLastRB
         {
             get => ModSave.Data.PPGainedLastRB;
             set => ModSave.Data.PPGainedLastRB = value;
         }
 
-        private static long _ppThisRB
+        private static long PPGainedThisRB
         {
             get => ModSave.Data.PPGainedThisRB;
             set => ModSave.Data.PPGainedThisRB = value;
@@ -58,8 +58,8 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(Rebirth), "engage", typeof(bool))]
         private static void Rebirth_engage_postfix()
         {
-            _ppLastRB = _ppThisRB;
-            _ppThisRB = 0L;
+            PPGainedLastRB = PPGainedThisRB;
+            PPGainedThisRB = 0L;
 
             _sourcesLastRB = _sourcesThisRB;
             _sourcesThisRB = [0L, 0L, 0L];
@@ -79,7 +79,7 @@ namespace jshepler.ngu.mods
         {
             var gained = _curPP - _ppBefore;
             _sourcesThisRB[PPSource.ITOPOD] += gained;
-            _ppThisRB += gained;
+            PPGainedThisRB += gained;
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(AdventureController), "enemyDeath")]
@@ -145,7 +145,7 @@ namespace jshepler.ngu.mods
             if (_nextSource >= 0)
                 _sourcesThisRB[_nextSource] += __result;
 
-            _ppThisRB += __result;
+            PPGainedThisRB += __result;
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(ItopodPerkController), "Start")]
@@ -190,8 +190,8 @@ namespace jshepler.ngu.mods
             {
 
                 if (!_altIsDown)
-                    text = $"<b>PP gained this rebirth:</b> {character.display(_ppThisRB)}"
-                        + $"\n<b>PP gained last rebirth:</b> {character.display(_ppLastRB)}";
+                    text = $"<b>PP gained this rebirth:</b> {character.display(PPGainedThisRB)}"
+                        + $"\n<b>PP gained last rebirth:</b> {character.display(PPGainedLastRB)}";
 
                 else
                 {
@@ -205,20 +205,20 @@ namespace jshepler.ngu.mods
                     {
                         var sourceThisRB = _sourcesThisRB[source];
                         if (sourceThisRB > 0)
-                            dataThisRB.Add((PPSource.Name(source), sourceThisRB, _ppThisRB == 0 ? 0f : (float)sourceThisRB / _ppThisRB));
+                            dataThisRB.Add((PPSource.Name(source), sourceThisRB, PPGainedThisRB == 0 ? 0f : (float)sourceThisRB / PPGainedThisRB));
 
                         var sourceLastRB = _sourcesLastRB[source];
                         if (sourceLastRB > 0)
-                            dataLastRB.Add((PPSource.Name(source), sourceLastRB, _ppLastRB == 0 ? 0f : (float)sourceLastRB / _ppLastRB));
+                            dataLastRB.Add((PPSource.Name(source), sourceLastRB, PPGainedLastRB == 0 ? 0f : (float)sourceLastRB / PPGainedLastRB));
                     }
 
-                    var otherThisRB = _ppThisRB - sumThisRB;
+                    var otherThisRB = PPGainedThisRB - sumThisRB;
                     if (otherThisRB > 0)
-                        dataThisRB.Add(("Other", otherThisRB, _ppThisRB == 0 ? 0f : (float)otherThisRB / _ppThisRB));
+                        dataThisRB.Add(("Other", otherThisRB, PPGainedThisRB == 0 ? 0f : (float)otherThisRB / PPGainedThisRB));
 
-                    var otherLastRB = _ppLastRB - sumLastRB;
+                    var otherLastRB = PPGainedLastRB - sumLastRB;
                     if (otherLastRB > 0)
-                        dataLastRB.Add(("Other", otherLastRB, _ppLastRB == 0 ? 0f : (float)otherLastRB / _ppLastRB));
+                        dataLastRB.Add(("Other", otherLastRB, PPGainedLastRB == 0 ? 0f : (float)otherLastRB / PPGainedLastRB));
 
                     dataThisRB.Sort(sorter);
                     dataLastRB.Sort(sorter);
@@ -226,8 +226,8 @@ namespace jshepler.ngu.mods
                     var sourcesThisRB = dataThisRB.Join(d => $"   <b>{d.Item1}:</b> {display(d.Item2)} <color=blue>({d.Item3 * 100f:0.#}%)</color>", "\n");
                     var sourcesLastRB = dataLastRB.Join(d => $"   <b>{d.Item1}:</b> {display(d.Item2)} <color=blue>({d.Item3 * 100f:0.#}%)</color>", "\n");
 
-                    text = $"<b>PP gained this rebirth:</b> {character.display(_ppThisRB)}\n{sourcesThisRB}"
-                        + $"\n\n<b>PP gained last rebirth:</b> {character.display(_ppLastRB)}\n{sourcesLastRB}";
+                    text = $"<b>PP gained this rebirth:</b> {character.display(PPGainedThisRB)}\n{sourcesThisRB}"
+                        + $"\n\n<b>PP gained last rebirth:</b> {character.display(PPGainedLastRB)}\n{sourcesLastRB}";
                 }
 
                 Plugin.ShowTooltip(text);

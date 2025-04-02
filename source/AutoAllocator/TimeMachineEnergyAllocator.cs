@@ -1,5 +1,5 @@
 ﻿using HarmonyLib;
-using UnityEngine;
+using jshepler.ngu.mods.CapCalculators;
 using UnityEngine.UI;
 
 namespace jshepler.ngu.mods.AutoAllocator
@@ -24,7 +24,7 @@ namespace jshepler.ngu.mods.AutoAllocator
 
         internal override long CalcCapDelta(int id)
         {
-            var tm = _controller.character.machine;
+            var tm = _character.machine;
             var cap = CalcCapForLevel(tm.levelSpeed + 1);
 
             var delta = cap - tm.speedEnergy;
@@ -50,11 +50,11 @@ namespace jshepler.ngu.mods.AutoAllocator
         [HarmonyPrefix, HarmonyPatch(typeof(TimeMachineController), "addEnergy")]
         private static bool TimeMachineController_addEnergy_prefix(TimeMachineController __instance)
         {
-            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+            if (Plugin.ShiftIsDown)
             {
                 Instance[0] = !Instance[0];
 
-                if (Input.GetKey(KeyCode.LeftAlt))
+                if (Plugin.AltIsDown)
                 {
                     var magic = Allocators.Magic[Allocators.Feature.TM_Magic];
                     magic[0] = !magic[0];
@@ -63,12 +63,12 @@ namespace jshepler.ngu.mods.AutoAllocator
                 return false;
             }
 
-            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+            if (Plugin.ControlIsDown)
             {
                 Instance[0] = false;
                 OverCap();
 
-                if (Input.GetKey(KeyCode.LeftAlt))
+                if (Plugin.AltIsDown)
                 {
                     Allocators.Magic[Allocators.Feature.TM_Magic][0] = false;
                     TimeMachineMagicAllocator.OverCap();
@@ -80,13 +80,25 @@ namespace jshepler.ngu.mods.AutoAllocator
             return true;
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(TimeMachineController), "removeEnergy")]
-        private static void TimeMachineController_removeEnergy_postfix(TimeMachineController __instance)
+        [HarmonyPrefix, HarmonyPatch(typeof(TimeMachineController), "removeEnergy")]
+        private static bool TimeMachineController_removeEnergy_prefix(TimeMachineController __instance)
         {
+            if (Plugin.ControlIsDown)
+            {
+                setTimeTarget();
+
+                if (Plugin.AltIsDown)
+                    TimeMachineMagicAllocator.setTimeTarget();
+
+                return false;
+            }
+
             Instance[0] = false;
 
-            if (Input.GetKey(KeyCode.LeftShift))
+            if (Plugin.ShiftIsDown)
                 __instance.removeAllEnergy();
+
+            return true;
         }
 
         private static long CalcCapForLevel(long level)
@@ -137,6 +149,37 @@ namespace jshepler.ngu.mods.AutoAllocator
 
             Instance.Allocate(0, cap);
             _character.idleEnergy -= cap;
+        }
+
+        internal static void setTimeTarget()
+        {
+            var calc = Calculators.TM_EnergyCalculator;
+            var resource = _character.machine.speedEnergy;
+            if (resource == 0)
+                resource = _character.totalCapEnergy();
+
+            var runTimeSeconds = _character.input.energyMagicInput * 60;
+            if (runTimeSeconds > 172800)
+            {
+                Plugin.ShowNotification("Max time allowed is 2 days");
+                return;
+            }
+
+            var ticksRemaining = runTimeSeconds * 50;
+            var targetLevel = _character.machine.levelSpeed;
+
+            while (ticksRemaining > 0)
+            {
+                var ttl = calc.TicksToLevel(resource, targetLevel + 1);
+                if (ttl > ticksRemaining)
+                    break;
+
+                ticksRemaining -= ttl;
+                targetLevel++;
+            }
+
+            _controller.speedTarget.text = targetLevel.ToString();
+            _controller.checkSpeedTargetInput();
         }
     }
 }

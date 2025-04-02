@@ -347,14 +347,14 @@ namespace jshepler.ngu.mods
 
             // This difference should always be a power of two
             float difference = next - current;
-            Plugin.LogInfo($"diff: {difference:r}");
+            //Plugin.LogInfo($"diff: {difference:r}");
             if (difference <= 1.0f)
                 return 1.0f;
 
             // while difference is the actual difference between the values, anything
             // more than half of that difference should round up to the next value
             var min = difference / 2.0f + 1.0f;
-            Plugin.LogInfo($"min: {min:r}");
+            //Plugin.LogInfo($"min: {min:r}");
 
             return min;
         }
@@ -364,7 +364,7 @@ namespace jshepler.ngu.mods
         {
             var bits = FloatToInt32Bits(value);
             var next = Int32BitsToFloat(bits + 1);
-            Plugin.LogInfo($"v: {value:r}, b: {bits}, n: {next:r}");
+            //Plugin.LogInfo($"v: {value:r}, b: {bits}, n: {next:r}");
 
             return next;
         }

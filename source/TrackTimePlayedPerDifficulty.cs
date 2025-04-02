@@ -7,18 +7,19 @@ namespace jshepler.ngu.mods
     [HarmonyPatch]
     internal class TrackTimePlayedPerDifficulty
     {
-        [HarmonyPostfix, HarmonyPatch(typeof(Character), "addOfflineProgress", typeof(int))]
-        private static void Character_addOfflineProgress_postfix(int timeElapsed)
-        {
-            if (Plugin.Character.challenges.levelChallenge10k.inChallenge
-                || Plugin.Character.challenges.trollChallenge.inChallenge
-                || Plugin.Character.challenges.hour24Challenge.inChallenge
-                || timeElapsed <= 0)
-                return;
+        // moved to OfflineTime as this would still run even if SkipOffline was enabled,
+        //[HarmonyPostfix, HarmonyPatch(typeof(Character), "addOfflineProgress", typeof(int))]
+        //private static void Character_addOfflineProgress_postfix(int timeElapsed)
+        //{
+        //    if (Plugin.Character.challenges.levelChallenge10k.inChallenge
+        //        || Plugin.Character.challenges.trollChallenge.inChallenge
+        //        || Plugin.Character.challenges.hour24Challenge.inChallenge
+        //        || timeElapsed <= 0)
+        //        return;
 
-            AddTime(timeElapsed, true);
-            CheckTime();
-        }
+        //    AddTime(timeElapsed, !OfflineTime.SkipOfflineProgress);
+        //    CheckTime();
+        //}
 
         [HarmonyPostfix, HarmonyPatch(typeof(TotalTimePlayed), "updateTimer")]
         private static void TotalTimePlayed_updateTimer_postfix()
@@ -42,7 +43,7 @@ namespace jshepler.ngu.mods
                 + $"\n       (sadistic): {NumberOutput.timeOutput(Data.TotalTimePlayedSadistic)} (offline: {NumberOutput.timeOutput(Data.TotalTimeOfflineSadistic)})";
         }
 
-        private static void AddTime(double totalSeconds, bool offline = false)
+        internal static void AddTime(double totalSeconds, bool offline = false)
         {
             // if game wasn't started with this mod, start it with current playtime;
             // if current difficulty isn't normal, there's no way to know how much was normal,
@@ -78,7 +79,7 @@ namespace jshepler.ngu.mods
             }
         }
 
-        private static void CheckTime()
+        internal static void CheckTime()
         {
             //Data.TotalTimePlayedNormal = new System.TimeSpan(123, 23, 25, 54, 0).TotalSeconds;
             //Data.TotalTimePlayedEvil = new System.TimeSpan(207, 15, 11, 30, 0).TotalSeconds;

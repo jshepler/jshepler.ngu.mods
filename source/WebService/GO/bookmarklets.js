@@ -92,3 +92,16 @@ function go2ngu_hacks2() {
         body: JSON.stringify(appState.hackstats.hacks.map(h => h.goal))
     });
 }
+
+
+// NGU2GO/wishstats
+// javascript:fetch("http://localhost:8088/ngu/NGU2GO/wishstats").then(s=>s.json()).then(s=>{let t=appState.wishstats;Object.assign(t,s),appHandlers.handleSettings("wishstats",t)});
+function ngu2go_wishstats() {
+    fetch("http://localhost:8088/ngu/NGU2GO/wishstats")
+        .then(resp => resp.json())
+        .then(data => {
+            let wishStats = appState.wishstats;
+            Object.assign(wishStats, data);
+            appHandlers.handleSettings("wishstats", wishStats);
+        });
+}

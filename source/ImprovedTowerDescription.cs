@@ -16,6 +16,7 @@ namespace jshepler.ngu.mods
         private static Queue<float> _last5KillTimes = new();
 
         private static float _atpNeeded(float power) => AdvancedTrainingTitanAK.GetNeededAT(new(power, 0f)).Power;
+        private static bool _altIsDown => Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
 
         private static string _tooltipText;
 
@@ -39,7 +40,9 @@ namespace jshepler.ngu.mods
 
             _lastTime = time;
 
-            UpdateTooltip();
+            // only update the tooltip if it's currently being displayed
+            if(_cr != null)
+                UpdateTooltip();
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(AdventureController), "zoneDescriptions")]
@@ -81,14 +84,27 @@ namespace jshepler.ngu.mods
 
         private static IEnumerator ShowTooltip()
         {
+            var wasAltDown = _altIsDown;
+
             while (true)
             {
+                if (_altIsDown != wasAltDown)
+                {
+                    UpdateTooltip();
+                    wasAltDown = _altIsDown;
+                }
+
                 Plugin.Character.adventureController.zoneDescriptions();
                 yield return _delay;
             }
         }
 
         private static void UpdateTooltip()
+        {
+            _tooltipText = _altIsDown ? buildAltTooltip() : buildTooltip();
+        }
+
+        private static string buildTooltip()
         {
             var character = Plugin.Character;
             var controller = character.adventureController;
@@ -116,7 +132,7 @@ namespace jshepler.ngu.mods
             var killsPerHour = 3600f / secondsPerKill;
             var killsPerDay = 86400f / secondsPerKill;
 
-            _tooltipText = $"\n\n<b>PP Progress:</b> {currentProgress:#,##0} / {MAXPROGRESS:#,##0} ({currentProgress / MAXPROGRESS * 100f:##0.00}%)"
+            var text = $"\n\n<b>PP Progress:</b> {currentProgress:#,##0} / {MAXPROGRESS:#,##0} ({currentProgress / MAXPROGRESS * 100f:##0.00}%)"
                 + $"\n\n<b>Seconds per kill:</b> {(secondsPerKill == 0f ? "????" : NumberOutput.timeOutput(secondsPerKill))} ({(isEstimated ? "estimated" : currentFloor < optimalFloor ? "sub-optimal" : "optimal")})"
                 + $"\n<b>Kills per hour:</b> {killsPerHour:#,##0.##}"
                 + $"\n<b>Kills per day:</b> {killsPerDay:#,##0.##}";
@@ -129,19 +145,12 @@ namespace jshepler.ngu.mods
             var ppPerDay = secondsPerKill == 0f ? 0 : killsPerDay * ppPerKill;
 
             if (killsPerPP == 1)
-                _tooltipText += $"\n\n<b>PP per kill:</b> {ppPerKill:#,##0.00}";
+                text += $"\n\n<b>PP per kill:</b> {ppPerKill:#,##0.00}";
             else
-                _tooltipText += $"\n\n<b>Kills per PP:</b> {killsPerPP} taking {(secondsPerPP == 0f ? "????" : NumberOutput.timeOutput(secondsPerPP))}"
+                text += $"\n\n<b>Kills per PP:</b> {killsPerPP} taking {(secondsPerPP == 0f ? "????" : NumberOutput.timeOutput(secondsPerPP))}"
                     + $"\n<b>Kills to next PP:</b> {killsRemaining} in {(secondsRemaining == 0f ? "????" : NumberOutput.timeOutput(secondsRemaining))}";
 
-            //_tooltipText += killsPerPP == 1
-            //    ? $"\n\n<b>PP per kill:</b> {ppPerKill:#,##0.00}"
-            //    : $"\n\n<b>Kills per PP:</b> {killsPerPP} taking {(secondsPerPP == 0f ? "????" : NumberOutput.timeOutput(secondsPerPP))}";
-
-            //if (killsPerPP > 1)
-            //    _tooltipText += $"\n<b>Kills to next PP:</b> {killsRemaining} in {(secondsRemaining == 0f ? "????" : NumberOutput.timeOutput(secondsRemaining))}";
-
-            _tooltipText += $"\n<b>PP per hour:</b> {ppPerHour:#,##0.##}"
+            text += $"\n<b>PP per hour:</b> {ppPerHour:#,##0.##}"
                 + $"\n<b>PP per day:</b> {ppPerDay:#,##0.##}";
 
 
@@ -154,12 +163,45 @@ namespace jshepler.ngu.mods
             var expPerDay = secondsPerKill == 0f ? 0L : (long)(60 * 60 * 24 / secondsPerExpGroup) * expPerGroup;
             var apPerDay = secondsPerKill == 0f ? 0L : (long)(60 * 60 * 24 / secondsPerExpGroup);
 
-            _tooltipText += $"\n\n<b>Kills per EXP/AP drop:</b> {killsPerEXP} taking {(secondsPerExpGroup == 0f ? "????" : NumberOutput.timeOutput(secondsPerExpGroup))}"
+            text += $"\n\n<b>Kills per EXP/AP drop:</b> {killsPerEXP} taking {(secondsPerExpGroup == 0f ? "????" : NumberOutput.timeOutput(secondsPerExpGroup))}"
                 + $"\n<b>Kills to next EXP/AP:</b> {killsToNextAP} in {(secondsPerKill == 0f ? "???" : NumberOutput.timeOutput(killsToNextAP * secondsPerKill))}"
                 + $"\n<b>EXP per drop:</b> {character.display(expPerGroup)} ({baseExpPerGroup} base)"
                 + $"\n<b>EXP per day:</b> {character.display(expPerDay)}"
                 + $"\n<b>AP per day:</b> {character.display(apPerDay)}";
 
+            text += $"\n\n<b>Max Floor: </b> {maxFloor - 1}"
+                + $"\n<b>Optimal Floor:</b> {optimalFloor}";
+
+            return text;
+        }
+
+        private static string buildAltTooltip()
+        {
+            var character = Plugin.Character;
+            var controller = character.adventureController;
+
+            var optimalFloor = CalculateOptimalFloor();
+            var maxFloor = character.adventure.highestItopodLevel;
+            var currentFloor = controller.itopodLevel;
+
+            var progressPerKill = controller.itopod.progressGained(currentFloor);
+            var currentProgress = (float)character.adventure.itopod.pointProgress;
+
+            var isEstimated = currentFloor > optimalFloor || !character.adventure.autoattacking;
+            var secondsPerKill = isEstimated ? _last5KillTimes.Count == 0 ? 0 : _last5KillTimes.Average() : 0f;
+            if (!isEstimated)
+            {
+                var respawnTime = Plugin.Character.adventureController.respawnTime();
+                var idleAttackSpeed = Plugin.Character.adventure.attackSpeed;
+                secondsPerKill = respawnTime + idleAttackSpeed;
+            }
+
+            var killsPerHour = 3600f / secondsPerKill;
+            var killsPerDay = 86400f / secondsPerKill;
+
+            var text = $"\n\n<b>Seconds per kill:</b> {(secondsPerKill == 0f ? "????" : NumberOutput.timeOutput(secondsPerKill))} ({(isEstimated ? "estimated" : currentFloor < optimalFloor ? "sub-optimal" : "optimal")})"
+                + $"\n<b>Kills per hour:</b> {killsPerHour:#,##0.##}"
+                + $"\n<b>Kills per day:</b> {killsPerDay:#,##0.##}";
 
             if (character.adventure.itopod.perkLevel[30] >= 1)
             {
@@ -167,45 +209,54 @@ namespace jshepler.ngu.mods
                 var killsToNextPoop = killsPerPoop - character.adventure.itopod.poopProgress;
                 var dcPoop = character.adventureController.itopod.effectPerLevel[30];
                 var avgPoopPerDay = (killsPerDay / killsPerPoop) + (killsPerDay * dcPoop);
-                _tooltipText += $"\n\n<b>Kills per Poop:</b> {killsPerPoop} taking {NumberOutput.timeOutput(killsPerPoop * secondsPerKill)}"
+                text += $"\n\n<b>Kills per Poop:</b> {killsPerPoop} taking {NumberOutput.timeOutput(killsPerPoop * secondsPerKill)}"
                     + $"\n<b>Kills to next Poop:</b> {killsToNextPoop} in {(secondsPerKill == 0f ? "???" : NumberOutput.timeOutput(killsToNextPoop * secondsPerKill))}"
                     + $"\n<b>DC per kill:</b> {dcPoop * 100f:0.####}%"
                     + $"\n<b>Avg Poop per day:</b> ~{avgPoopPerDay:#,##0.##}";
             }
-
 
             if (character.achievements.achievementComplete[145] && character.adventure.itopod.perkLevel[68] >= 1)
             {
                 var killsPerGuff = controller.lootDrop.killsPerMacguffin();
                 var killsToNextGuff = controller.lootDrop.killsUntilMacguffin();
                 var guffsPerDay = killsPerDay / killsPerGuff;
-                _tooltipText += $"\n\n<b>Kills per MacGuffin:</b> {killsPerGuff} taking {NumberOutput.timeOutput(killsPerGuff * secondsPerKill)}"
+                text += $"\n\n<b>Kills per MacGuffin:</b> {killsPerGuff} taking {NumberOutput.timeOutput(killsPerGuff * secondsPerKill)}"
                     + $"\n<b>Kills to next MacGuffin:</b> {killsToNextGuff} in {(secondsPerKill == 0f ? "???" : NumberOutput.timeOutput(killsToNextGuff * secondsPerKill))}"
                     + $"\n<b>MacGuffins per day:</b> {character.display(guffsPerDay)}";
             }
 
-            _tooltipText += $"\n\n<b>Max Floor: </b> {maxFloor - 1}"
+            text += $"\n\n<b>Max Floor: </b> {maxFloor - 1}"
                 + $"\n<b>Optimal Floor:</b> {optimalFloor}";
 
-            //var currentATP = character.advancedTraining.level[1];
-            //_tooltipText += $"\n\n<b>Current AT Power:</b> {character.display(currentATP)}";
-
             var nextOptimalFloorPower = getPowForOpt(optimalFloor + 1);
-            //var nextOptimalATP = _atpNeeded(nextOptimalFloorPower);
             if (optimalFloor < 1599)
-                _tooltipText += $"\n\n<b>Power for next opt:</b> {character.display(nextOptimalFloorPower)}";
+                text += $"\n\n<b>Power for next opt:</b> {character.display(nextOptimalFloorPower)}";
 
             var next50Floor = (Mathf.FloorToInt(optimalFloor / 50f) + 1) * 50;
             var next50FloorPower = next50Floor < 1600 ? getPowForOpt(next50Floor) : 0f;
-            //var next50FloorATP = _atpNeeded(next50FloorPower);
             if (next50Floor < 1600)
-                _tooltipText += $"\n<b>  ... next 50th ({next50Floor}):</b> {character.display(next50FloorPower)}";
+                text += $"\n<b>  ... next 50th ({next50Floor}):</b> {character.display(next50FloorPower)}";
 
             var nextBoostFloor = _boostFloors.FirstOrDefault(f => f > optimalFloor);
             var nextBoostFloorPower = nextBoostFloor == 0 ? 0 : getPowForOpt(nextBoostFloor);
-            //var nextBoostATP = _atpNeeded(nextBoostFloorPower);
-            if(nextBoostFloor > 0)
-                _tooltipText += $"\n<b>  ... next boost ({nextBoostFloor}):</b> {character.display(nextBoostFloorPower)}";
+            if (nextBoostFloor > 0)
+                text += $"\n<b>  ... next boost ({nextBoostFloor}):</b> {character.display(nextBoostFloorPower)}";
+
+            var currentATP = character.advancedTraining.level[1];
+            var nextOptimalATP = _atpNeeded(nextOptimalFloorPower);
+            if (optimalFloor < 1599)
+                text += $"\n\n<b>Current AT Power:</b> {character.display(currentATP)}"
+                    + $"\n<b>ATP for next opt:</b> {character.display(nextOptimalATP)}";
+
+            var next50FloorATP = _atpNeeded(next50FloorPower);
+            if (next50Floor < 1600)
+                text += $"\n<b>  ... next 50th ({next50Floor}):</b> {character.display(next50FloorATP)}";
+
+            var nextBoostATP = _atpNeeded(nextBoostFloorPower);
+            if (nextBoostFloor > 0)
+                text += $"\n<b>  ... next boost ({nextBoostFloor}):</b> {character.display(nextBoostATP)}";
+
+            return text;
         }
 
         private static int[] _boostFloors = [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 700, 850, 1150];

@@ -38,6 +38,7 @@ namespace jshepler.ngu.mods
         internal int MaxLevel => (int)_props[Id].maxLevel;
         internal int Level => _wishes[Id].level;
         internal float Progress => _wishes[Id].progress;
+        internal bool IsLocked => Plugin.Character.wishesController.wishLocked(Id);
 
         internal long Energy
         {

@@ -2,7 +2,6 @@
 using System.Linq;
 using HarmonyLib;
 using jshepler.ngu.mods.CapCalculators;
-using UnityEngine;
 using UnityEngine.UI;
 
 namespace jshepler.ngu.mods.AutoAllocator
@@ -94,9 +93,9 @@ namespace jshepler.ngu.mods.AutoAllocator
         {
             var id = __instance.id;
 
-            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+            if (Plugin.ShiftIsDown)
             {
-                if (Input.GetKey(KeyCode.LeftAlt))
+                if (Plugin.AltIsDown)
                     Enumerable.Range(0, 7).Do(i => Instance[i] = !Instance[i]);
                 else
                     Instance[id] = !Instance[id];
@@ -104,9 +103,9 @@ namespace jshepler.ngu.mods.AutoAllocator
                 return false;
             }
 
-            if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+            if (Plugin.ControlIsDown)
             {
-                if (Input.GetKey(KeyCode.LeftAlt))
+                if (Plugin.AltIsDown)
                 {
                     Instance.DisableAll();
                     Enumerable.Range(0, 7).Do(i => OverCap(i));
@@ -120,7 +119,7 @@ namespace jshepler.ngu.mods.AutoAllocator
                 return false;
             }
 
-            if (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
+            if (Plugin.AltIsDown)
             {
                 Instance.DisableAll();
                 SplitMagic();
@@ -131,13 +130,25 @@ namespace jshepler.ngu.mods.AutoAllocator
             return true;
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(NGUMagicController), "remove")]
-        private static void NGUMagicController_remove_postfix(NGUMagicController __instance)
+        [HarmonyPrefix, HarmonyPatch(typeof(NGUMagicController), "remove")]
+        private static bool NGUMagicController_remove_prefix(NGUMagicController __instance)
         {
+            if (Plugin.ControlIsDown)
+            {
+                if (Plugin.AltIsDown)
+                    Enumerable.Range(0, 7).Do(setTimeTarget);
+                else
+                    setTimeTarget(__instance.id);
+
+                return false;
+            }
+
             Instance[__instance.id] = false;
 
-            if (Input.GetKey(KeyCode.LeftShift))
+            if (Plugin.ShiftIsDown)
                 __instance.removeAll();
+
+            return true;
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(NGUMagicController), "updateText")]
@@ -220,6 +231,39 @@ namespace jshepler.ngu.mods.AutoAllocator
 
                 ngu.updateText();
             }
+        }
+
+        private static void setTimeTarget(int id)
+        {
+            var controller = _allNGU.NGUMagic[id];
+            var character = controller.character;
+            var calc = Calculators.NGU_MagicCalculators[id];
+            var resource = character.NGU.magicSkills[id].magic;
+            if (resource == 0)
+                resource = character.totalCapMagic();
+
+            var runTimeSeconds = character.input.energyMagicInput * 60;
+            if (runTimeSeconds > 172800)
+            {
+                Plugin.ShowNotification("Max time allowed is 2 days");
+                return;
+            }
+
+            var ticksRemaining = runTimeSeconds * 50;
+            var targetLevel = controller.CurrentLevel();
+
+            while (ticksRemaining > 0)
+            {
+                var ttl = calc.TicksToLevel(resource, targetLevel + 1);
+                if (ttl > ticksRemaining)
+                    break;
+
+                ticksRemaining -= ttl;
+                targetLevel++;
+            }
+
+            controller.magicTarget.text = targetLevel.ToString();
+            controller.setTarget();
         }
     }
 }
