@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using UnityEngine;
@@ -16,7 +17,8 @@ namespace jshepler.ngu.mods.AutoAllocator
         private static bool _shiftHeld => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
         private static bool _altHeld => Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
         private static bool _ctrlHeld => Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-        private static bool _allSlotsUsed => _controller.numAllocatedWishes() >= _controller.curWishSlots();
+        //private static bool _allSlotsUsed => _controller.numAllocatedWishes() >= _controller.curWishSlots();
+        private static bool _allSlotsUsed => Math.Max(_controller.numAllocatedWishes(), Instance.EnabledIDs.Count()) >= _controller.curWishSlots();
 
         public WishMagicAllocator() : base(231, 1)
         {
@@ -25,8 +27,14 @@ namespace jshepler.ngu.mods.AutoAllocator
 
         internal override void Allocate(int id, long amount)
         {
-            Wishes.AllWishes[id].Magic += amount;
+            var wish = Wishes.AllWishes[id];
+            var was0 = wish.Magic == 0;
+
+            wish.Magic += amount;
             _controller.updateMagicPodText();
+
+            if(was0 || wish.Magic == 0)
+                _controller.updatebyID(id);
         }
 
         internal override long CalcCapDelta(int id)
@@ -45,7 +53,7 @@ namespace jshepler.ngu.mods.AutoAllocator
             return TextComponents[0];
         }
 
-        protected override void UpdateText(int id)
+        protected override void UpdateButton(int id)
         {
             TextComponents[0].text = id == _controller.curSelectedWish && this[id] ? "++" : "+";
         }
@@ -79,13 +87,13 @@ namespace jshepler.ngu.mods.AutoAllocator
         [HarmonyPostfix, HarmonyPatch(typeof(WishesController), "updateMagicPodText")]
         private static void WishesController_updateMagicPodText_postfix(WishesController __instance)
         {
-            Instance.UpdateText(__instance.curSelectedWish);
+            Instance.UpdateButton(__instance.curSelectedWish);
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(WishesController), "selectNewWish")]
         private static void WishesController_selectNewWish_postfix(int id)
         {
-            Instance.UpdateText(id);
+            Instance.UpdateButton(id);
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(WishesController), "addMagic", typeof(int))]
@@ -93,6 +101,12 @@ namespace jshepler.ngu.mods.AutoAllocator
         {
             if (!_shiftHeld)
                 return true;
+
+            if (Wishes.AllWishes[id].IsLocked(out var message))
+            {
+                Plugin.ShowOverrideNotification(message);
+                return false;
+            }
 
             if (_altHeld && _ctrlHeld)
             {
@@ -107,7 +121,7 @@ namespace jshepler.ngu.mods.AutoAllocator
             else
                 toggleOne(id);
 
-            Instance.UpdateText(id);
+            Instance.UpdateButton(id);
             return false;
         }
 

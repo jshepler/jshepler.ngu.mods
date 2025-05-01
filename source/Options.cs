@@ -88,6 +88,8 @@ namespace jshepler.ngu.mods
             Yggdrasil.AutoHarvest = Config.Bind("Yggdrasil", "AutoHarvest", false, "enable auto harvest/eat fruits when fully grown (max tier)");
             Yggdrasil.PoopAudioChance = Config.Bind("Yggdrasil", "PoopAudioChance", 0f, "chance a fart audio clip is played when gain fruit, 0.0 to 1.0");
 
+            Experimental.StaplerNoECap = Config.Bind("Experimental", "StaplerNoECap", false, "if enabled, the cap special is removed from stapler (item 118)");
+
             // when loading an old version of the cfg file, some options may have changed or been removed;
             // this will check for known things that have changed and copy values if appropriate,
             // then remove all orphaned entries
@@ -337,6 +339,11 @@ namespace jshepler.ngu.mods
         internal static class MixedNumberFormat
         {
             internal static ConfigEntry<double> Threshold;
+        }
+
+        internal static class Experimental
+        {
+            internal static ConfigEntry<bool> StaplerNoECap;
         }
     }
 }

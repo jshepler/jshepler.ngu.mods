@@ -110,16 +110,32 @@ namespace jshepler.ngu.mods
                 if (card.type != cardType.end)
                 {
                     text += $"\n<b>Bonus Variance:</b> {relativeCurVariance:+0.##;-0.##}%";
+                    var (qf, ef, fc, sc) = _constants[card.bonusType];
+                    var tf = calcTierFactor(card);
+                    var mayo = card.manaCosts.Sum();
 
-                    if(_altIsDown)
+                    if (_altIsDown)
                         text += $"\n\n<b>Variance Range (rarity):</b> {relMinRarVar:+0.##;-0.##}% to {relMaxRarVar:+0.##;-0.##}%"
-                            + $"\n\n<b>Tier Factor:</b> x{calcTierFactor(card):r}"
                             + $"\n\n<b>Min Bonus:</b> {minBonus * 100f:#,##0.##}%"
                             + $"\n   <b>(in rarity):</b> {minRarityBonus * 100f:#,##0.##}%"
                             + $"\n\n<b>Max Bonus:</b> {maxBonus * 100f:#,##0.##}%"
                             + $"\n   <b>(in rarity):</b> {maxRarityBonus * 100f:#,##0.##}%"
                             + $"\n\n<b>Cur Bonus/Mayo:</b> {curBonusPerMayo * 100f:#,##0.####}%"
-                            + $"\n<b>Best Bonus/Mayo:</b> {bestBonusPerMayo * 100f:#,##0.####}%";
+                            + $"\n<b>Best Bonus/Mayo:</b> {bestBonusPerMayo * 100f:#,##0.####}%"
+
+                            + $"\n\n<b>quadFactor (QF):</b> {qf:0.#####}"
+                            + $"\n<b>expFactor (EF):</b> {ef:0.######}"
+                            + $"\n<b>tierFactor (TF):</b>"
+                            + $"\n   = 1 + (tier ^ QF) × (EF ^ tier)"
+                            + $"\n   = 1 + ({card.tier} ^ {qf:0.#####}) × ({ef:0.#####} ^ {card.tier})"
+                            + $"\n   = {tf:r}"
+
+                            + $"\n\n<b>fixedCoeff (FC):</b> {fc:0.#####}"
+                            + $"\n<b>scalingCoeff (SC):</b> {sc:0.#####}"
+                            + $"\n<b>Bonus:</b>"
+                            + $"\n   = (FC + SC × TF × variance) × mayo"
+                            + $"\n   = <size=10>({fc:0.#####} + {sc:0.#####} × {tf:r} × {curVariance:r}) × {mayo}</size>"
+                            + $"\n   = {card.effectAmount:r}";
                 }
 
                 Plugin.ShowTooltip(text);
@@ -164,7 +180,7 @@ namespace jshepler.ngu.mods
         }
 
         // pulled from CardsController.calculateXEffect methods
-        private static Dictionary<cardBonus, (float quadFactor, float expFactor, float, float)> _constants = new()
+        private static Dictionary<cardBonus, (float quadFactor, float expFactor, float fixedCoefficient, float scalingCoefficient)> _constants = new()
         {
             { cardBonus.energyNGUSpeed, (1.2f, 1.03f, 0.0003f, 0.001f) },
             { cardBonus.magicNGUSpeed, (0.8f, 1.08f, 0.0002f, 0.001f) },

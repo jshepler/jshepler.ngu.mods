@@ -95,9 +95,9 @@ namespace jshepler.ngu.mods
             if (!_shiftIsDown)
                 return true;
 
-            if (Wishes.AllWishes[id].IsLocked)
+            if (Wishes.AllWishes[id].IsLocked(out var message))
             {
-                __instance.displayLockedMessage(id);
+                Plugin.ShowOverrideNotification(message);
                 return false;
             }
 
@@ -268,7 +268,7 @@ namespace jshepler.ngu.mods
 
             var wish = getNextWishFromList();
             if (wish == null)
-                wish = Wishes.CurValidUpgradesList.FirstOrDefault(w => w.Level < w.MaxLevel && !w.IsRunning && !w.IsLocked && (!_blacklistMode || !_wishList.Contains(w.Id)));
+                wish = Wishes.CurValidUpgradesList.FirstOrDefault(w => w.Level < w.MaxLevel && !w.IsRunning && !w.IsLocked(out _) && (!_blacklistMode || !_wishList.Contains(w.Id)));
 
             return wish;
         }

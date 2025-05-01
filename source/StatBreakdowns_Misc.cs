@@ -74,7 +74,8 @@ namespace jshepler.ngu.mods
         {
             var display = (double d) => character.display(d);
 
-            var completedBoostsCount = character.inventory.itemList.itemMaxxed.Take(39).Count(b => b);
+            // skip 1 because the item at index 0 isn't used for anything, index 1 is the first item (the first boost)
+            var completedBoostsCount = character.inventory.itemList.itemMaxxed.Skip(1).Take(39).Count(b => b);
             var completedBoostsBonus = (completedBoostsCount * .02f) + 1f;
             var bdwCompleteBonus = character.inventory.itemList.badlyDrawnComplete ? 1.2f : 1f;
             var constructionCompleteBonus = character.inventory.itemList.constructionComplete ? 1.2f : 1f;

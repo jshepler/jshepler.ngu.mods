@@ -1,6 +1,5 @@
 ﻿using HarmonyLib;
 using UnityEngine;
-using UnityEngine.TextCore;
 
 namespace jshepler.ngu.mods
 {
@@ -12,10 +11,12 @@ namespace jshepler.ngu.mods
         {
             var id = __instance.id;
             var character = __instance.character;
-            if (id >= character.inventory.daycareTimers.Count || !character.InMenu(Menu.Inventory)) return;
+            if (id >= character.inventory.daycareTimers.Count || !character.InMenu(Menu.Inventory))
+                return;
             
             var item = character.inventory.daycare[id];
-            if (item.id == 0 || (item.level >= 100 && item.type != part.MacGuffin)) return;
+            if (item.id == 0 || (item.level >= 100 && item.type != part.MacGuffin))
+                return;
 
             var gained = __instance.levelsAdded();
             if (item.type == part.MacGuffin || item.level + gained >= 100)
@@ -31,15 +32,43 @@ namespace jshepler.ngu.mods
             // time left = (r - c % r) / b
             // so when c = 0, seconds per level = r / b
 
-            var r = (double)__instance.daycareRate(item);
+            //var r = (double)__instance.daycareRate(item);
+            //var c = character.inventory.daycareTimers[id].totalseconds;
+            //var b = (double)character.allDiggers.totalDaycareBonus();
+
+            //var secondsPerLevel = r / b;
+            //var secondsRemainingThisLevel = (r - c % r) / b;
+
+            //var totalSecondsTo100 = (secondsPerLevel * (99 - (item.level + gained)) ) + secondsRemainingThisLevel;
+            var totalSecondsTo100 = TimeToMaxLevel(__instance);
+            __instance.daycareText.text = $"<b><size=12>Level: {item.level + gained} ({NumberOutput.timeOutput(totalSecondsTo100)})</size></b>";
+        }
+
+        internal static double TimeToMaxLevel(DaycareItemController controller, int levelOffset = 0)
+        {
+            var id = controller.id;
+            var character = controller.character;
+            var item = character.inventory.daycare[id];
+            var gained = controller.levelsAdded();
+
+            // based on DaycareItemController.timeLeftMessage()
+            //  r = dacareRate(Equipment)
+            //  c = current total seconds
+            //  b = digger daycare bonus
+            // time left = (r - c % r) / b
+            // so when c = 0, seconds per level = r / b
+
+            var r = (double)controller.daycareRate(item);
             var c = character.inventory.daycareTimers[id].totalseconds;
             var b = (double)character.allDiggers.totalDaycareBonus();
 
             var secondsPerLevel = r / b;
             var secondsRemainingThisLevel = (r - c % r) / b;
 
-            var totalSecondsTo100 = (secondsPerLevel * (99 - (item.level + gained)) ) + secondsRemainingThisLevel;
-            __instance.daycareText.text = $"<b><size=12>Level: {item.level + gained} ({NumberOutput.timeOutput(totalSecondsTo100)})</size></b>";
+            var currentLevel = item.level + gained + levelOffset;
+            var totalSecondsTo100 = (secondsPerLevel * (99 - (currentLevel))) + secondsRemainingThisLevel;
+
+            return totalSecondsTo100;
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(DaycareItemController), "timeLeftMessage")]

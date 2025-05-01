@@ -72,7 +72,12 @@ This sends current data from NGU to GO for the `NGUs` tab.
 ## sending hack stats from NGU to GO
 `javascript:fetch("http://localhost:8088/ngu/ngu2go/hacks").then(e=>e.json()).then(e=>{let a=appState.hackstats;a.rpow=e.rpow,a.rcap=e.rcap,a.hackspeed=e.hackspeed;for(let c=0;c<15;c++)a.hacks[c].goal=a.hacks[c].level=e.hacks[c].level,a.hacks[c].reducer=e.hacks[c].reducer;appHandlers.handleSettings("hackstats",a)});`
 
-This sends current hack stats from NGU to GO for the `Hacks` tab.
+This sends current hack stats from NGU to GO for the `Hacks` tab: stats at the top, current reducer counts, current hack levels, reset targets to match current levels.
+
+## sending hack stats from NGU to GO (no targets)
+`javascript:fetch("http://localhost:8088/ngu/ngu2go/hacks").then(e=>e.json()).then(e=>{let a=appState.hackstats;a.rpow=e.rpow,a.rcap=e.rcap,a.hackspeed=e.hackspeed;for(let c=0;c<15;c++)a.hacks[c].level=e.hacks[c].level,a.hacks[c].reducer=e.hacks[c].reducer;appHandlers.handleSettings("hackstats",a)});`
+
+Same as above except doesn't reset targets. This is useful if stats changed before starting HD and might need to do some adjustments without having to start completly over. Or if in the middle of HD and times didn't work out how you thought and want to make adjustments for the remaining hacks.
 
 ## sending hack targets from GO to NGU
 `javascript:fetch("http://localhost:8088/ngu/go2ngu/hacks",{method:"POST",body:JSON.stringify(appState.hackstats.hacks.map(a=>a.goal))});`
@@ -228,9 +233,13 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 34. shift-right-click questing button to toggle automate manual major quest: auto-collect items, auto-complete quest, auto-start new major quest, auto-use butter (option in cfg file)
 
+    while running, uncheck the "User Major Quests" box to not start a new major when current finishes, acts as if ran out of majors
+
     doesn't automatically switch adventure zone - assumes already in quest zone and the above mod that uses current zone when starting quest
 
     when run out of major quests, will start minor idle quest and change zone to ITOPOD
+
+    disables itself if player changes to idle
 
 35. left-alt-click + button to split resources into all runnable bars (i.e. target = 0 or level < target), such that bar speeds are equal
 
@@ -418,7 +427,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 78. on the rebirth screen, the rebirth button will be red if there is "Crap to do before rebirthing"
     - adds a check for if any digger can be upgraded (increase max level)
 
-79. removed "not less than 10k" limit on buy custom energy/magic cap, lowest is what you can get for 1 exp (e.g. 250 energy cap)
+79. removed "not less than 10k" limit on buy custom energy/magic/res3 cap, lowest is what you can get for 1/3/100k exp (i.e. 250 E/M/R3 cap)
 
 80. fixed bug with Jake's (T3) locusts attack - the attacks aren't supposed to start until the turn after the warning, currently it's the next frame
 
@@ -941,3 +950,5 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 230. fixed game bug when clicking a digger's cap button would often result in 1 level lower than it could
 
 231. fixed game bug that preventing being able to click the "Auto Spell" text for blood number to toggle the checkbox
+
+232. changes manual combat moves to not start on cooldown when game starts (was added at the same time as mod 91, forgot to put in README)

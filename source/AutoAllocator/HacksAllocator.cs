@@ -100,7 +100,7 @@ namespace jshepler.ngu.mods.AutoAllocator
         {
             for (var x = 0; x < NUMBER_OF_PODS; x++)
             {
-                Instance.UpdateText(_hacksController.pods[x].id);
+                Instance.UpdateButton(_hacksController.pods[x].id);
             }
         }
 

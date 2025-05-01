@@ -155,6 +155,7 @@ namespace jshepler.ngu.mods
                 , EffectTimer = () => 5f - pc.hyperRegenTime
             };
 
+            Traverse.Create(ac.megaBuffMove).Field<float>("megaBuffTimer").Value = character.megaBuffCooldown() + 1;
             bbMegaBuff = new ButtonBar(__instance.megaBuffMove.button);
 
             bbOhShit = new ButtonBar(__instance.ohShitMove.button);

@@ -250,7 +250,7 @@ namespace jshepler.ngu.mods
                 if (item.isMacGuffin())
                 {
                     var muff = character.arbitrary.macGuffinBooster1Time.totalseconds > 0.0 || character.arbitrary.macGuffinBooster1InUse;
-                    text += $"\n\n<b>Time Factor:</b> {character.inventoryController.macGuffinBonusTimeFactor()}{(muff ? " (muffin active)" : string.Empty)}";
+                    text += $"\n\n<b>Time Factor:</b> x{character.inventoryController.macGuffinBonusTimeFactor()}{(muff ? " (muffin active)" : string.Empty)}";
                 }
 
                 if (item.id == 92 && item.level > 0 && character.settings.yggdrasilOn)
@@ -286,13 +286,18 @@ namespace jshepler.ngu.mods
             if (dcId == -1)
                 return null;
 
-            var dcLevel = daycare[dcId].level + Plugin.Character.inventoryController.daycares[dcId].levelsAdded();
+            var controller = Plugin.Character.inventoryController.daycares[dcId];
+            var dcLevel = daycare[dcId].level + controller.levelsAdded();
             var text = $"\n\n<b>Item level in Daycare:</b> {dcLevel}";
 
             if (item.type != part.MacGuffin)
             {
+                // level + 1 to account for the extra level gained when merging
                 var afterMerge = Math.Min(100, dcLevel + item.level + 1);
-                text += $" ({afterMerge} after merge)";
+                var timeToMaxLevel = Math.Max(0, DaycareBarText.TimeToMaxLevel(controller, item.level + 1));
+
+                text += $" ({afterMerge} after merge)"
+                    + $"\n  ... time to 100 (merged): {NumberOutput.timeOutput(timeToMaxLevel)}";
             }
 
             return text;

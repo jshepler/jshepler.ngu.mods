@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 
 namespace jshepler.ngu.mods.Popups
@@ -273,7 +273,7 @@ namespace jshepler.ngu.mods.Popups
 
             if (_base.cap > _shouldBe.cap)
             {
-                root = ((float)_base.cap / _ratio.cap).CeilToLong();
+                root = ((double)_base.cap / _ratio.cap).CeilToLong();
                 _shouldBe.cap = root * _ratio.cap;
                 _shouldBe.power = root * _ratio.power;
                 _shouldBe.bars = root * _ratio.bars;
@@ -349,31 +349,30 @@ namespace jshepler.ngu.mods.Popups
             if (exp <= 0L)
                 return;
 
-            var power = _levelsNeeded.power;
-            var cost = powerCost(power);
-            while (cost > exp)
-                cost = powerCost(--power);
-
-            if (cost <= 0L || power <= 0L)
+            var maxCost = Math.Min(exp, _expNeeded.power);
+            var costOf1 = powerCost(1L);
+            var powerToBuy = maxCost / costOf1;
+            var cost = powerCost(powerToBuy);
+            if (cost <= 0L || powerToBuy <= 0L)
                 return;
 
             switch (_menu)
             {
                 case Menu.EXP_Energy:
-                    _ep += power;
-                    _base.power = (long)_ep;
+                    _ep += powerToBuy;
+                    _base = _baseEnergy;
                     _energyPurchases.refresh();
                     break;
 
                 case Menu.EXP_Magic:
-                    _mp += power;
-                    _base.power = (long)_mp;
+                    _mp += powerToBuy;
+                    _base = _baseMagic;
                     _magicPurchases.refresh();
                     break;
 
                 case Menu.EXP_R3:
-                    _rp += power;
-                    _base.power = (long)_rp;
+                    _rp += powerToBuy;
+                    _base = _baseRes3;
                     _res3Purchases.refresh();
                     break;
             }
@@ -388,41 +387,30 @@ namespace jshepler.ngu.mods.Popups
             if (exp <= 0L)
                 return;
 
-            var cap = _levelsNeeded.cap;
-            var cost = capCost(cap);
-            while (cost > exp)
-            {
-                cap -= 250;
-                cost = capCost(cap);
-            }
-
-            if (cost <= 0L || cap <= 0L)
+            var maxCost = Math.Min(exp, _expNeeded.cap);
+            var costOf250 = capCost(250L);
+            var capToBuy = maxCost / costOf250 * 250L;
+            var cost = capCost(capToBuy);
+            if (cost <= 0L || capToBuy <= 0L)
                 return;
-
-            // can only buy in multiples of 250
-            if (cap % 250 != 250)
-            {
-                cap = (long)Mathf.Floor(cap / 250f) * 250L;
-                cost = capCost(cap);
-            }
 
             switch (_menu)
             {
                 case Menu.EXP_Energy:
-                    _ec += cap;
-                    _base.cap = _ec;
+                    _ec += capToBuy;
+                    _base = _baseEnergy;
                     _energyPurchases.refresh();
                     break;
 
                 case Menu.EXP_Magic:
-                    _mc += cap;
-                    _base.cap = _mc;
+                    _mc += capToBuy;
+                    _base = _baseMagic;
                     _magicPurchases.refresh();
                     break;
 
                 case Menu.EXP_R3:
-                    _rc += cap;
-                    _base.cap = _rc;
+                    _rc += capToBuy;
+                    _base = _baseRes3;
                     _res3Purchases.refresh();
                     break;
             }
@@ -437,31 +425,31 @@ namespace jshepler.ngu.mods.Popups
             if (exp <= 0L)
                 return;
 
-            var bars = _levelsNeeded.bars;
-            var cost = barsCost(bars);
-            while (cost > exp)
-                cost = barsCost(--bars);
+            var maxCost = Math.Min(exp, _expNeeded.bars);
+            var costOf1 = barsCost(1L);
+            var barsToBuy = maxCost / costOf1;
+            var cost = barsCost(barsToBuy);
 
-            if (cost <= 0L || bars <= 0)
+            if (cost <= 0L || barsToBuy <= 0)
                 return;
 
             switch (_menu)
             {
                 case Menu.EXP_Energy:
-                    _eb += bars;
-                    _base.bars = _eb;
+                    _eb += barsToBuy;
+                    _base = _baseEnergy;
                     _energyPurchases.refresh();
                     break;
 
                 case Menu.EXP_Magic:
-                    _mb += bars;
-                    _base.bars = _mb;
+                    _mb += barsToBuy;
+                    _base = _baseMagic;
                     _magicPurchases.refresh();
                     break;
 
                 case Menu.EXP_R3:
-                    _rb += bars;
-                    _base.bars = _rb;
+                    _rb += barsToBuy;
+                    _base = _baseRes3;
                     _res3Purchases.refresh();
                     break;
             }

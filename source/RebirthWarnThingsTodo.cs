@@ -32,15 +32,26 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(RebirthReminders), "OnPointerEnter")]
         private static void RebirthReminders_OnPointerEnter_postfix(RebirthReminders __instance, string ___message)
         {
+            var message = ___message;
+
             if (UpgradeAllDiggers.CanUpgradeAnyDigger())
             {
-                var tt = __instance.tooltip;
-
-                if (___message == "There's nothing you need to do! Go ahead and rebirth!")
-                    tt.showTooltip("You have diggers that can be upgraded!");
+                if (message == "There's nothing you need to do! Go ahead and rebirth!")
+                    message = "You have diggers that can be upgraded!";
                 else
-                    tt.showTooltip($"{___message}\nYou have diggers that can be upgraded!");
+                    message = $"{message}\nYou have diggers that can be upgraded!";
             }
+
+            if (sadMuffinAvailable())
+            {
+                if (message == "There's nothing you need to do! Go ahead and rebirth!")
+                    message = "You have a MacGuffin Muffin that you can eat!";
+                else
+                    message = $"{message}\nYou have a MacGuffin Muffin that you can eat!";
+            }
+
+            ___message = message;
+            __instance.tooltip.showTooltip(___message);
         }
 
         private static IEnumerator SetButtonColors()
@@ -88,6 +99,9 @@ namespace jshepler.ngu.mods
             if (UpgradeAllDiggers.CanUpgradeAnyDigger())
                 return true;
 
+            if (sadMuffinAvailable())
+                return true;
+
             return false;
         }
 
@@ -109,6 +123,18 @@ namespace jshepler.ngu.mods
             var upgSeconds = Calculators.AugUpgradeCalculators[6].TimeToTarget(0, challTarget, totalEnergy, 0f);
 
             return (augSeconds + upgSeconds) <= maxSecondsToTarget;
+        }
+
+        private static bool sadMuffinAvailable()
+        {
+            var character = Plugin.Character;
+            if (character.settings.rebirthDifficulty < difficulty.sadistic
+                || character.arbitrary.macGuffinBooster1Count == 0
+                || character.arbitrary.macGuffinBooster1InUse
+                || character.arbitrary.macGuffinBooster1Time.totalseconds > 0)
+                return false;
+
+            return true;
         }
     }
 }

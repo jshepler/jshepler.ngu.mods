@@ -2,13 +2,14 @@
 using System.Reflection.Emit;
 using HarmonyLib;
 using jshepler.ngu.mods.GameData;
+using UnityEngine.TextCore;
 
 namespace jshepler.ngu.mods
 {
     [HarmonyPatch]
-    internal class LastYggRewards
+    internal class ImprovedYggTooltips
     {
-        private static string[] _texts// = new string[21];
+        private static string[] _texts
         {
             get => ModSave.Data.LastYggRewards;
         }
@@ -136,15 +137,40 @@ namespace jshepler.ngu.mods
 
         // appends [NGU YIELD FH] to the fruit name in the tooltip
         // NGU = ngu yield, YIELD = ygg yield from equipment (and quirk 92), FH = first harvest perk
+        // and inserts time to max tier
         [HarmonyTranspiler, HarmonyPatch(typeof(FruitController), "showTooltip")]
         private static IEnumerable<CodeInstruction> FruitController_showTooltip_transpiler(IEnumerable<CodeInstruction> instructions)
         {
+            var concat3 = typeof(string).GetMethod("Concat", [typeof(object), typeof(object), typeof(object)]);
+            var concat4 = typeof(string).GetMethod("Concat", [typeof(object), typeof(object), typeof(object), typeof(object)]);
+
+            if (concat3 == null)
+            {
+                Plugin.LogInfo("concat3 is null");
+                return instructions;
+            }
+
+            if (concat4 == null)
+            {
+                Plugin.LogInfo("concat4 is null");
+                return instructions;
+            }
+
             var cm = new CodeMatcher(instructions)
                 .MatchForward(false, new CodeMatch(OpCodes.Ldstr, "<b>"))
                 .Advance(1)
                 .RemoveInstructions(4)
                 .Advance(2)
-                .SetInstruction(Transpilers.EmitDelegate(AppendFruitModifiers));
+                .SetInstruction(Transpilers.EmitDelegate(AppendFruitModifiers))
+
+                .MatchForward(false, new CodeMatch(OpCodes.Ldstr, "\n\n<b>Time to next Tier:</b> "))
+                .SetOperandAndAdvance("\n<b>Time to next Tier:</b> ")
+
+                .MatchForward(false, new CodeMatch(OpCodes.Call, concat3))
+                .InsertAndAdvance(
+                    new CodeInstruction(OpCodes.Ldarg_0),
+                    Transpilers.EmitDelegate(InsertTimeToMaxTier))
+                .SetOperandAndAdvance(concat4);
 
             return cm.InstructionEnumeration();
         }
@@ -158,6 +184,22 @@ namespace jshepler.ngu.mods
             var fh = mod.FH ? "blue" : "#cccccc";
 
             return $"{name} [<color={ngu}>NGU</color> <color={yield}>YIELD</color> <color={fh}>FH</color>]";
+        }
+
+        private static string InsertTimeToMaxTier(FruitController controller)
+        {
+            var id = controller.id;
+            var fruit = controller.character.yggdrasil.fruits[id];
+            var currentTier = controller.harvestTier(id);
+            if (currentTier >= fruit.maxTier)
+                return $"\n<b>Time to Max Tier:</b> DONE";
+
+            var secondsPerTier = controller.tierThreshold();
+            var secondsToNextTier = (int)(secondsPerTier - fruit.seconds % secondsPerTier);
+            var tiersAfterNext = fruit.maxTier - currentTier - 1;
+            var secondsToMaxTier = (int)(secondsToNextTier + tiersAfterNext * secondsPerTier);
+
+            return $"\n<b>Time to max Tier:</b> {NumberOutput.timeOutput(secondsToMaxTier)}";
         }
     }
 }

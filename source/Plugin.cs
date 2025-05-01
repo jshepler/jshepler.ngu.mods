@@ -254,15 +254,22 @@ namespace jshepler.ngu.mods
 
 /*
 notes:
-    the load save button from startup screen calls:
+    the load local save button on the startup screen calls:
         MainMenuController.loadFileSave()
         ->  MainMenuController.loadFileKartridge()
             ->  OpenFileDialog.loadFileMainMenuStandalone()
-                ->  OpenFileDialog.loadIntoGame()
+                ->  OpenFileDialog.loadintoGame()
                     ->  ImportExport.loadData()
                     ->  Character.addOfflineProgress()
 
-    the load save button bottom-left game screen calls:
+    the load autosave button on the startup screen calls:
+        MainMenuController.loadAutosave()
+        -> MainMenuController.loadAutosaveSteam()
+            -> OpenFileDialog.loadintoGame()
+                ->  ImportExport.loadData()
+                ->  Character.addOfflineProgress()
+
+    the load save button bottom-left of game screen calls:
         OpenFileDialog.startLoadStandalone()
         ->  OpenFileDialog.quickLoad()
             ->  importExport.loadBase64ToData()

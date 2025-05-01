@@ -164,15 +164,15 @@ namespace jshepler.ngu.mods
                 else if (text.EndsWith("q"))
                     suffixMulti = 1000000000000000.0;
 
-                var decimalSeperator = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
-                text = Regex.Replace("0" + text, $"[^0-9{decimalSeperator}]", string.Empty);
+                var decimalSeparator = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
+                text = Regex.Replace("0" + text, $"[^0-9{decimalSeparator}]", string.Empty);
 
                 // no clue why 4G was checking for multiples, but keeping it anyway and using current culture intead of assuming '.'
-                if (text.Split(decimalSeperator[0]).Length - 1 > 1)
+                if (text.Split(decimalSeparator[0]).Length - 1 > 1)
                 {
-                    int num2 = text.Length - text.LastIndexOf(decimalSeperator);
-                    text = text.Replace(decimalSeperator, "");
-                    text = text.Insert(text.Length + 1 - num2, decimalSeperator);
+                    int num2 = text.Length - text.LastIndexOf(decimalSeparator);
+                    text = text.Replace(decimalSeparator, "");
+                    text = text.Insert(text.Length + 1 - num2, decimalSeparator);
                 }
 
                 parsed = double.Parse(text) * suffixMulti;

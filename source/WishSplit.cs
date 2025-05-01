@@ -82,9 +82,9 @@ namespace jshepler.ngu.mods
             }
 
             var id = __instance.id;
-            if (Wishes.AllWishes[id].IsLocked)
+            if (Wishes.AllWishes[id].IsLocked(out var message))
             {
-                Plugin.Character.wishesController.displayLockedMessage(id);
+                Plugin.ShowOverrideNotification(message);
                 return;
             }
 
@@ -222,10 +222,14 @@ namespace jshepler.ngu.mods
                 .OrderBy(w => w.cap)
                 .ToList();
 
+
+            // removeAllResources will trigger the disabling of any allocators - take a snapshot to restore later
+            var enabledR3 = WishRes3Allocator.Instance.EnabledIDs.ToList();
+
             var character = Plugin.Character;
             character.wishesController.removeAllRes3();
-            var amountLeft = character.res3.idleRes3;
 
+            var amountLeft = character.res3.idleRes3;
             while (runningWishes.Count > 0)
             {
                 var rw = runningWishes[0];
@@ -239,6 +243,7 @@ namespace jshepler.ngu.mods
             }
 
             character.res3.idleRes3 = amountLeft;
+            WishRes3Allocator.Instance.SetEnabled(enabledR3);
         }
 
         private static void ClearSelected()

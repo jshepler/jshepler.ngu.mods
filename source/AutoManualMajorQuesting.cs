@@ -23,9 +23,10 @@ namespace jshepler.ngu.mods
             if (original != null)
                 return;
             
-            Plugin.OnSaveLoaded += (o, e) =>
+            // after offline progression finishes, disable if was enabled and no longer in a manual major quest
+            Plugin.OnOfflineProgressionComplete += (o, e) =>
             {
-                _enabled = _enabled && InManualQuest() && _character.settings.useMajorQuests;
+                _enabled = _enabled && InManualQuest() && !_character.beastQuest.reducedRewards; //_character.settings.useMajorQuests;
             };
         }
 
@@ -38,7 +39,10 @@ namespace jshepler.ngu.mods
             __instance.beast.gameObject.AddComponent<ClickHandlerComponent>()
                 .OnRightClick(e =>
                 {
-                    if (Input.GetKey(KeyCode.LeftShift))
+                    if (!_character.settings.beastOn)
+                        return;
+
+                    if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
                     {
                         _enabled = !_enabled;
                         __instance.beast.image.color = _enabled ? Plugin.ButtonColor_LightBlue : Color.white;
@@ -88,8 +92,25 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(BeastQuestController), "completeQuest")]
         private static void BeastQuestController_completeQuest_postfix(BeastQuestController __instance)
         {
-            if (_enabled)
-                StartManualMajorQuest();
+            if (!_enabled)
+                return;
+
+            // let's player indicate to not continue running more majors by unchecking "User Majors"
+            if (!_character.settings.useMajorQuests)
+            {
+                stopAutoManualQuesting();
+                return;
+            }
+
+            StartManualMajorQuest();
+        }
+
+        // if auto enabled and player switches to idle questing, disable auto
+        [HarmonyPrefix, HarmonyPatch(typeof(BeastQuestController), "toggleIdleMode")]
+        private static void BeastQuestController_toggleIdleMode_prefix(BeastQuestController __instance)
+        {
+            if (_enabled && !__instance.character.beastQuest.idleMode)
+                _enabled = false;
         }
 
         private static void CollectQuestItems()
@@ -108,24 +129,12 @@ namespace jshepler.ngu.mods
         {
             var quest = _character.beastQuest;
 
-            if (!_enabled
-                || !_character.settings.beastOn
-                || (quest.inQuest && !quest.idleMode))
+            if (!_enabled || (quest.inQuest && !quest.idleMode))
                 return;
 
             if (quest.curBankedQuests < 1)
             {
-                if (_character.settings.useMajorQuests)
-                    _controller.toggleMajorQuestUse();
-
-                _controller.startQuest();
-
-                if (!quest.idleMode)
-                    _controller.toggleIdleMode();
-
-                _character.adventureController.zoneSelector.changeZone(1000);
-
-                _enabled = false;
+                stopAutoManualQuesting();
                 return;
             }
 
@@ -139,8 +148,23 @@ namespace jshepler.ngu.mods
                 _controller.toggleMajorQuestUse();
 
             _controller.startQuest();
-            
             _controller.refreshMenu();
+        }
+
+        private static void stopAutoManualQuesting()
+        {
+            _enabled = false;
+
+            if (_character.settings.useMajorQuests)
+                _controller.toggleMajorQuestUse();
+
+            _controller.startQuest();
+
+            if (!_character.beastQuest.idleMode)
+                _controller.toggleIdleMode();
+
+            _controller.refreshMenu();
+            _character.adventureController.zoneSelector.changeZone(1000);
         }
 
         private static bool InManualQuest()

@@ -44,7 +44,7 @@ namespace jshepler.ngu.mods
                     return false;
 
                 default:
-                    return true;
+                    return false;
             }
         }
 
@@ -77,7 +77,7 @@ namespace jshepler.ngu.mods
                     return false;
 
                 default:
-                    return true;
+                    return false;
             }
         }
 
@@ -98,7 +98,7 @@ namespace jshepler.ngu.mods
                     return false;
 
                 default:
-                    return true;
+                    return false;
             }
         }
 

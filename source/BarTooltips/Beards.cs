@@ -32,7 +32,7 @@ namespace jshepler.ngu.mods.BarTooltips
                 ___message += $" ({NumberOutput.timeOutput(secondsRemaining)})";
 
             ___message += $"\n   (ppt: {ppt:0.0000000} = {tpb}t/bar)"
-                + $"\n\n<b>Time Factor:</b> {character.allBeards.timeFactor()}";
+                + $"\n\n<b>Time Factor:</b> x{character.allBeards.timeFactor()}";
 
             var bank = character.adventureController.itopod.totalBankedBeardTemp();
             if (bank > 0f)

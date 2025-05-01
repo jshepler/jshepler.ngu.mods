@@ -38,7 +38,31 @@ namespace jshepler.ngu.mods
         internal int MaxLevel => (int)_props[Id].maxLevel;
         internal int Level => _wishes[Id].level;
         internal float Progress => _wishes[Id].progress;
-        internal bool IsLocked => Plugin.Character.wishesController.wishLocked(Id);
+
+        internal bool IsLocked(out string message)
+        {
+            message = null;
+
+            if (Plugin.Character.wishesController.wishLocked(Id))
+            {
+                message = Id switch
+                {
+                    28 => "You need to complete Evil Troll Challenge #4 to research this Wish!",
+                    45 => "You need to complete Evil Troll Challenge #6 to research this Wish!",
+                    _ => "This wish is currently locked!"
+                };
+
+                return true;
+            }
+
+            if (_props[Id].difficultyRequirement > Plugin.Character.settings.rebirthDifficulty)
+            {
+                message = $"You need to move to at least {_props[Id].difficultyRequirement} difficulty to research this Wish!";
+                return true;
+            }
+
+            return false;
+        }
 
         internal long Energy
         {
