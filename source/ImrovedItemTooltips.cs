@@ -1,14 +1,17 @@
-﻿using System;
+﻿using HarmonyLib;
+using jshepler.ngu.mods.GameData;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using HarmonyLib;
-using jshepler.ngu.mods.GameData;
+using System.Xml.Linq;
 using UnityEngine;
 using UnityEngine.TextCore;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
+using static jshepler.ngu.mods.TrackBaseAdvPowerGained;
 
 namespace jshepler.ngu.mods
 {
@@ -257,7 +260,7 @@ namespace jshepler.ngu.mods
                     text += $"\n\n<b>Gain <color=blue>{(int)(item.level * (1f + item.level / 100f))}</color> seeds if consumed now</b>";
 
                 if (Input.GetKey(KeyCode.LeftAlt))
-                    text += BuildItemSourcesString(item);
+                    text += BuildItemSourcesString(item) + BuildBoostETAString(item);
 
                 character.tooltip.showOverrideTooltip(text);
                 yield return _waiter;
@@ -381,5 +384,128 @@ namespace jshepler.ngu.mods
                 _ => inventory.inventory[slotId]
             };
         }
+
+        private static string BuildBoostETAString(Equipment item)
+        {
+
+            var boostsStrings = new List<string>();
+
+            var missingPower = Mathf.Floor(item.capAttack * (1f + (float)item.level / 100f)) - item.curAttack;
+            var missingToughness = Mathf.Floor(item.capDefense * (1f + (float)item.level / 100f)) - item.curDefense;
+            var missingSpecial1 = Mathf.Floor(item.spec1Cap * (1f + (float)item.level / 100f)) - item.spec1Cur;
+            var missingSpecial2 = Mathf.Floor(item.spec2Cap * (1f + (float)item.level / 100f)) - item.spec2Cur;
+            var missingSpecial3 = Mathf.Floor(item.spec3Cap * (1f + (float)item.level / 100f)) - item.spec3Cur;
+
+            var character = Plugin.Character;
+
+            var completedBoostsCount = character.inventory.itemList.itemMaxxed.Skip(1).Take(39).Count(b => b);
+            var completedBoostsBonus = (completedBoostsCount * .02f) + 1f;
+            var bdwCompleteBonus = character.inventory.itemList.badlyDrawnComplete ? 1.2f : 1f;
+            var constructionCompleteBonus = character.inventory.itemList.constructionComplete ? 1.2f : 1f;
+            var perksBonus = character.adventureController.itopod.totalBoostBonus();
+            var quirksBonus = character.beastQuestPerkController.totalBoostBonus();
+
+            var totalBonus = completedBoostsBonus * bdwCompleteBonus * constructionCompleteBonus * perksBonus * quirksBonus;
+            var totalBoostMissing = missingPower + missingToughness + missingSpecial1 + missingSpecial2 + missingSpecial3;
+
+            if ( totalBoostMissing == 0) return "";
+
+            string boostText = $"<b>P:</b> {(int)(missingPower / totalBonus)} / <b>T:</b> {(int)(missingToughness / totalBonus)} / <b>S:</b> {(int)((missingSpecial1 + missingSpecial2 + missingSpecial3) / totalBonus)}";
+            boostsStrings.Add(boostText);
+
+            //TODO: it's better to check for zones with no boost drops but this is easier.
+            // Leaves out bosses altogether though!!
+            if (Plugin.Character.adventureController.zone >= 1000
+                || Zones.TitanZoneIds.Contains(Plugin.Character.adventureController.zone)
+                || Plugin.Character.adventureController.zone == -1
+                ) return $"\n\n<b>base boosts needed to cap:</b>\n{boostsStrings.Join(s => s, "\n")}"; ;
+
+            var zoneid = Plugin.Character.adventureController.zone;
+            var zone = DropTable.Zones[zoneid];
+            var boostList = zone.NormalDrops.Items.Where(item => DropTable.CheckIfBoost(item.ItemIds.Cast<Items>().ToArray()).Item1);
+
+            var expectedBoostsPerKill = EstimateBoostPerKillFromCurrentZone(boostList);
+
+            if (expectedBoostsPerKill.normal == 0) return $"\n\n<b>base boosts needed to cap:</b>\n{boostsStrings.Join(s => s, "\n")}";
+             
+            var enemies = Plugin.Character.adventureController.enemyList[zoneid];
+            var eCount = enemies.Count;
+            var nCount = enemies.Count(e => e.enemyType == enemyType.normal);
+            var bCount = enemies.Count(e => e.enemyType == enemyType.boss);
+            var nRatio = (float)nCount / (float)eCount;
+
+            float killsForCap = totalBoostMissing / totalBonus / (expectedBoostsPerKill.normal * nRatio) ;
+            float recycledKillsForCap = totalBoostMissing / totalBonus / (expectedBoostsPerKill.recycled * nRatio);
+            
+            boostsStrings.Add($"Kills required (estimate): {killsForCap}");
+            boostsStrings.Add($"... with boost recycling: {recycledKillsForCap}");
+
+            var respawnTime = Plugin.Character.adventureController.respawnTime();
+            var idleAttackSpeed = Plugin.Character.adventure.attackSpeed;
+            var secondsPerKill = respawnTime + idleAttackSpeed;
+
+            boostsStrings.Add($"Time needed (1-shot kills): {NumberOutput.timeOutput(killsForCap * secondsPerKill)}");
+            boostsStrings.Add($"... with boost recycling: {NumberOutput.timeOutput(recycledKillsForCap * secondsPerKill)}");
+
+
+
+            return $"\n\n<b>base boosts needed to cap:</b>\n{boostsStrings.Join(s => s, "\n")}";
+        }
+
+        private static (float normal,float recycled) EstimateBoostPerKillFromCurrentZone(IEnumerable<DropItems> boostList)
+        {
+            var character = Plugin.Character;
+            var zoneid = Plugin.Character.adventureController.zone;
+
+            float dcMultiplier = 0f;
+            var rooted = zoneid >= 20;
+            dcMultiplier = rooted ? character.lootFactorRooted() : character.lootFactor();
+
+
+            // does it need to be added?
+            //if (_shiftIsDown && !isCharmActive)
+            //   _dcMulti *= rooted ? rootedCharmMulti : 2f;
+            float totalWeightedBoost = 0f;
+            int boostCount = 0;
+
+            foreach (var boost in boostList)
+            {
+                float moddedDC = boost.BaseDC * dcMultiplier + boost.BonuseDC;
+                float dc = Math.Min(moddedDC, boost.MaxDC);
+
+                var (isBoost, boostValue) = DropTable.CheckIfBoost(boost.ItemIds.Cast<Items>().ToArray());
+
+                if (isBoost)
+                {
+                    totalWeightedBoost += boostValue * dc;
+                    boostCount++;
+                }
+            }
+
+            float expectedBoostPerKill = boostCount > 0 ? totalWeightedBoost : 0f;
+
+            totalWeightedBoost = 0f;
+            boostCount = 0;
+
+
+            foreach (var boost in boostList)
+            {
+                float moddedDC = boost.BaseDC * dcMultiplier + boost.BonuseDC;
+                float dc = Math.Min(moddedDC, boost.MaxDC);
+
+                var (isBoost, boostValue) = DropTable.CheckIfBoost(boost.ItemIds.Cast<Items>().ToArray(), true);
+
+                if (isBoost)
+                {
+                    totalWeightedBoost += boostValue * dc;
+                    boostCount++;
+                }
+            }
+
+            float recycledExpectedBoostPerKill = boostCount > 0 ? totalWeightedBoost : 0f;
+
+            return (expectedBoostPerKill, recycledExpectedBoostPerKill);
+        }
+
     }
 }
