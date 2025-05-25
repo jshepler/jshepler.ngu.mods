@@ -25,6 +25,8 @@ namespace jshepler.ngu.mods.GameData
         //internal ZoneDrops this[int zoneId] => Zones[zoneId];
         //internal int Count => Zones.Count;
 
+        internal static Items[][] getboostList() { return [_boosts1, _boosts2, _boosts5, _boosts10, _boosts20, _boosts50, _boosts100, _boosts200, _boosts500, _boosts1k, _boosts2k, _boosts5k, _boosts10k]; }
+
         static DropTable()
         {
             Zones = new();
@@ -1377,58 +1379,9 @@ namespace jshepler.ngu.mods.GameData
             {
                 TitanV1Drops = new DropGroup(new DropItems(1.00f, Items.TheEnd_T14))
             });
-        }
+        }        
 
-        internal static (bool isBoost, float boostValue) CheckIfBoost(Items[] items, bool recycle = false)
-        {
-            var boostGroups = new Dictionary<Items[], float>
-            {
-                { _boosts1, 1 },
-                { _boosts2, 2 },
-                { _boosts5, 5 },
-                { _boosts10, 10 },
-                { _boosts20, 20 },
-                { _boosts50, 50 },
-                { _boosts100, 100 },
-                { _boosts200, 200 },
-                { _boosts500, 500 },
-                { _boosts1k, 1000 },
-                { _boosts2k, 2000 },
-                { _boosts5k, 5000 },
-                { _boosts10k, 10000 }
-            };
 
-            float maxBoost = 0f;
-            bool foundBoost = false;
-            foreach (var item in items)
-            {
-                foreach (var group in boostGroups)
-                {
-                    if (group.Key.Contains(item))
-                    {
-                        foundBoost = true;
-                        if (group.Value > maxBoost)
-                            maxBoost = group.Value;
-                    }
-                }
-            }
-
-            if (!foundBoost)
-                return (false, 0f);
-
-            if (!recycle)
-                return (true, maxBoost);
-
-            float recycledBoost = 0f;
-            foreach (var value in boostGroups.Values)
-            {
-                if (value <= maxBoost)
-                    recycledBoost += value;
-            }
-
-            return (true, recycledBoost);
-
-        }
 
     }
 }
