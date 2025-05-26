@@ -418,11 +418,11 @@ namespace jshepler.ngu.mods
 
             var boostsStrings = new List<string>();
 
-            var missingPower = (item.capAttack * (1f + (float)item.level / 100f)) - item.curAttack;
-            var missingToughness = (item.capDefense * (1f + (float)item.level / 100f)) - item.curDefense;
-            var missingSpecial1 = (item.spec1Cap * (1f + (float)item.level / 100f)) - item.spec1Cur;
-            var missingSpecial2 = (item.spec2Cap * (1f + (float)item.level / 100f)) - item.spec2Cur;
-            var missingSpecial3 = (item.spec3Cap * (1f + (float)item.level / 100f)) - item.spec3Cur;
+            var missingPower = Mathf.Floor(item.capAttack * (1f + (float)item.level / 100f)) - item.curAttack;
+            var missingToughness = Mathf.Floor(item.capDefense * (1f + (float)item.level / 100f)) - item.curDefense;
+            var missingSpecial1 = Mathf.Floor(item.spec1Cap * (1f + (float)item.level / 100f)) - item.spec1Cur;
+            var missingSpecial2 = Mathf.Floor(item.spec2Cap * (1f + (float)item.level / 100f)) - item.spec2Cur;
+            var missingSpecial3 = Mathf.Floor(item.spec3Cap * (1f + (float)item.level / 100f)) - item.spec3Cur;
 
             var character = Plugin.Character;
 
