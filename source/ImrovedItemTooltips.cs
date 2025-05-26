@@ -389,7 +389,6 @@ namespace jshepler.ngu.mods
         private static int[] _boosts = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000];
         private static float getAverageBoost(int startIndex, float boostBonus, float recycleChance)
         { 
-            
 
             var totalBoost = 0f;
             var probability = 1f;
@@ -397,7 +396,7 @@ namespace jshepler.ngu.mods
             for (var x = startIndex; x >= 0; x--)
             {
                 totalBoost += probability * _boosts[x] * boostBonus;
-                probability *= recycleChance;
+                probability *= Math.Min(recycleChance, 1f); //recycle chance needs to be capped
             }
 
             return totalBoost;
