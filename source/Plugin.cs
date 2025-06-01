@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection.Emit;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace jshepler.ngu.mods
@@ -54,6 +54,7 @@ namespace jshepler.ngu.mods
         internal static bool AltIsDown => Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
         internal static bool ControlIsDown => Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
         internal static bool ShiftIsDown => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+        internal static bool InputFieldHasFocus = false;
 
         private void Awake()
         {
@@ -90,6 +91,8 @@ namespace jshepler.ngu.mods
             if (Character == null)
                 return;
 
+            InputFieldHasFocus = EventSystem.current.currentSelectedGameObject?.GetComponent<InputField>()?.isFocused ?? false;
+
             OnLateUpdate?.Invoke(null, EventArgs.Empty);
         }
 
@@ -122,8 +125,12 @@ namespace jshepler.ngu.mods
             OnPreSave?.Invoke(null, EventArgs.Empty);
         }
 
-        [HarmonyPrefix, HarmonyPatch(typeof(Character), "addOfflineProgress")]
-        private static void Character_addOfflineProgress_prefix()
+        //[HarmonyPrefix, HarmonyPatch(typeof(Character), "addOfflineProgress")]
+        //private static void Character_addOfflineProgress_prefix()
+
+        // this is now called from ModSave/Patches.cs::LoadModData()
+        // doing the postfix on finalTriggers would execute before the modData was loaded
+        internal static void ImportExport_finalTriggers_postfix()
         {
             OnSaveLoaded?.Invoke(null, EventArgs.Empty);
             OnSaveLoaded2?.Invoke(null, EventArgs.Empty);
@@ -268,6 +275,13 @@ notes:
             -> OpenFileDialog.loadintoGame()
                 ->  ImportExport.loadData()
                 ->  Character.addOfflineProgress()
+                    ->  ImportExport.loadData()
+                    ->  Character.addOfflineProgress()
+
+    the load cloud save button on the startup screen calls:
+        MainMenuController.loadCloudSave()
+        -> MainMenuController.loadCloudSaveSteam()
+            -> openFileDialog.loadintoGame()
 
     the load save button bottom-left of game screen calls:
         OpenFileDialog.startLoadStandalone()

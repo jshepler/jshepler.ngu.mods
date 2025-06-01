@@ -13,10 +13,12 @@ namespace jshepler.ngu.mods
             AutoSnipe.TargetEnemy = Config.Bind("AutoSnipe", "TargetEnemy", 0, "used to target specific enemy in specific zone; enter enemy number (from bestiary), 0 = bosses");
             AutoMergeTransform.Enabled = Config.Bind("AutoMergeTransform", "Enabled", false, "enables/disables auto merging and transforming of pendants and looties");
 
+            BloodMagic.NotifiedSpells = Config.Bind("BloodMagic", "NotifiedSpells", NotifiedSpells.IP | NotifiedSpells.GUFFA | NotifiedSpells.GUFFB, "For which spells the Blood Magic button turns purple to notify being ready to cast");
+
             Cards.AutoSortEnabled = Config.Bind("Cards", "AutoSort.Enabled", true, "if enabled, sorts cards as they are added");
             Cards.AutoSortBy = Config.Bind("Cards", "AutoSort.By", CardSortBy.RarityFirst, "RarityFirst: rarity, type, bonus; TypeFirst: type, rarity, bonus; Efficency: based on bonus/mayo");
             Cards.AutoSortDirection = Config.Bind("Cards", "AutoSort.Direction", CardSortDirection.Ascending, "the order cards are sorted");
-            Cards.AutoYeetMode = Config.Bind("Cards", "AutoYeet.Mode", CardYeetMode.Rarity, "What is used to determine when to auto yeet a card");
+            Cards.AutoYeetMode = Config.Bind("Cards", "AutoYeet.Mode", CardYeetMode.Disabled, "What is used to determine when to auto yeet a card");
             Cards.MaxYeetRarity = Config.Bind("Cards", "AutoYeet.MaxYeetRarity", rarity.Crappy, "if AutoYeet.Mode is Rarity, this is a card's max rarity that will get yeeted");
             Cards.MaxYeetEfficiency = Config.Bind("Cards", "AutoYeet.MaxYeetEfficiency", 0f, "if AutoYeet.Mode is Efficiency, this is a card's max mayo efficiency that will get yeeted");
             Cards.MaxYeetVariance = Config.Bind("Cards", "AutoYeet.MaxYeetVariance", 0f, "if AutoYeet.Mode is Variance, this a card's max variance that will get yeeted, 0.8 to 1.2");
@@ -26,6 +28,7 @@ namespace jshepler.ngu.mods
             Colors.LootItemNames = Config.Bind("Colors", "LootItemNames", "#000000", "hex RGB color string for loot item names in combat log");
 
             CheckForNewVersion.Enabled = Config.Bind("CheckForNewVersion", "Enabled", true, "checks for new version when loading a save and every hour after");
+            CheckForNewVersion.Skipped = Config.Bind("CheckForNewVersion", "Skipped", string.Empty, "last version skipped - this is set internally, do not set this manually");
             CustomResolution.Width = Config.Bind("CustomResolution", "Width", 0, "custom resolution width, 0 = disabled");
             CustomResolution.Height = Config.Bind("CustomResolution", "Height", 0, "custom resolution height, 0 = disabled");
 
@@ -88,7 +91,9 @@ namespace jshepler.ngu.mods
             Yggdrasil.AutoHarvest = Config.Bind("Yggdrasil", "AutoHarvest", false, "enable auto harvest/eat fruits when fully grown (max tier)");
             Yggdrasil.PoopAudioChance = Config.Bind("Yggdrasil", "PoopAudioChance", 0f, "chance a fart audio clip is played when gain fruit, 0.0 to 1.0");
 
+            Experimental.AlwaysShowAT = Config.Bind("Experimental", "AlwaysShowAT", false, "if enabled, the AT button will always be visible; dislaimer: will not allow you to run AT before being unlocked");
             Experimental.StaplerNoECap = Config.Bind("Experimental", "StaplerNoECap", false, "if enabled, the cap special is removed from stapler (item 118)");
+            Experimental.LoadoutSwapKeepsAutoAllocators = Config.Bind("Experimental", "LoadoutSwapKeepsAutoAllocators", false, "if enabled, and have the game setting 'Unassign E/M on Loadout Swap' enabled, auto allocators won't disable on loadout swap");
 
             // when loading an old version of the cfg file, some options may have changed or been removed;
             // this will check for known things that have changed and copy values if appropriate,
@@ -223,7 +228,8 @@ namespace jshepler.ngu.mods
 
         internal static class CheckForNewVersion
         {
-            public static ConfigEntry<bool> Enabled;
+            internal static ConfigEntry<bool> Enabled;
+            internal static ConfigEntry<string> Skipped;
         }
 
         internal static class Twitch
@@ -341,9 +347,16 @@ namespace jshepler.ngu.mods
             internal static ConfigEntry<double> Threshold;
         }
 
+        internal static class BloodMagic
+        {
+            internal static ConfigEntry<NotifiedSpells> NotifiedSpells;
+        }
+
         internal static class Experimental
         {
             internal static ConfigEntry<bool> StaplerNoECap;
+            internal static ConfigEntry<bool> AlwaysShowAT;
+            internal static ConfigEntry<bool> LoadoutSwapKeepsAutoAllocators;
         }
     }
 }

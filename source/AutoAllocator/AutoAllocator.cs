@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
-using UnityEngine;
 
 namespace jshepler.ngu.mods.AutoAllocator
 {
@@ -18,16 +17,28 @@ namespace jshepler.ngu.mods.AutoAllocator
             Plugin.OnSaveLoaded += (o, e) => ClearAllAllocators();
         }
 
+        private static bool _swappingLoadout = false;
+        private static bool _ignoreLoadoutSwaps = Options.Experimental.LoadoutSwapKeepsAutoAllocators.Value;
+
+        [HarmonyPrefix, HarmonyPatch(typeof(InventoryController), "equipLoadout")]
+        private static void InventoryController_equipLoadout_prefix()
+        {
+            _swappingLoadout = true;
+        }
+
         [HarmonyPrefix, HarmonyPatch(typeof(Character), "removeAllEnergyAndMagic")]
         private static void Character_removeAllEnergyAndMagic_prefix()
         {
+            if (_ignoreLoadoutSwaps && _swappingLoadout)
+                return;
+
             ClearAllAllocators();
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(Character), "removeMostEnergy")]
         private static void ClearEnergyAllocators()
         {
-            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+            if (Plugin.ShiftIsDown)
                 switch (Plugin.Character.CurrentMenu())
                 {
                     case Menu.AdvancedTraining:
@@ -55,6 +66,10 @@ namespace jshepler.ngu.mods.AutoAllocator
                     case Menu.Wandoos:
                         Allocators.Energy[Allocators.Feature.Wandoos_Energy].DisableAll();
                         break;
+
+                    case Menu.Wishes:
+                        Allocators.Energy[Allocators.Feature.WishEnergy].DisableAll();
+                        break;
                 }
 
             else
@@ -64,7 +79,7 @@ namespace jshepler.ngu.mods.AutoAllocator
         [HarmonyPostfix, HarmonyPatch(typeof(Character), "removeMostMagic")]
         private static void ClearMagicAllocators()
         {
-            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+            if (Plugin.ShiftIsDown)
                 switch (Plugin.Character.CurrentMenu())
                 {
                     case Menu.BloodMagic_Rituals:
@@ -82,6 +97,10 @@ namespace jshepler.ngu.mods.AutoAllocator
                     case Menu.Wandoos:
                         Allocators.Magic[Allocators.Feature.Wandoos_Magic].DisableAll();
                         break;
+
+                    case Menu.Wishes:
+                        Allocators.Magic[Allocators.Feature.WishMagic].DisableAll();
+                        break;
                 }
 
             else
@@ -91,11 +110,15 @@ namespace jshepler.ngu.mods.AutoAllocator
         [HarmonyPostfix, HarmonyPatch(typeof(Character), "removeAllRes3")]
         private static void ClearRes3Allocators()
         {
-            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+            if (Plugin.ShiftIsDown)
                 switch (Plugin.Character.CurrentMenu())
                 {
                     case Menu.Hacks:
                         Allocators.Res3[Allocators.Feature.Hacks].DisableAll();
+                        break;
+
+                    case Menu.Wishes:
+                        Allocators.Res3[Allocators.Feature.WishRes3].DisableAll();
                         break;
                 }
 

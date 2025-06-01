@@ -148,14 +148,6 @@ namespace jshepler.ngu.mods.AutoAllocator
             Instance[wishId] = !Instance[wishId];
         }
 
-        [HarmonyPostfix,
-            HarmonyPatch(typeof(WishesController), "removeEnergy", typeof(int)),
-            HarmonyPatch(typeof(WishesController), "removeAllEnergy", typeof(int))]
-        private static void WishesController_removeEnergy_postfix(int id)
-        {
-            Instance[id] = false;
-        }
-
         [HarmonyPostfix, HarmonyPatch(typeof(WishesController), "clearSelectedWish")]
         private static void WishesController_clearSelectedWish_postfix(WishesController __instance)
         {

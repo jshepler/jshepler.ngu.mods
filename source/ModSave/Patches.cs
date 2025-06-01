@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -94,6 +95,8 @@ namespace jshepler.ngu.mods.ModSave
             // check first in case loading a vanilla save
             if (pd is ModPlayerData mpd)
                 Data.Values = mpd.Data ?? new();
+
+            Plugin.ImportExport_finalTriggers_postfix();
         }
     }
 }

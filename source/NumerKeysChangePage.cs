@@ -1,10 +1,7 @@
-﻿using System.CodeDom;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Reflection.Emit;
 using HarmonyLib;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace jshepler.ngu.mods
@@ -17,8 +14,7 @@ namespace jshepler.ngu.mods
         [HarmonyPrefix, HarmonyPatch(typeof(Character), "Update")]
         private static bool Character_Update_prefix(Character __instance)
         {
-            // if typing in a text box...
-            if (EventSystem.current.currentSelectedGameObject != null)
+            if (Plugin.InputFieldHasFocus)
                 return true;
 
             int numberKey;

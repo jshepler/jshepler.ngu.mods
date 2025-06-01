@@ -23,7 +23,6 @@ namespace jshepler.ngu.mods
     [HarmonyPatch]
     internal class TabNavigation
     {
-        private static EventSystem _system;
         private static Dictionary<Menu, List<InputField>> _fields = new();
         private static bool _sorted = false;
 
@@ -31,10 +30,7 @@ namespace jshepler.ngu.mods
         private static void prep(MethodBase original)
         {
             if (original == null)
-            {
-                _system = EventSystem.current;
                 Plugin.OnUpdate += OnUpdate;
-            }
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(AugmentController), "Start")]
@@ -124,10 +120,10 @@ namespace jshepler.ngu.mods
 
         private static void OnUpdate(object sender, EventArgs e)
         {
-            if (_system == null || _system.currentSelectedGameObject == null || !Input.GetKeyDown(KeyCode.Tab))
+            if (!Input.GetKeyDown(KeyCode.Tab) || !Plugin.InputFieldHasFocus)
                 return;
 
-            var current = _system.currentSelectedGameObject.GetComponent<Selectable>();
+            var current = EventSystem.current.currentSelectedGameObject.GetComponent<Selectable>();
             if (current == null)
                 return;
 

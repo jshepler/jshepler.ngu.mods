@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Reflection.Emit;
 using HarmonyLib;
-using UnityEngine.TextCore;
 
 namespace jshepler.ngu.mods
 {
@@ -24,7 +23,7 @@ namespace jshepler.ngu.mods
 
                 // removing "a hard worker and " shortens the string enough to not wrap and saves a line, offsetting that exta line break
                 .MatchForward(false, new CodeMatch(OpCodes.Ldstr, "% rewards because you're a hard worker and haven't used Idle Mode!</b>"))
-                .SetOperandAndAdvance("% rewards because you're haven't used Idle Mode!</b>");
+                .SetOperandAndAdvance("% rewards because you haven't used Idle Mode!</b>");
 
             return cm.InstructionEnumeration();
         }
@@ -39,10 +38,24 @@ namespace jshepler.ngu.mods
             var curMajors = character.beastQuest.curBankedQuests;
             var secondsUntilMax = curMajors >= maxMajors ? 0f : (maxMajors - curMajors) * secondsPerQuest - character.beastQuest.dailyQuestTimer.totalseconds;
 
-            return text
-                + $"\n<b>Time per Major Quest:</b> {NumberOutput.timeOutput(secondsPerQuest)}"
+            text += $"\n<b>Time per Major Quest:</b> {NumberOutput.timeOutput(secondsPerQuest)}"
                 + $"\n<b>Major Quests per Day:</b> {questsPerDay}"
                 + $"\n<b>Time to Full Bank:</b> {NumberOutput.timeOutput(secondsUntilMax)}";
+
+            var banked = character.beastQuest.curBankedQuests;
+            if (banked > 0)
+            {
+                var respawnTime = character.adventureController.respawnTime();
+                var idleAttackSpeed = character.adventure.attackSpeed;
+                var secondsPerKill = respawnTime + idleAttackSpeed;
+                var avgItems = character.adventure.itopod.perkLevel[94] >= 610 ? 50 : 55;
+                var dropChance = character.beastQuestController.questDropChance();
+                var bankedSeconds = (banked * avgItems / dropChance) * secondsPerKill;
+
+                text += $"\n<b>Est. Time to Complete Cur Bank:</b> {NumberOutput.timeOutput(bankedSeconds)}";
+            }
+
+            return text;
         }
     }
 }

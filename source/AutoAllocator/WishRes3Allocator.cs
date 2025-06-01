@@ -145,13 +145,5 @@ namespace jshepler.ngu.mods.AutoAllocator
 
             Instance[wishId] = !Instance[wishId];
         }
-
-        [HarmonyPostfix,
-            HarmonyPatch(typeof(WishesController), "removeRes3", typeof(int)),
-            HarmonyPatch(typeof(WishesController), "removeAllRes3", typeof(int))]
-        private static void WishesController_removeRes3_postfix(int id)
-        {
-            Instance[id] = false;
-        }
     }
 }

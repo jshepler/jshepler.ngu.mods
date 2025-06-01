@@ -5,7 +5,6 @@ using System.Reflection;
 using HarmonyLib;
 using jshepler.ngu.mods.Popups;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace jshepler.ngu.mods
 {
@@ -43,9 +42,7 @@ namespace jshepler.ngu.mods
             if (!Plugin.Character.InMenu(Menu.Inventory))
                 return;
 
-            if (!_showInput && Input.GetKeyDown(KeyCode.S)
-                // ignore the s if entering a loadout name - currentSelectedGameObject won't be null in that case
-                && EventSystem.current.currentSelectedGameObject == null)
+            if (!_showInput && Input.GetKeyDown(KeyCode.S) && !Plugin.InputFieldHasFocus)
             {
                 var sf = Plugin.Character.tooltip.canvas.scaleFactor;
                 _window = new Rect(324 * sf, 282 * sf, 200 * sf, 26);

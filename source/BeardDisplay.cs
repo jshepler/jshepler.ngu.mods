@@ -44,8 +44,12 @@ namespace jshepler.ngu.mods
             __instance.permBonus.text = $"<b>{bonusText(id)}</b>";
             __instance.tempValue.text = $"{beard.beardLevel:#,##0}\n{beard.permLevel:#,##0}";
 
-            var color = beard.active ? "black" : "red";
-            __instance.permValue.text = $"<color={color}>{tempBonus(id):#,##0.00}%</color>\n{permBonus(id):#,##0.00}%\n{totalBonus(id):#,##0.00}%";
+            if (beard.active)
+                __instance.permValue.text = $"{tempBonus(id):#,##0.00}%";
+            else
+                __instance.permValue.text = "<color=red>100%</color>";
+
+            __instance.permValue.text += $"\nx{permBonus(id):#,##0.00}%\n{totalBonus(id):#,##0.00}%";
 
             __instance.activeBeardsText.text = $"Active:\n{character.beards.activeBeards.Count}/{character.allBeards.capBeards()}";
             return false;

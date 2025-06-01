@@ -1,5 +1,6 @@
 ﻿using System.IO.Pipes;
 using System.Linq;
+using System.Reflection;
 using HarmonyLib;
 using jshepler.ngu.mods.Popups;
 using UnityEngine;
@@ -37,11 +38,7 @@ namespace jshepler.ngu.mods
                 return;
 
             if (_autoYeetMode != CardYeetMode.Disabled)
-            {
-                _autoYeetInProgress = true;
                 yeetCards();
-                _autoYeetInProgress = false;
-            }
 
             if (_autoSortEnabled)
                 SortCards();
@@ -61,11 +58,7 @@ namespace jshepler.ngu.mods
                 return;
 
             if (Input.GetKeyDown(KeyCode.Y))
-            {
-                _autoYeetInProgress = true;
                 yeetCards();
-                _autoYeetInProgress = false;
-            }
 
             if (Input.GetKeyDown(KeyCode.S))
                 SortCards();
@@ -86,34 +79,55 @@ namespace jshepler.ngu.mods
             if (_autoYeetedCard == null)
                 return;
 
-            message = $"<b><color=blue>AUTO-YEET</color></b>\n\n{message}";
+            var controller = Plugin.Character.cardsController;
+            var card = _autoYeetedCard;
+            var rarityColor = controller.getRarityColorTag(card.cardRarity);
+            var rarityName = controller.getRarityName(card.cardRarity);
+            var effectName = card.type == cardType.end ? "END" : controller.getBonusName(card.bonusType);
+
+            message = $"<b><color=blue>AUTO-YEET</color> {rarityColor}{rarityName}</color> T{card.tier} {effectName}</b>\n\n{message}";
         }
 
         private static void yeetCards()
         {
             var character = Plugin.Character;
-            var cards = character.cards.cards;
-            var index = cards.Count;
-
             var alwaysYeet = Options.Cards.AlwaysYeetCSV.Value.Split(',').Select(s => s == "1").ToArray();
 
-            while (index > 0)
+            _autoYeetInProgress = true;
+
+            var doAnotherPass = true;
+            while (doAnotherPass)
             {
-                var card = cards[--index];
-                if (card.isProtected)
-                    continue;
+                doAnotherPass = false;
 
-                _autoYeetedCard = card;
+                // can't use foreach and need to go from end to start because cards are being removed from the array
+                var index = character.cards.cards.Count;
+                while (index > 0)
+                {
+                    var card = character.cards.cards[--index];
+                    if (card.isProtected)
+                        continue;
 
-                if (alwaysYeet[(int)card.bonusType]
-                    || (_autoYeetMode == CardYeetMode.Efficiency && CardTooltip.GetCardEfficiency(card) <= _maxYeetEfficiency)
-                    || (_autoYeetMode == CardYeetMode.Variance && CardTooltip.GetCardVariance(card) <= _maxYeetVariance)
-                    || (_autoYeetMode == CardYeetMode.Rarity && card.cardRarity <= _maxYeetRarity)
-                )
-                    character.cardsController.trashCard(index);
+                    // END cards have bonusType.atkDefStats
+                    // make sure they don't get yeeted when alwaysYeet includes A/D
+                    // make sure they do get yeeted when alwaysYeet includes none (0)
+                    // ignore END cards for the 3 filters because they have the lowest efficiency/variance/rarity so would always get yeeted
+                    if ((alwaysYeet[(int)card.bonusType] && card.type != cardType.end)
+                        || (card.type == cardType.end && alwaysYeet[0])
+                        || (_autoYeetMode == CardYeetMode.Efficiency && CardTooltip.GetCardEfficiency(card) <= _maxYeetEfficiency && card.type != cardType.end)
+                        || (_autoYeetMode == CardYeetMode.Variance && CardTooltip.GetCardVariance(card) <= _maxYeetVariance && card.type != cardType.end)
+                        || (_autoYeetMode == CardYeetMode.Rarity && card.cardRarity <= _maxYeetRarity && card.type != cardType.end))
+                    {
+                        _autoYeetedCard = card;
+                        character.cardsController.trashCard(index);
+                        _autoYeetedCard = null;
 
-                _autoYeetedCard = null;
+                        doAnotherPass = true;
+                    }
+                }
             }
+
+            _autoYeetInProgress = false;
         }
 
         internal static void SortCards()
