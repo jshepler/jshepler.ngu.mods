@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using UnityEngine;
@@ -8,7 +7,7 @@ using UnityEngine.UI;
 namespace jshepler.ngu.mods
 {
     [Flags]
-    internal enum NotifiedSpells { IP = 1, GUFFA = 2, GUFFB = 4 }
+    internal enum NotifiedSpells { none = 0, IP = 1, GUFFA = 2, GUFFB = 4 }
 
     [HarmonyPatch]
     internal class BloodMagic

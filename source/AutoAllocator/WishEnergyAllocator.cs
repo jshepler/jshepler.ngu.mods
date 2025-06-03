@@ -157,13 +157,15 @@ namespace jshepler.ngu.mods.AutoAllocator
                 WishMagicAllocator.Instance.DisableAll();
                 WishRes3Allocator.Instance.DisableAll();
             }
-            else
-            {
-                var wishId = _controller.curSelectedWish;
-                Instance[wishId] = false;
-                WishMagicAllocator.Instance[wishId] = false;
-                WishRes3Allocator.Instance[wishId] = false;
-            }
+        }
+
+        [HarmonyPostfix,
+            HarmonyPatch(typeof(WishesController), "removeEnergy", typeof(int)),
+            HarmonyPatch(typeof(WishesController), "removeAllEnergy", typeof(int))]
+        private static void WishesController_removeEnergy_postfix(int id)
+        {
+            if (!AutoAllocator.SwappingLoadouts || !AutoAllocator.IgnoreLoadoutSwaps)
+                Instance[id] = false;
         }
     }
 }

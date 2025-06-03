@@ -666,6 +666,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 137. shift-click the "Use" button on some consumables to convert them to another consumable:
       - 24 EMR3 potion alphas to 1 potion delta
       - 24 lucky charms to 1 super lucky charm
+      - 5 EM bar bars to 1 muffin
 
 138. shift-click the + button next to a hack's target to previous milestone
 

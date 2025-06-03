@@ -17,19 +17,25 @@ namespace jshepler.ngu.mods.AutoAllocator
             Plugin.OnSaveLoaded += (o, e) => ClearAllAllocators();
         }
 
-        private static bool _swappingLoadout = false;
-        private static bool _ignoreLoadoutSwaps = Options.Experimental.LoadoutSwapKeepsAutoAllocators.Value;
+        internal static bool SwappingLoadouts = false;
+        internal static bool IgnoreLoadoutSwaps = Options.Experimental.LoadoutSwapKeepsAutoAllocators.Value;
 
         [HarmonyPrefix, HarmonyPatch(typeof(InventoryController), "equipLoadout")]
         private static void InventoryController_equipLoadout_prefix()
         {
-            _swappingLoadout = true;
+            SwappingLoadouts = true;
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(InventoryController), "equipLoadout")]
+        private static void InventoryController_equipLoadout_postfix()
+        {
+            SwappingLoadouts = false;
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(Character), "removeAllEnergyAndMagic")]
         private static void Character_removeAllEnergyAndMagic_prefix()
         {
-            if (_ignoreLoadoutSwaps && _swappingLoadout)
+            if (IgnoreLoadoutSwaps && SwappingLoadouts)
                 return;
 
             ClearAllAllocators();

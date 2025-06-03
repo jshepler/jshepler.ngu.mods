@@ -55,6 +55,10 @@ namespace jshepler.ngu.mods
                             continue;
                         }
 
+                        // don't auto transform a9/lootz
+                        if (item.id == 504 || item.id == 505)
+                            continue;
+
                         // from ItemController.consumeItem, modified because ItemController is the visible slot regardless of page,
                         // if the item to transform isn't on the current page, using ItemController.consumeItem won't work right
                         var transformItemId = __instance.checkItemTransform(item);
