@@ -175,11 +175,9 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 22. during manual questing, set questing button color to yellow if the number of quest items in inventory plus the number of quest items already collected are within 5 of the target number (only if got the AP purchase "Quest Reminder!")
 
-23. auto harvest/eat fruits when attain full growth (max tier)
+23. auto harvest/eat fruits when attain full growth (max tier) - shift-right-click the yggdrasil button to toggle
 
-    also on rebirth any fruit >= tier 1
-
-    (auto harvest max tier fruits now have an config option to disable)
+    on rebirth, will always (ignores toggle above) auto harvest/eat any fruit >= tier 1
 
 24. when starting a manual quest, if current zone has unlocked quest item, that item is assigned as the quest (instead of random quest item)
 
@@ -233,9 +231,11 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 34. shift-right-click questing button to toggle automate manual major quest: auto-collect items, auto-complete quest, auto-start new major quest, auto-use butter (option in cfg file)
 
-    while running, uncheck the "User Major Quests" box to not start a new major when current finishes, acts as if ran out of majors
+    if have the AP purchase "Go To Quest Zone", will auto change to quest zone
 
-    doesn't automatically switch adventure zone - assumes already in quest zone and the above mod that uses current zone when starting quest
+    if enabled, will auto use butter (shift-right-click the Use Beast Butter button to toggle)
+
+    while running, uncheck the "User Major Quests" box to not start a new major when current finishes, acts as if ran out of majors
 
     when run out of major quests, will start minor idle quest and change zone to ITOPOD
 
@@ -245,7 +245,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
     currently: augment pairs (aug+upgrade), advanced training, NGUs
 
-36. added total boost from recycling to boosts' tooltips
+36. added total boost from recycling to boosts' tooltips - accounts for current recylce chance and shows the average value when chance < 100%
 
 37. added boost modifier breakdown to stat breakdowns / misc
 
@@ -666,6 +666,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 137. shift-click the "Use" button on some consumables to convert them to another consumable:
       - 24 EMR3 potion alphas to 1 potion delta
       - 24 lucky charms to 1 super lucky charm
+      - 5 EM bar bars to 1 muffin
 
 138. shift-click the + button next to a hack's target to previous milestone
 
@@ -729,6 +730,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
       - set sort by: rarity first, bonus type first, mayo efficiency, bonus variance
       - set sort direction
       - set auto yeet option: max rarity, max efficiency, max variance
+      - auto yeet options ignore END cards as they would alywas get yeeted no matter the setting
       - select which card(s) to always yeet regardless of rarity, efficiency, or variance
       - enable/disable automatically protecting chonker cards (vanilla always protects, this makes it optional)
       - enabled or not, can press the s/y keys to sort/yeet cards
@@ -952,3 +954,15 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 231. fixed game bug that preventing being able to click the "Auto Spell" text for blood number to toggle the checkbox
 
 232. changes manual combat moves to not start on cooldown when game starts (was added at the same time as mod 91, forgot to put in README)
+
+233. shows estimated time to complete current banked major quests on questing screen
+
+     and shows estimated time to complete current manual quest in questing button's tooltip
+
+234. cfg option to specify which blood spells (IP, GuffA, GuffB) get the purple indicator for being off cooldown, defaults to all of them
+
+235. experimental option to show AT button before unlocked from BT - allows you to pre-assign energy, but won't run until BT unlocks AT
+
+236. experimental option for auto allocators to not get disabled when doing a loadout swap and have the game optin enabled to unassign EM on loadout swap
+
+237. fixed game bug with BT where it could think a skill is locked when it wasn't

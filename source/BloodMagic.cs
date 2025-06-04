@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Specialized;
 using System.Linq;
 using HarmonyLib;
 using UnityEngine;
@@ -7,6 +6,9 @@ using UnityEngine.UI;
 
 namespace jshepler.ngu.mods
 {
+    [Flags]
+    internal enum NotifiedSpells { none = 0, IP = 1, GUFFA = 2, GUFFB = 4 }
+
     [HarmonyPatch]
     internal class BloodMagic
     {
@@ -164,6 +166,26 @@ namespace jshepler.ngu.mods
                 count++;
 
             return count;
+        }
+
+        private static NotifiedSpells _notifySpells = Options.BloodMagic.NotifiedSpells.Value;
+
+        [HarmonyPostfix, HarmonyPatch(typeof(ButtonShower), "updateButtons")]
+        private static void ButtonShower_updateButtons_postfix(ButtonShower __instance)
+        {
+            var character = __instance.character;
+            if (character.bossID < 37)
+                return;
+
+            var showIP = (_notifySpells & NotifiedSpells.IP) == NotifiedSpells.IP && character.bloodMagic.adventureSpellTime.totalseconds >= character.bloodMagicController.spells.adventureSpellCooldown;
+            var showGuffA = (_notifySpells & NotifiedSpells.GUFFA) == NotifiedSpells.GUFFA && character.adventure.itopod.perkLevel[72] >= 1 && character.bloodMagic.macguffin1Time.totalseconds >= character.bloodMagicController.spells.macguffin1Cooldown;
+            var showGuffB = (_notifySpells & NotifiedSpells.GUFFB) == NotifiedSpells.GUFFB && character.adventure.itopod.perkLevel[73] >= 1 && character.bloodMagic.macguffin2Time.totalseconds >= character.bloodMagicController.spells.macguffin2Cooldown;
+
+            // the game should already be highlighting if any of those spells are ready
+            if (showIP || showGuffA || showGuffB)
+                return;
+
+            __instance.bloodMagic.image.color = Color.white;
         }
     }
 }

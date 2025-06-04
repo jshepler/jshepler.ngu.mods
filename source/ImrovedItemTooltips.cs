@@ -430,9 +430,7 @@ namespace jshepler.ngu.mods
             
             if (totalBoostMissing == 0) return "";
             
-            //TODO: it's better to check for zones with no boost drops but this is easier.
-            // Leaves out titans altogether though!!
-            //FIXME: might be nice to check for titans 
+            //FIXME: might be nice to calculate for titans as well
             if (Zones.TitanZoneIds.Contains(Plugin.Character.adventureController.zone)
                 || Plugin.Character.adventureController.zone == -1
                 ) return $"\n\n<b>item cap stats:</b>\n{boostsStrings.Join(s => s, "\n")}";

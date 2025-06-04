@@ -151,7 +151,8 @@ namespace jshepler.ngu.mods.AutoAllocator
             HarmonyPatch(typeof(WishesController), "removeAllRes3", typeof(int))]
         private static void WishesController_removeRes3_postfix(int id)
         {
-            Instance[id] = false;
+            if (!AutoAllocator.SwappingLoadouts || !AutoAllocator.IgnoreLoadoutSwaps)
+                Instance[id] = false;
         }
     }
 }

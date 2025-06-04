@@ -144,7 +144,8 @@ namespace jshepler.ngu.mods.AutoAllocator
             HarmonyPatch(typeof(WishesController), "removeAllMagic", typeof(int))]
         private static void WishesController_removeMagic_postfix(int id)
         {
-            Instance[id] = false;
+            if (!AutoAllocator.SwappingLoadouts || !AutoAllocator.IgnoreLoadoutSwaps)
+                Instance[id] = false;
         }
     }
 }
