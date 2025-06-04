@@ -557,7 +557,7 @@ namespace jshepler.ngu.mods
                 float filteredBoostMulti = 1f - ((float)filteredBoosts / 3f);  //this is to avoid a 0.99f instead of 1f
 
                 float moddedDC = boost.BaseDC * dcMultiplier + boost.BonuseDC;
-                float dc = isItopod? 1 : Math.Min(moddedDC, boost.MaxDC);
+                float dc = isItopod? 0.14f : Math.Min(moddedDC, boost.MaxDC);
 
                 var boostId = (boost.ItemIds.First() - 1) % 13;
                 var boostValue = getAverageBoost(boostId, GetBoostBonus(character),character.totalRecycleBonus()) * filteredBoostMulti;
