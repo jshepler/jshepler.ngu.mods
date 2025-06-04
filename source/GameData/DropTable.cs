@@ -706,7 +706,8 @@ namespace jshepler.ngu.mods.GameData
                     , new DropItems(0.00023f, 0.25f, Items.T7_OrdinaryCalculator)
                     , new DropItems(0.00035f, 0.25f, Items.T7_AnimeFigurine)
                     , new DropItems(0.00035f, 0.25f, Items.Pendant_A4P)
-                    , new DropItems(1.00f, Items.Guff_Adventure) { Condition = EnemiesKilledDropCondition.Walerp5Killed })
+                    , new DropItems(1.00f, Items.Guff_Adventure) { Condition = EnemiesKilledDropCondition.Walerp5Killed }
+                    , new DropItems(1.00f, Items.RandomGuff))
 
                 , TitanV2Drops = new DropGroup(
                       new DropItems(0.00027f, 0.25f, Items.T7_D20)
@@ -804,7 +805,8 @@ namespace jshepler.ngu.mods.GameData
                     , new DropItems(0.0001f, 0.25f, Items.T8_BrassKnuckles)
                     , new DropItems(0.0001f, 0.25f, Items.Pendant_A4P)
                     , new DropItems(0.0001f, 0.25f, Items.Looty_KingLooty)
-                    , new DropItems(0.0001f, 0.25f, Items.Guff_R3Power) { Condition = EnemiesKilledDropCondition.Walerp5Killed })
+                    , new DropItems(0.0001f, 0.25f, Items.Guff_R3Power) { Condition = EnemiesKilledDropCondition.Walerp5Killed }
+                    , new DropItems(1.0f, Items.RandomGuff))
 
                 , TitanV2Drops = new DropGroup(
                       new DropItems(7.5E-05f, 0.25f, Items.T8_ViolinCase)
@@ -941,6 +943,7 @@ namespace jshepler.ngu.mods.GameData
                     , new DropItems(2E-05f, 0.25f, Items.T9_AntlersOfTheExile)
                     , new DropItems(1.5E-05f, 0.25f, Items.Pendant_A4P)
                     , new DropItems(1.5E-05f, 0.25f, Items.Looty_KingLooty)
+                    , new DropItems(1.0f, Items.RandomGuff)
                     , new DropItems(0f, 0.02f, Items.T9_Clue_SackOfTheExile)
                         {
                             BonuseDC = 0.02f
@@ -1076,7 +1079,8 @@ namespace jshepler.ngu.mods.GameData
                     , new DropItems(1E-06f, 0.25f, Items.T10_RedShirt)
                     , new DropItems(1E-06f, 0.25f, Items.T10_TheCricket)
                     , new DropItems(1E-06f, 0.25f, Items.Pendant_A5P)
-                    , new DropItems(1E-06f, 0.25f, Items.Looty_EmperorLooty))
+                    , new DropItems(1E-06f, 0.25f, Items.Looty_EmperorLooty)
+                    , new DropItems(1.0f, Items.RandomGuff))
 
                 , TitanV2Drops = new DropGroup(
                     new DropItems(6E-07f, 0.25f, Items.T10_EvilRubberDucky)
@@ -1200,7 +1204,8 @@ namespace jshepler.ngu.mods.GameData
                     , new DropItems(1E-07f, 0.25f, Items.T11_RollingStone)
                     , new DropItems(1E-07f, 0.25f, Items.T11_GiantDrumsticks)
                     , new DropItems(1E-07f, 0.25f, Items.Pendant_A6P)
-                    , new DropItems(1E-07f, 0.25f, Items.Looty_GalacticHeraldLooty))
+                    , new DropItems(1E-07f, 0.25f, Items.Looty_GalacticHeraldLooty)
+                    , new DropItems(1.0f, Items.RandomGuff))
 
                 , TitanV2Drops = new DropGroup(
                     new DropItems(6.5E-08f, 0.25f, Items.T11_SkippingStone)
@@ -1325,7 +1330,8 @@ namespace jshepler.ngu.mods.GameData
                     , new DropItems(1.4E-08f, 0.25f, Items.T12_UUGsBigBookOfInsults)
                     , new DropItems(1.4E-08f, 0.25f, Items.Pendant_A7P)
                     , new DropItems(1.4E-08f, 0.25f, Items.Looty_SupremeIntelligenceLooty)
-                    , new DropItems(1.4E-08f, 0.25f, Items.TheEnd_T12V1))
+                    , new DropItems(1.4E-08f, 0.25f, Items.TheEnd_T12V1)
+                    , new DropItems(1.0f, Items.RandomGuff))
 
                 , TitanV2Drops = new DropGroup(
                     new DropItems(1E-08f, 0.25f, Items.T12_RawSlabOfWood)

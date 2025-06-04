@@ -1,4 +1,6 @@
-﻿using HarmonyLib;
+﻿using System.Collections.Generic;
+using System.Reflection.Emit;
+using HarmonyLib;
 using jshepler.ngu.mods.CapCalculators;
 
 namespace jshepler.ngu.mods.BarTooltips
@@ -6,6 +8,18 @@ namespace jshepler.ngu.mods.BarTooltips
     [HarmonyPatch]
     internal class AdvancedTraining
     {
+        [HarmonyTranspiler, HarmonyPatch(typeof(AdvancedTrainingController), "bonusText")]
+        private static IEnumerable<CodeInstruction> AdvancedTrainingController_bonusText_transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var cm = new CodeMatcher(instructions)
+                .MatchForward(false, new CodeMatch(OpCodes.Ldstr, "##.0#"))
+                .SetOperandAndAdvance("r")
+                .MatchForward(false, new CodeMatch(OpCodes.Ldstr, "##.0#"))
+                .SetOperandAndAdvance("r");
+
+            return cm.InstructionEnumeration();
+        }
+
         [HarmonyPostfix, HarmonyPatch(typeof(AdvancedTrainingController), "showTooltip")]
         private static void AdvancedTrainingController_showTooltip_postfix(AdvancedTrainingController __instance)
         {
@@ -50,6 +64,9 @@ namespace jshepler.ngu.mods.BarTooltips
             var bank = character.adventureController.itopod.totalBankedAdvTraining();
             if (bank > 0f)
                 message += $"\n\n<b>Banked ({bank * 100f:0}%):</b> {character.display((long)(currentLevel * bank))}";
+
+            if (!character.advancedTraining.transferredBankedLevels)
+                message += $"\n\n<b>Incoming Banked:</b> {character.display(character.advancedTraining.bankedLevel[id])}";
 
             __instance.tooltip.showTooltip($"{LastTooltip.Message}{message}");
         }

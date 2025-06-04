@@ -21,13 +21,6 @@ namespace jshepler.ngu.mods
         private static void BeastQuestController_startQuest_postfix(BeastQuestController __instance)
         {
             _getRandomQuest = false;
-
-            if (!__instance.character.beastQuest.usedButter
-                && __instance.character.arbitrary.beastButterCount > 0
-                && Options.Questing.AutoButter.Value == true
-                && __instance.character.settings.useMajorQuests)
-
-                __instance.tryUseButter();
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(BeastQuestController), "constructQuestList")]

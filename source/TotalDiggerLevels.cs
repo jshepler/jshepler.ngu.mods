@@ -13,6 +13,7 @@ namespace jshepler.ngu.mods
             __instance.levelBonus.gameObject
                 .AddComponent<PointerHandlerComponent>()
                 .OnPointerEnter(e => Plugin.ShowTooltip($"{TEXT}\n\n<b>Total Digger Levels:</b> {__instance.sumOfAllLevels()}"));
+            // don't need an OnPointerExit because the game already hides the tooltip on pointer exit
         }
     }
 }

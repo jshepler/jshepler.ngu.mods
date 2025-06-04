@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using System;
+using HarmonyLib;
 using jshepler.ngu.mods.CapCalculators;
 
 namespace jshepler.ngu.mods.BarTooltips
@@ -50,16 +51,22 @@ namespace jshepler.ngu.mods.BarTooltips
             __instance.tooltip.showTooltip(___message);
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(TimeMachineController), "displayGoldMultiTooltip")]
-        private static void TimeMachineController_displayGoldMultiTooltip_postfix(TimeMachineController __instance, ref string ___message)
+        [HarmonyPrefix, HarmonyPatch(typeof(TimeMachineController), "displayGoldMultiTooltip")]
+        private static bool TimeMachineController_displayGoldMultiTooltip_postfix(TimeMachineController __instance, ref string ___message)
         {
             var character = __instance.character;
             if (character.challenges.blindChallenge.inChallenge)
-                return;
+                return false;
+
+            var timeLeft = Traverse.Create(__instance).Method("goldMultiTimeLeft").GetValue<string>();
+
+            ___message = "<b>Time Machine Gold Multiplier</b>\n\nCapture multiple time bubbles within a single time bubble, letting multiple past-you's loot gold at once!"
+                    + $"\n\n<b>Current Gold Multiplier:</b> {character.machine.levelGoldMulti + 1}"
+                    + $"\n\n<b>Gold Cost:</b> {character.display(__instance.machineGoldMultiCost())}"
+                    + $"\n\n<b>Time to level up:</b> {timeLeft}";
 
             var currentLevel = character.machine.levelGoldMulti;
             var magic = character.machine.goldMultiMagic;
-
             var targetLevel = character.machine.multiTarget;
             if (targetLevel > currentLevel)
             {
@@ -93,6 +100,7 @@ namespace jshepler.ngu.mods.BarTooltips
             }
 
             __instance.tooltip.showTooltip(___message);
+            return false;
         }
     }
 }

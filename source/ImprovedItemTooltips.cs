@@ -1,18 +1,13 @@
-﻿using HarmonyLib;
-using jshepler.ngu.mods.GameData;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Xml.Linq;
+using HarmonyLib;
+using jshepler.ngu.mods.GameData;
 using UnityEngine;
-using UnityEngine.TextCore;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
-using static jshepler.ngu.mods.TrackBaseAdvPowerGained;
-using static UnityEngine.ParticleSystem;
 
 namespace jshepler.ngu.mods
 {
@@ -257,6 +252,12 @@ namespace jshepler.ngu.mods
                     text += $"\n\n<b>Time Factor:</b> x{character.inventoryController.macGuffinBonusTimeFactor()}{(muff ? " (muffin active)" : string.Empty)}";
                 }
 
+                if (item.isBoost())
+                {
+                    var boosts = BuildBoostValuesString(item);
+                    text += boosts;
+                }
+
                 if (item.id == 92 && item.level > 0 && character.settings.yggdrasilOn)
                     text += $"\n\n<b>Gain <color=blue>{(int)(item.level * (1f + item.level / 100f))}</color> seeds if consumed now</b>";
 
@@ -361,6 +362,46 @@ namespace jshepler.ngu.mods
             }
 
             return $"\n\n<b>source(s):</b>\n{sources.Join(s => s, "\n")}";
+        }
+
+        private static List<int> _boosts = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000];
+        private static float GetAverageRecycledBoostValue(int startIndex, float boostBonus, float recycleChance)
+        {
+            var totalBoost = 0f;
+            var probability = 1f;
+
+            for (var x = startIndex; x >= 0; x--)
+            {
+                totalBoost += probability * _boosts[x] * boostBonus;
+                probability *= recycleChance;
+            }
+
+            return totalBoost;
+        }
+
+        private static string BuildBoostValuesString(Equipment item)
+        {
+            var boostIndex = (item.id - 1) % 13;
+            var boostBonus = Plugin.Character.allItemList.boostBonus();
+            var boostValue = _boosts[boostIndex] * boostBonus;
+            var cubeBoost = boostValue / InfinityCubeSoftCap.CubeBoostDivider;
+            var text = $"\n     <b>To Cube:</b> {cubeBoost:#,##0.##}";
+
+            // totalRecycleBonus() is bugged and counts more than challenge completions and could return > 100%
+            // need to cap it at 100% since it's being used in probability math
+            // but need to keep using this method as it's what the game uses when doing recycling
+            var recycleChance = Math.Min(1f, Plugin.Character.totalRecycleBonus());
+            if (recycleChance > 0)
+            {
+                var avgBoostWithRecycling = GetAverageRecycledBoostValue(boostIndex, boostBonus, recycleChance);
+                var avgCubeBoostWithRecycling = avgBoostWithRecycling / InfinityCubeSoftCap.CubeBoostDivider;
+
+                var avgTag = (recycleChance > 0 && recycleChance < 1) ? " (avg)" : string.Empty;
+                text += $"\n\n<b> ... with Boost Recycling ({recycleChance * 100f:0.#}%):</b> {avgBoostWithRecycling:#,##0.##}{avgTag}"
+                    + $"\n     <b>To Cube:</b> {avgCubeBoostWithRecycling:#,##0.##}{avgTag}";
+            }
+
+            return text;
         }
 
         private static Equipment GetItemFromSlotId(int slotId)

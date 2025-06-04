@@ -2,13 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using jshepler.ngu.mods.GameData;
 using jshepler.ngu.mods.GameData.DropConditions;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace jshepler.ngu.mods
 {
@@ -43,7 +41,7 @@ namespace jshepler.ngu.mods
                 (int)Items.AP => "AP",
                 (int)Items.Exp => "Exp",
                 (int)Items.Unknown => "Unknown",
-                _ => Plugin.Character.itemInfo.itemName[itemId]
+                _ => Plugin.Character.itemInfo.itemName[itemId].Replace("Resource 3", Plugin.Character.res3.res3Name)
             };
         };
 
@@ -53,8 +51,6 @@ namespace jshepler.ngu.mods
 
         private static readonly float _rootedCharm = Mathf.Pow(2f, 1f / 3f);
         private static readonly float _rootedCharmWithBlueHeart = Mathf.Pow(2.2f, 1f / 3f);
-        private static float rootedCharmMulti => Plugin.Character.inventory.itemList.blueHeartComplete ? _rootedCharmWithBlueHeart : _rootedCharm;
-        private static bool isCharmActive => Plugin.Character.arbitrary.lootcharm1Time.totalseconds > 0.0;
 
         [HarmonyPostfix, HarmonyPatch(typeof(BestiaryController), "Start")]
         private static void BestiaryController_Start_postfix(BestiaryController __instance)
@@ -162,8 +158,15 @@ namespace jshepler.ngu.mods
             var rooted = _zoneId >= 20;
             _dcMulti = rooted ? character.lootFactorRooted() : character.lootFactor();
 
+            var blueHeartComplete = character.inventory.itemList.blueHeartComplete;
+            var charmMulti = blueHeartComplete ? 2.2f : 2f;
+            var rootedCharmMulti = blueHeartComplete ? _rootedCharmWithBlueHeart : _rootedCharm;
+            var isCharmActive = character.arbitrary.lootcharm1Time.totalseconds > 0.0;
+
+            // holding shift will apply charm to displayed DCs
+            // if charm is already active, no need to change anything
             if (_shiftIsDown && !isCharmActive)
-                _dcMulti *= rooted ? rootedCharmMulti : 2f;
+                _dcMulti *= rooted ? rootedCharmMulti : charmMulti;
 
             var color = _shiftIsDown ? "blue" : "black";
             var text = $"<b>Drop Table For {controller.zoneName(_zoneId)}</b>"
@@ -245,6 +248,7 @@ namespace jshepler.ngu.mods
             var killsPerGuff = Plugin.Character.adventureController.lootDrop.macGuffinThreshold(0);
             var killsRemaining = killsPerGuff - Plugin.Character.adventureController.globalKillCounter % killsPerGuff;
             var name = _name((int)drop.MacGuffinItem);
+
             return $"\n\n<b>MacGuffin:</b> ({killsRemaining} kills remaining)\n<b><color=green>100%</color></b> for {name}";
         }
 
@@ -300,6 +304,10 @@ namespace jshepler.ngu.mods
 
                 switch (idc.ItemIds[0])
                 {
+                    case (int)Items.RandomGuff:
+                        text += $"Random MacGuffin Fragment";
+                        break;
+
                     case (int)Items.Poop:
                         text += $"{idc.BaseAmount} POOP";
                         break;

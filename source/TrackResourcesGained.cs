@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace jshepler.ngu.mods
@@ -78,9 +77,7 @@ namespace jshepler.ngu.mods
                 _lastSeedCount = seeds;
                 _lastPoopCount = poop;
 
-                if (Input.GetKeyDown(KeyCode.P)
-                    // ignore the p if entering a loadout name - currentSelectedGameObject won't be null in that case
-                    && EventSystem.current.currentSelectedGameObject == null)
+                if (Input.GetKeyDown(KeyCode.P) && !Plugin.InputFieldHasFocus)
                     _fart.fart();
             };
         }

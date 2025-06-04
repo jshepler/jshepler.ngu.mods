@@ -3,7 +3,6 @@ using System.Collections;
 using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace jshepler.ngu.mods
@@ -42,15 +41,14 @@ namespace jshepler.ngu.mods
                     return;
 
                 var doRefresh = false;
-                var inCustomPurchaseInput = EventSystem.current.currentSelectedGameObject != null;
 
-                if (Input.GetKey(KeyCode.LeftShift) != _shiftDown && !inCustomPurchaseInput)
+                if (Input.GetKey(KeyCode.LeftShift) != _shiftDown && !Plugin.InputFieldHasFocus)
                 {
                     _shiftDown = !_shiftDown;
                     doRefresh = true;
                 }
 
-                if (Input.GetKey(KeyCode.LeftControl) != _ctrlDown && !inCustomPurchaseInput)
+                if (Input.GetKey(KeyCode.LeftControl) != _ctrlDown && !Plugin.InputFieldHasFocus)
                 {
                     _ctrlDown = !_ctrlDown;
                     doRefresh = true;

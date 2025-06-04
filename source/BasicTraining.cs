@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Reflection.Emit;
 using HarmonyLib;
 using UnityEngine;
 
@@ -8,6 +10,17 @@ namespace jshepler.ngu.mods
     [HarmonyPatch]
     internal class BasicTraining
     {
+        [HarmonyTranspiler, HarmonyPatch(typeof(DefenseTraining), "locked"), HarmonyPatch(typeof(OffenseTraining), "locked")]
+        private static IEnumerable<CodeInstruction> locked_transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var cm = new CodeMatcher(instructions)
+                .MatchForward(false, new CodeMatch(OpCodes.Cgt))
+                .SetOpcodeAndAdvance(OpCodes.Clt)
+                .RemoveInstructions(2);
+
+            return cm.InstructionEnumeration();//.DumpToLog();
+        }
+
         [HarmonyPrefix, HarmonyPatch(typeof(OffenseTraining), "cap", new Type[0])]
         private static bool OffenseTraining_cap_prefix(OffenseTraining __instance)
         {

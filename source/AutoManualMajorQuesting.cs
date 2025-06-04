@@ -77,7 +77,7 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(BeastQuestController), "startQuest")]
         private static void BeastQuestController_startQuest_postfix(BeastQuestController __instance)
         {
-            if (!_enabled || !InManualQuest())
+            if (!_enabled || !InManualQuest() || !__instance.character.arbitrary.goToQuestZoneBought)
                 return;
 
             var itemId = _character.beastQuest.questID;

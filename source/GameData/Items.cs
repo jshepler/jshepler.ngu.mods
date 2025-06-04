@@ -4,6 +4,7 @@ namespace jshepler.ngu.mods.GameData
 {
     internal enum Items
     {
+        RandomGuff = -6,
         Poop = -5,
         QP = -4,
         PP = -3,

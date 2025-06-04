@@ -56,10 +56,11 @@ namespace jshepler.ngu.mods
                 if (data != null && data.HasKey("tag_name"))
                 {
                     var version = data["tag_name"].Value;
-                    if (!string.IsNullOrWhiteSpace(version) && version != PluginInfo.PLUGIN_VERSION)
+                    if (!string.IsNullOrWhiteSpace(version)
+                        && version != PluginInfo.PLUGIN_VERSION
+                        && version != Options.CheckForNewVersion.Skipped.Value)
                     {
                         _version = version;
-                        yield break;
                     }
                 }
 
@@ -69,7 +70,7 @@ namespace jshepler.ngu.mods
 
         private static void Init()
         {
-            _area = new Rect(20, 5, 300, 30);
+            _area = new Rect(20, 5, 340, 30);
 
             _areaStyle = new GUIStyle("box");
             _areaStyle.normal.background = Popups.Popup.CreateSolidColorTexture(_area, Color.cyan);
@@ -97,8 +98,15 @@ namespace jshepler.ngu.mods
 
             GUILayout.Label($"jshepler mods {_version} available", _labelStyle);
             GUILayout.FlexibleSpace();
+
             if(GUILayout.Button("download", GUILayout.ExpandHeight(true)))
                 Application.OpenURL("https://github.com/jshepler/jshepler.ngu.mods/releases/latest");
+
+            if (GUILayout.Button("skip", GUILayout.ExpandHeight(true)))
+            {
+                Options.CheckForNewVersion.Skipped.Value = _version;
+                _version = null;
+            }
 
             GUILayout.EndHorizontal();
             GUILayout.EndArea();

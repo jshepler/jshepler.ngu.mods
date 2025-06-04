@@ -48,7 +48,8 @@ namespace jshepler.ngu.mods
 
             var byTTL = __instance.curValidUpgradesList
                 .Select(id => new { id, ttl = TimeToNextLevel(id) })
-                .OrderBy(w => w.ttl);
+                .OrderBy(w => w.ttl)
+                .ThenBy(w => w.id); // shouldn't need this, but just in case
 
             _dictDouble.SetValue(__instance, byTTL.ToDictionary(w => w.id, w => w.ttl));
             __instance.curValidUpgradesList = byTTL.Select(w => w.id).ToList();
