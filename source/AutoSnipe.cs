@@ -9,17 +9,18 @@ namespace jshepler.ngu.mods
     [HarmonyPatch]
     internal class AutoSnipe
     {
-        private static bool _running = false;
-        private static bool _waiting = false;
-        private static int _snipeZone = -1;
-        private static WaitForSeconds _wait = new WaitForSeconds(.2f);
+        private enum Stages { NotRunning, WaitingForSpawn, Fighting, Healing }
+        private static Stages _stage = Stages.NotRunning;
 
         private static AdventureController Controller => Plugin.Character.adventureController;
+        private static float _curHP => Plugin.Character.adventure.curHP;
+        private static float _maxHP => Plugin.Character.totalAdvHP();
+        private static float _hpStart;
+        private static float _hpMaxLoss;
+
+        private static int _snipeZone = -1;
         private static void GotoSafe() => Controller.zoneSelector.changeZone(-1);
         private static void GotoSnipe() => Controller.zoneSelector.changeZone(_snipeZone);
-        private static float CurrentHP => Plugin.Character.adventure.curHP;
-        private static float MaxHP => Plugin.Character.totalAdvHP();
-
 
         [HarmonyPrepare]
         private static void prep(MethodBase original)
@@ -41,7 +42,7 @@ namespace jshepler.ngu.mods
         [HarmonyPrefix, HarmonyPatch(typeof(Rebirth), "engage", typeof(bool))]
         private static void Rebirth_engage_bool_prefix()
         {
-            _running = false;
+            _stage = Stages.NotRunning;
             _snipeZone = -1;
         }
 
@@ -50,7 +51,7 @@ namespace jshepler.ngu.mods
             , HarmonyPatch(typeof(IdleAttack), "checkIdleAttackState")]
         private static void IdleAttack_setToggle_postfix(IdleAttack __instance)
         {
-            if (_running)
+            if (_stage != Stages.NotRunning)
                 Controller.idleAttackMove.Border.color = Color.red;
         }
 
@@ -60,41 +61,94 @@ namespace jshepler.ngu.mods
             if (Controller.zone == 1000)
                 return;
 
-            _running = !_running;
-            _snipeZone = _running ? Controller.zone : -1;
+            if (_stage == Stages.NotRunning)
+            {
+                _stage = Stages.WaitingForSpawn;
+                _snipeZone = Controller.zone;
+                _hpMaxLoss = 0;
+            }
+            else
+            {
+                _stage = Stages.NotRunning;
+                _snipeZone = -1;
+            }
+
+            // sets Idle Mode button visuals - hooked into above to set red border
             Controller.idleAttackMove.checkIdleAttackState();
         }
 
         private static void Update(object sender, EventArgs e)
         {
-            // F1 pressed this frame, only in Adventure screen, not in safe zone, not in tower
-            //if (Input.GetKeyDown(KeyCode.F1) && Plugin.Character.menuID == 3 && Controller.zone >= 0 && Controller.zone < 1000)
-            //    ToggleRunning();
+            switch (_stage)
+            {
+                case Stages.NotRunning:
+                    return;
 
-            if (!_running)
-                return;
+                case Stages.WaitingForSpawn:
+                    waitingForSpawn();
+                    break;
 
-            if (Controller.zone == -1 && CurrentHP < MaxHP)
-                return;
+                case Stages.Fighting:
+                    fighting();
+                    break;
 
-            if (!Controller.fightInProgress && Controller.zone == _snipeZone && CurrentHP < MaxHP * 0.5)
-                GotoSafe();
+                case Stages.Healing:
+                    healing();
+                    break;
+            }
+        }
 
-            if (Controller.zone != _snipeZone && CurrentHP >= MaxHP)
+        private static bool _inSpawnDelay = false; // short delay so player can see the enemy being skipped
+        private static void waitingForSpawn()
+        {
+            if (Controller.zone != _snipeZone)
                 GotoSnipe();
 
-            if (Controller.fightInProgress && SkipCurrentEnemy())
+            if (Controller.fightInProgress)
             {
-                Plugin.Character.StartCoroutine(WaitBeforeGoingToSafeZone());
-                _waiting = true;
+                if (_inSpawnDelay)
+                    return;
+
+                if (SkipCurrentEnemy())
+                    Plugin.BeginCoroutine(WaitThenGotoSafeZone()); // changing zones resets fightInProgress
+                else
+                {
+                    _hpStart = _curHP;
+                    _stage = Stages.Fighting;
+                }
             }
+
+            // else if fight not in progress, enemy hasn't spawned yet - do nothing
+        }
+
+        private static void fighting()
+        {
+            if (Controller.fightInProgress)
+                return;
+
+            var hpLoss = Math.Max(0, _hpStart - _curHP);
+            if (hpLoss > _hpMaxLoss)
+                _hpMaxLoss = hpLoss;
+
+            Controller.log.AddEvent($"[hpLoss: {hpLoss}, hpMaxLoss: {_hpMaxLoss}]");
+
+            if (_curHP <= _hpMaxLoss)// _maxHP * 0.5f)
+                _stage = Stages.Healing;
+            else
+                _stage = Stages.WaitingForSpawn;
+        }
+
+        private static void healing()
+        {
+            if (Controller.zone != -1)
+                GotoSafe();
+
+            if (_curHP >= _maxHP)
+                _stage = Stages.WaitingForSpawn;
         }
 
         private static bool SkipCurrentEnemy()
         {
-            if (_waiting)
-                return false;
-
             // snipe target enemy when in target zone
             var targetZone = Options.AutoSnipe.TargetZone.Value - 2;
             var targetEnemy = Options.AutoSnipe.TargetEnemy.Value;
@@ -105,11 +159,13 @@ namespace jshepler.ngu.mods
             return Controller.currentEnemy.enemyType != enemyType.boss;
         }
 
-        private static IEnumerator WaitBeforeGoingToSafeZone()
+        private static WaitForSeconds _delay = new WaitForSeconds(.2f);
+        private static IEnumerator WaitThenGotoSafeZone()
         {
-            yield return _wait;
+            _inSpawnDelay = true;
+            yield return _delay;
             GotoSafe();
-            _waiting = false;
+            _inSpawnDelay = false;
         }
     }
 }

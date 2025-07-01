@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -24,10 +23,13 @@ namespace jshepler.ngu.mods.ModSave
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(StandaloneFileBrowser), "SaveFilePanel", typeof(string), typeof(string), typeof(string), typeof(string))]
-        private static void StandaloneFileBrowser_SaveFilePanel_prefix(ref string title)
+        private static void StandaloneFileBrowser_SaveFilePanel_prefix(ref string title, ref string defaultName)
         {
             if (DoCleanSave)
+            {
                 title += " (CLEAN)";
+                defaultName += "_(CLEAN)";
+            }
         }
 
         // serialization patches

@@ -358,6 +358,54 @@ namespace jshepler.ngu.mods.ModSave
             set => Set("Deaths_Sadistic", value);
         }
 
+        internal static double LastBossMultiCombined
+        {
+            get => Get("LastBossMultiCombined", 0.0);
+            set => Set("LastBossMultiCombined", value);
+        }
+
+        internal static double LastTimeMultiCombined
+        {
+            get => Get("LastTimeMultiCombined", 0.0);
+            set => Set("LastTimeMultiCombined", value);
+        }
+
+        internal static long LastTrainingFactor
+        {
+            get => Get("LastTrainingFactor", 0L);
+            set => Set("LastTrainingFactor", value);
+        }
+
+        internal static double LastNGUNumberBonus
+        {
+            get => Get("LastNGUNumberBonus", 0.0);
+            set => Set("LastNGUNumberBonus", value);
+        }
+
+        internal static float LastBeardNumberBonus
+        {
+            get => Get("LastBeardNumberBonus", 0f);
+            set => Set("LastBeardNumberBonus", value);
+        }
+
+        internal static double LastYggNumberBonus
+        {
+            get => Get("LastYggNumberBonus", 0.0);
+            set => Set("LastYggNumberBonus", value);
+        }
+
+        internal static float LastGuffNumberBonus
+        {
+            get => Get("LastGuffNumberBonus", 0f);
+            set => Set("LastGuffNumberBonus", value);
+        }
+
+        internal static float LastHackNumberBonus
+        {
+            get => Get("LastHackNumberBonus", 0f);
+            set => Set("LastHackNumberBonus", value);
+        }
+
         // REMINDER: NO TYPES DEFINED IN MODS ELSE NOT LOADABLE IN VANILLA
     }
 }

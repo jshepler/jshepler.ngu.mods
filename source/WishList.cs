@@ -460,6 +460,9 @@ namespace jshepler.ngu.mods
 
         internal static bool WishTargetReached(WishWrapper wish)
         {
+            if (!_wishListEnabled)
+                return false;
+
             var index = _wishList.IndexOf(wish.Id);
             if (index == -1)
                 return false;

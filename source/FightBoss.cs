@@ -145,9 +145,12 @@ namespace jshepler.ngu.mods
             }
             else if (fighting || nuking)
             {
-                _image.color = nuking ? Plugin.ButtonColor_Green : Color.red;
-                _image.fillAmount = Plugin.Character.bossController.bossHPBar.value;
-                _text.text = $"Boss {Plugin.Character.bossID + 1}";
+                if (!Hardcore.IsHardcoreGame || (Hardcore.IsHardcoreGame && !nuking))
+                {
+                    _image.color = nuking ? Plugin.ButtonColor_Green : Color.red;
+                    _image.fillAmount = Plugin.Character.bossController.bossHPBar.value;
+                    _text.text = $"Boss {Plugin.Character.bossID + 1}";
+                }
             }
             else if ((CanNuke || CanFight) && !Hardcore.IsHardcoreGame)
             {

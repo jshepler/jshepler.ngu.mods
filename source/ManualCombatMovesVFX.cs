@@ -34,8 +34,9 @@ namespace jshepler.ngu.mods
 
         private static FieldInfo _enemyParalyzeTime = typeof(EnemyAI).GetField("paralyzeTime", BindingFlags.Instance | BindingFlags.NonPublic);
         private static Func<float> EnemyParalyzeTime = () => Math.Max(0f, (float)_enemyParalyzeTime.GetValue(ac.enemyAI));
-
         private static Func<float, float, float> pctCooldown = (cur, max) => Mathf.Clamp01((max - cur) / max);
+
+        private static bool _resetCooldownsEnabled = Options.Experimental.ResetCooldownsOnFightEnd.Value;
 
         [HarmonyPostfix, HarmonyPatch(typeof(AdventureController), "Start")]
         private static void AdventureController_Start_postfix(AdventureController __instance)
@@ -44,14 +45,12 @@ namespace jshepler.ngu.mods
             pc = ac.playerController;
             character = ac.character;
 
-            Traverse.Create(__instance.regularAttackMove).Field<float>("regularAttackTimer").Value = character.regAttackCooldown() + 1;
             bbRegularAttack = new ButtonBar(__instance.regularAttackMove.button)
             {
                 IsLocked = () => character.training.attackTraining[0] < 5000
                 , CooldownDuration = character.regAttackCooldown
             };
 
-            Traverse.Create(__instance.strongAttackMove).Field<float>("strongAttackTimer").Value = character.strongAttackCooldown() + 1;
             bbStrongAttack = new ButtonBar(__instance.strongAttackMove.button)
             {
                 IsLocked = () => character.training.attackTraining[1] < 10000
@@ -59,7 +58,6 @@ namespace jshepler.ngu.mods
                 , IsDisabled = () => pc.strongDisabled
             };
 
-            Traverse.Create(__instance.parryMove).Field<float>("parryTimer").Value = character.parryCooldown() + 1;
             bbParry = new ButtonBar(__instance.parryMove.button)
             {
                 IsLocked = () => character.training.attackTraining[2] < 15000
@@ -67,7 +65,6 @@ namespace jshepler.ngu.mods
                 , IsEffectActive = () => pc.isParrying
             };
 
-            Traverse.Create(__instance.pierceMove).Field<float>("attackTimer").Value = character.pierceAttackCooldown() + 1;
             bbPiercingAttack = new ButtonBar(__instance.pierceMove.button)
             {
                 IsLocked = () => character.training.attackTraining[3] < 20000
@@ -75,7 +72,6 @@ namespace jshepler.ngu.mods
                 , IsDisabled = () => pc.pierceDisabled
             };
 
-            Traverse.Create(__instance.ultimateAttackMove).Field<float>("ultimateAttackTimer").Value = character.ultimateAttackCooldown() + 1;
             bbUltimateAttack = new ButtonBar(__instance.ultimateAttackMove.button)
             {
                 IsLocked = () => character.training.attackTraining[4] < 25000
@@ -83,7 +79,6 @@ namespace jshepler.ngu.mods
                 , IsDisabled = () => pc.ultimateDisabled
             };
 
-            Traverse.Create(__instance.blockMove).Field<float>("blockTimer").Value = character.blockCooldown() + 1;
             bbBlock = new ButtonBar(__instance.blockMove.button)
             {
                 IsLocked = () => false
@@ -92,7 +87,6 @@ namespace jshepler.ngu.mods
                 , EffectTimer = () => pc.blockTime
             };
 
-            Traverse.Create(__instance.defenseBuffMove).Field<float>("defenseBuffTimer").Value = character.defenseBuffCooldown() + 1;
             bbDefensiveBuff = new ButtonBar(__instance.defenseBuffMove.button)
             {
                 IsLocked = () => character.training.defenseTraining[0] < 5000
@@ -101,7 +95,6 @@ namespace jshepler.ngu.mods
                 , EffectTimer = () => pc.defenseBuffTime
             };
 
-            Traverse.Create(__instance.healMove).Field<float>("healTimer").Value = character.healCooldown() + 1;
             bbHeal = new ButtonBar(__instance.healMove.button)
             {
                 IsLocked = () => character.training.defenseTraining[1] < 10000
@@ -109,7 +102,6 @@ namespace jshepler.ngu.mods
                 , IsDisabled = () => pc.healDisabled
             };
 
-            Traverse.Create(__instance.offenseBuffMove).Field<float>("offenseBuffTimer").Value = character.offenseBuffCooldown() + 1;
             bbOffensiveBuff = new ButtonBar(__instance.offenseBuffMove.button)
             {
                 IsLocked = () => character.training.defenseTraining[2] < 15000
@@ -119,7 +111,6 @@ namespace jshepler.ngu.mods
                 , IsDisabled = () => pc.offBuffDisabled
             };
 
-            Traverse.Create(__instance.chargeMove).Field<float>("chargeTimer").Value = character.chargeCooldown() + 1;
             bbCharge = new ButtonBar(__instance.chargeMove.button)
             {
                 IsLocked = () => character.training.defenseTraining[3] < 20000
@@ -127,7 +118,6 @@ namespace jshepler.ngu.mods
                 , IsEffectActive = () => pc.chargeFactor > 1f
             };
 
-            Traverse.Create(__instance.ultimateBuffMove).Field<float>("ultimateBuffTimer").Value = character.ultimateBuffCooldown() + 1;
             bbUltimateBuff = new ButtonBar(__instance.ultimateBuffMove.button)
             {
                 IsLocked = () => character.training.defenseTraining[4] < 25000
@@ -137,7 +127,6 @@ namespace jshepler.ngu.mods
                 , IsDisabled = () => pc.ultiBuffDisabled
             };
 
-            Traverse.Create(__instance.paralyzeMove).Field<float>("attackTimer").Value = character.paralyzeCooldown() + 1;
             bbParalyze = new ButtonBar(__instance.paralyzeMove.button)
             {
                 IsLocked = () => !character.allChallenges.hasParalyze()
@@ -146,7 +135,6 @@ namespace jshepler.ngu.mods
                 , EffectTimer = () => enemyParalyzeDuration - EnemyParalyzeTime()
             };
 
-            Traverse.Create(__instance.hyperRegenMove).Field<float>("healTimer").Value = character.hyperRegenCooldown() + 1;
             bbHyperRegen = new ButtonBar(__instance.hyperRegenMove.button)
             {
                 IsLocked = () => !character.settings.hasHyperRegen
@@ -155,10 +143,57 @@ namespace jshepler.ngu.mods
                 , EffectTimer = () => 5f - pc.hyperRegenTime
             };
 
-            Traverse.Create(ac.megaBuffMove).Field<float>("megaBuffTimer").Value = character.megaBuffCooldown() + 1;
             bbMegaBuff = new ButtonBar(__instance.megaBuffMove.button);
 
             bbOhShit = new ButtonBar(__instance.ohShitMove.button);
+
+            resetCooldowns(resetBuffs: false);
+        }
+
+        [HarmonyPostfix,
+            HarmonyPatch(typeof(AdventureController), "playerDeath"),
+            HarmonyPatch(typeof(AdventureController), "enemyDeath")]
+        private static void AdventureController_onDeath_postfix()
+        {
+            if (_resetCooldownsEnabled && !character.adventure.autoattacking)
+                resetCooldowns(resetBuffs: true);
+        }
+
+        private static void resetCooldowns(bool resetBuffs)
+        {
+            Traverse.Create(ac.regularAttackMove).Field<float>("regularAttackTimer").Value = character.regAttackCooldown() + 1;
+            Traverse.Create(ac.strongAttackMove).Field<float>("strongAttackTimer").Value = character.strongAttackCooldown() + 1;
+            Traverse.Create(ac.parryMove).Field<float>("parryTimer").Value = character.parryCooldown() + 1;
+            Traverse.Create(ac.pierceMove).Field<float>("attackTimer").Value = character.pierceAttackCooldown() + 1;
+            Traverse.Create(ac.ultimateAttackMove).Field<float>("ultimateAttackTimer").Value = character.ultimateAttackCooldown() + 1;
+            Traverse.Create(ac.blockMove).Field<float>("blockTimer").Value = character.blockCooldown() + 1;
+            Traverse.Create(ac.defenseBuffMove).Field<float>("defenseBuffTimer").Value = character.defenseBuffCooldown() + 1;
+            Traverse.Create(ac.healMove).Field<float>("healTimer").Value = character.healCooldown() + 1;
+            Traverse.Create(ac.offenseBuffMove).Field<float>("offenseBuffTimer").Value = character.offenseBuffCooldown() + 1;
+            Traverse.Create(ac.chargeMove).Field<float>("chargeTimer").Value = character.chargeCooldown() + 1;
+            Traverse.Create(ac.ultimateBuffMove).Field<float>("ultimateBuffTimer").Value = character.ultimateBuffCooldown() + 1;
+            Traverse.Create(ac.paralyzeMove).Field<float>("attackTimer").Value = character.paralyzeCooldown() + 1;
+            Traverse.Create(ac.hyperRegenMove).Field<float>("healTimer").Value = character.hyperRegenCooldown() + 1;
+            Traverse.Create(ac.megaBuffMove).Field<float>("megaBuffTimer").Value = character.megaBuffCooldown() + 1;
+
+            if (!resetBuffs)
+                return;
+
+            var pc = ac.playerController;
+            pc.isParrying = false;
+            pc.blockTime = -1;
+            pc.defenseBuffTime = -1;
+            pc.offenseBuffTime = -1;
+            pc.ultimateBuffTime = -1;
+            pc.megaBuffTime = -1;
+            pc.hyperRegenTime = -1;
+
+            // these timers are for the timed yellow borders
+            Traverse.Create(ac.blockMove).Field<float>("blockDuration").Value = character.blockDuration() + 1;
+            Traverse.Create(ac.defenseBuffMove).Field<float>("defenseDuration").Value = character.defenseBuffDuration() + 1f;
+            Traverse.Create(ac.offenseBuffMove).Field<float>("offenseBuffDuration").Value = character.offenseBuffDuration() + 1f;
+            Traverse.Create(ac.ultimateBuffMove).Field<float>("ultimateBuffDuration").Value = character.ultimateBuffDuration() + 1f;
+            Traverse.Create(ac.megaBuffMove).Field<float>("megaBuffDuration").Value = character.megaBuffDuration() + 1f;
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(PlayerController), "paralyzed")]

@@ -44,7 +44,32 @@ namespace jshepler.ngu.mods
 
             switch (__instance.CurrentMenu())
             {
+                case Menu.Inventory:
+                    if (Plugin.AltIsDown)
+                    {
+                        equipLoadout(numberKey - 1, false);
+                        return false;
+                    }
+
+                    return true;
+
+                case Menu.Adventure:
+                case Menu.Cooking:
+                    if (Plugin.AltIsDown)
+                    {
+                        equipLoadout(numberKey - 1, true);
+                        return false;
+                    }
+
+                    return true;
+
                 case Menu.Yggdrasil:
+                    if (Plugin.AltIsDown)
+                    {
+                        equipLoadout(numberKey - 1, true);
+                        return false;
+                    }
+
                     if (numberKey < 4)
                     {
                         __instance.yggdrasilController.changePage(numberKey - 1);
@@ -145,6 +170,18 @@ namespace jshepler.ngu.mods
                 default:
                     return true;
             }
+        }
+
+        private static void equipLoadout(int loadoutId, bool showNotification)
+        {
+            var character = Plugin.Character;
+            if (loadoutId >= character.inventoryController.loadoutSpaces())
+                return;
+
+            if (showNotification)
+                Plugin.ShowNotification($"Equipping loadout: <b>{character.inventory.loadouts[loadoutId].loadoutName}</b>");
+
+            character.inventoryController.equipLoadout(loadoutId);
         }
 
 

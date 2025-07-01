@@ -23,13 +23,8 @@ namespace jshepler.ngu.mods
             if (idle <= 0)
                 return true;
 
-            var cap = Calculators.NGU_EnergyCalculators[id].ResourceFromLevel(__instance.CurrentLevel() + 1);
-            var allocate = cap.CeilToLong();
-
-            if (idle < allocate)
-                allocate = (cap / Math.Ceiling(cap / idle)).CeilToLong();
-            else
-                allocate = Math.Min(idle, (allocate * character.settings.nguCapModifier).CeilToLong());
+            var cap = Calculators.NGU_EnergyCalculators[id].ResourceFromLevel(__instance.CurrentLevel() + 1) * character.settings.nguCapModifier;
+            var allocate = (cap / Math.Ceiling(cap / idle)).CeilToLong();
 
             idle -= allocate;
             character.idleEnergy = idle;

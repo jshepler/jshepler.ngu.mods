@@ -10,23 +10,17 @@ namespace jshepler.ngu.mods
     internal class NextYggRewards
     {
         private static WaitForSeconds _wait = new WaitForSeconds(1f);
-        private static HoverTooltip _tooltip;
-        private static AllYggdrasil _controller;
         private static Coroutine _coroutine;
 
-        [HarmonyPostfix, HarmonyPatch(typeof(AllYggdrasil), "Start")]
-        private static void AllYggdrasil_Start_postfix(AllYggdrasil __instance)
-        {
-            _tooltip = __instance.character.tooltip;
-            _controller = __instance;
+        private static bool _expDiggerActive => Plugin.Character.diggers.diggers[11].active;
+        private static bool _ppDiggerActive => Plugin.Character.diggers.diggers[8].active;
 
-            foreach (var fc in __instance.fruits)
-            {
-                fc.gameObject.transform.Find("../../Activate Button").gameObject
-                    .AddComponent<PointerHandlerComponent>()
-                    .OnPointerEnter(OnPointerEnter(fc))
-                    .OnPointerExit(OnPointerExit);
-            }
+        [HarmonyPostfix, HarmonyPatch(typeof(FruitController), "Start")]
+        private static void FruitController_Start_postfix(FruitController __instance)
+        {
+            __instance.actionButton.gameObject.AddComponent<PointerHandlerComponent>()
+                .OnPointerEnter(OnPointerEnter(__instance))
+                .OnPointerExit(OnPointerExit);
         }
 
         private static Action<PointerEventData> OnPointerEnter(FruitController fc)
@@ -34,10 +28,10 @@ namespace jshepler.ngu.mods
             return pd =>
             {
                 if (_coroutine != null)
-                    _controller.StopCoroutine(_coroutine);
+                    Plugin.EndCoroutine(_coroutine);
 
                 if (fc.character.yggdrasil.fruits[fc.id].maxTier > 0)
-                    _coroutine = _controller.StartCoroutine(ShowTooltip(fc));
+                    _coroutine = Plugin.BeginCoroutine(ShowTooltip(fc));
             };
         }
 
@@ -45,9 +39,9 @@ namespace jshepler.ngu.mods
         {
             if (_coroutine != null)
             {
-                _controller.StopCoroutine(_coroutine);
+                Plugin.EndCoroutine(_coroutine);
                 _coroutine = null;
-                _tooltip.hideTooltip();
+                Plugin.HideTooltip();
             }
         }
 
@@ -55,7 +49,7 @@ namespace jshepler.ngu.mods
         {
             while (true)
             {
-                _tooltip.showTooltip(GetText(fc));
+                Plugin.ShowTooltip(GetText(fc));
                 yield return _wait;
             }
         }
@@ -185,8 +179,13 @@ namespace jshepler.ngu.mods
 
             var modified = character.checkExpAdded(exp);
 
-            return $"+{character.display(modified)} EXP"
+            var text = $"+{character.display(modified)} EXP"
                 + $"\n+{character.display(seeds)} seeds";
+
+            if (!_expDiggerActive)
+                text += "\n\n<b><color=red>EXP DIGGER IS NOT ACTIVE!</color></b>";
+
+            return text;
         }
 
         private static string POM(FruitController fc)
@@ -271,9 +270,14 @@ namespace jshepler.ngu.mods
             var pp = character.adventureController.itopod.progressToPP(ppp);
             ppp = character.adventureController.itopod.progressToRemainder(ppp);
 
-            return $"+{character.display(pp)} PP"
+            var text = $"+{character.display(pp)} PP"
                 + $"\n+{character.display(ppp)} progress to next PP"
                 + $"\n+{character.display(seeds)} seeds";
+
+            if (!_ppDiggerActive)
+                text += "\n\n<b><color=red>PP DIGGER IS NOT ACTIVE!</color></b>";
+
+            return text;
         }
 
         private static string Guff1(FruitController fc)
@@ -349,7 +353,7 @@ namespace jshepler.ngu.mods
 
         private static float poopBonus(int fruitId)
         {
-            var character = _controller.character;
+            var character = Plugin.Character;
             var fruit = character.yggdrasil.fruits[fruitId];
 
             if (!fruit.usePoop)

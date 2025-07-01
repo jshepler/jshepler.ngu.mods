@@ -295,7 +295,8 @@ namespace jshepler.ngu.mods
 
 
         // show AP gain on rebirth
-        [HarmonyPostfix, HarmonyPatch(typeof(RebirthPowerDisplay), "Update")]
+        //[HarmonyPostfix, HarmonyPatch(typeof(RebirthPowerDisplay), "Update")]
+        // moved to ImprovedNumberBreakdown.cs
         private static void RebirthPowerDisplay_Update_postfix(RebirthPowerDisplay __instance)
         {
             var character = __instance.character;

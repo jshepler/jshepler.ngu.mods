@@ -81,7 +81,7 @@ namespace jshepler.ngu.mods
             _switchingDifficulties = true;
         }
 
-        [HarmonyPrefix, HarmonyPatch(typeof(Rebirth), "engage", typeof(bool))]
+        [HarmonyPrefix, HarmonyPatch(typeof(Rebirth), "engage", typeof(bool)), HarmonyPriority(Priority.First)]
         private static void Rebirth_engage_bool_prefix(bool hardReset, Rebirth __instance)
         {
             if(!_switchingDifficulties)

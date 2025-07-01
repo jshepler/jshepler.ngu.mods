@@ -283,7 +283,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 47. when a piece of equipment is maxed (level 100), automatically enables the item filter for that item (except looties and pendants)
 
-    exceptions: looties, pendants, flubber, wanderer's cane
+    exceptions: looties, pendants, flubber, wanderer's cane, gerbil (sad-only)
 
 48. display all Fibonacci perk unlocks, green are unlocked, red are locked
 
@@ -418,7 +418,9 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 76. on an item's tooltip, if there is another of that item in daycare, show the level of the item in daycare including levels gained and displays the total of the 2 items - helpful for looties and pendents to know when to pull daycare item out and merge
 
-77. auto-sniping: skips normal enemies on adventure screen, if < 50% health after boss dies (or if player dies) stays in safe zone until full health
+77. auto-sniping: skips normal enemies on adventure screen
+
+    keeps track of max hp loss and after an enemy dies and if hp <= that max loss, goes to safe zone to fully heal
 
     go to desired zone and right-click idle button to toggle auto-snipe (changes border of the Idle Mode button to red)
 
@@ -966,3 +968,21 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 236. experimental option for auto allocators to not get disabled when doing a loadout swap and have the game optin enabled to unassign EM on loadout swap
 
 237. fixed game bug with BT where it could think a skill is locked when it wasn't
+
+238. warning indicators for FoK and FoR when the exp/pp digger isn't active
+
+239. shows notifications when in-game achievements are achieved
+
+240. in the card tags panel, changed the display of current tier to current/max; and changed to use short names to remove word-wrapping
+
+241. modified the NUMBER breakdown on rebirth screen to indicate +/- gains from previous rebirth
+
+242. shows estimated time to boost an item - hold alt on item tooltip for items that can be boosted
+
+243. adds keybinds to equip loadouts - press alt-# to equip loadout#, works in:
+  - inventory
+  - adventure
+  - ygg
+  - cooking
+
+244. (experimental) move cooldowns and buffs reset when player/enemy dies - option in cfg file, defaults to disabled

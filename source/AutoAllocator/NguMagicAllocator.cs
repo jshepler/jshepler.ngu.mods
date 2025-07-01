@@ -96,7 +96,11 @@ namespace jshepler.ngu.mods.AutoAllocator
             if (Plugin.ShiftIsDown)
             {
                 if (Plugin.AltIsDown)
-                    Enumerable.Range(0, 7).Do(i => Instance[i] = !Instance[i]);
+                    Enumerable.Range(0, 7).Do(i =>
+                    {
+                        if (Instance[i] || !Instance.IsTargetReached(i))
+                            Instance[i] = !Instance[i];
+                    });
                 else
                     Instance[id] = !Instance[id];
 

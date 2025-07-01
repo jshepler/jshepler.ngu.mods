@@ -16,13 +16,19 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(Equipment), "mergeItem"), HarmonyPatch(typeof(Equipment), "levelUp")]
         private static void InventoryController_levelUp_postfix(Equipment __instance)
         {
-            if (!Plugin.Character.arbitrary.lootFilter
+            var character = Plugin.Character;
+
+            if (!character.arbitrary.lootFilter
                 || __instance.level < 100
                 || !__instance.isEquipment()
                 || _ignoreItemIds.Contains(__instance.id)
-                ) return;
 
-            Plugin.Character.inventory.itemList.itemFiltered[__instance.id] = true;
+                // ignore gerbil in sad for those that want to farm it to red border grey liquid
+                || (__instance.id == 195 && character.settings.rebirthDifficulty == difficulty.sadistic))
+
+                return;
+
+            character.inventory.itemList.itemFiltered[__instance.id] = true;
         }
     }
 }

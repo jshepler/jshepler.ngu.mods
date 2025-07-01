@@ -16,6 +16,8 @@ namespace jshepler.ngu.mods
     {
         private static bool _appendDaycareText = false;
         private static bool _appendDualWieldText = false;
+        private static bool _appendEstBoostTime = false;
+
         private static Coroutine _cor;
         private static FieldInfo _tooltipText = typeof(HoverTooltip).GetField("tooltipText", BindingFlags.Instance | BindingFlags.NonPublic);
 
@@ -23,6 +25,12 @@ namespace jshepler.ngu.mods
         private static void InventoryController_itemTooltipText_prefix(int id)
         {
             _isWeap2 = id == -6;
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(InventoryController), "itemTooltipText", [typeof(int)])]
+        private static void InventoryController_itemTooltipText_postfix(int id)
+        {
+            _isWeap2 = false;
         }
 
         [HarmonyTranspiler, HarmonyPatch(typeof(InventoryController), "itemTooltipText", [typeof(Equipment)])]
@@ -77,6 +85,7 @@ namespace jshepler.ngu.mods
             if (item != null && item.id != 0)
             {
                 _appendDaycareText = false;
+                _appendEstBoostTime = false;
                 var messageField = Traverse.Create(__instance).Field<string>("message");
                 StartShowTooltip(item, __instance.updateTooltipMessage, () => messageField.Value);
             }
@@ -102,11 +111,12 @@ namespace jshepler.ngu.mods
                 character.inventory.item2 = id;
             }
 
-            var item = GetItemFromSlotId(id);
+            var item = getItemFromSlotId(id);
             if (item != null && item.id != 0)
             {
                 __instance.hovered = true;
                 _appendDaycareText = true;
+                _appendEstBoostTime = true;
 
                 var messageField = Traverse.Create(__instance).Field<string>("message");
                 StartShowTooltip(item, __instance.updateTooltipMessage, () => messageField.Value);
@@ -150,6 +160,7 @@ namespace jshepler.ngu.mods
                 return true;
 
             var messageField = Traverse.Create(__instance).Field<string>("message");
+            _appendEstBoostTime = false;
             StartShowTooltip(item, __instance.updateTooltipMessage, () => messageField.Value);
 
             return false;
@@ -176,8 +187,9 @@ namespace jshepler.ngu.mods
 
             _appendDualWieldText = slotId == -6;
             _appendDaycareText = true;
+            _appendEstBoostTime = true;
 
-            var item = GetItemFromSlotId(slotId);
+            var item = getItemFromSlotId(slotId);
             var messageField = Traverse.Create(__instance).Field<string>("message");
             StartShowTooltip(item, __instance.updateTooltipMessage, () => messageField.Value);
 
@@ -202,7 +214,7 @@ namespace jshepler.ngu.mods
                 return;
 
             var tt = _tooltipText.GetValue(__instance.tooltip) as Text;
-            var sources = BuildItemSourcesString(id);
+            var sources = buildItemSourcesString(id);
 
             if (_cor != null)
                 character.StopCoroutine(_cor);
@@ -240,8 +252,11 @@ namespace jshepler.ngu.mods
                 updateTooltipMessage();
                 var text = getTooltipMessage();
 
+                if (Plugin.AltIsDown && _appendEstBoostTime && item.isEquipment())
+                    text += buildEstBoostTime(item);
+
                 if (_appendDaycareText)
-                    text += BuildDaycareString(item);
+                    text += buildDaycareString(item);
 
                 if (_appendDualWieldText)
                     text += $"\n\n<b>Dual-Wield Effectiveness:</b> {character.inventoryController.weapon2Factor() * 100f:0}%";
@@ -253,16 +268,13 @@ namespace jshepler.ngu.mods
                 }
 
                 if (item.isBoost())
-                {
-                    var boosts = BuildBoostValuesString(item);
-                    text += boosts;
-                }
+                    text += buildBoostValuesString(item);
 
                 if (item.id == 92 && item.level > 0 && character.settings.yggdrasilOn)
                     text += $"\n\n<b>Gain <color=blue>{(int)(item.level * (1f + item.level / 100f))}</color> seeds if consumed now</b>";
 
                 if (Input.GetKey(KeyCode.LeftAlt))
-                    text += BuildItemSourcesString(item);
+                    text += buildItemSourcesString(item);
 
                 character.tooltip.showOverrideTooltip(text);
                 yield return _waiter;
@@ -273,13 +285,12 @@ namespace jshepler.ngu.mods
         {
             while (true)
             {
-                var isAlt = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
-                tooltipText.text = baseText + (isAlt ? sources : string.Empty);
+                tooltipText.text = baseText + (Plugin.AltIsDown ? sources : string.Empty);
                 yield return _waiter;
             }
         }
 
-        private static string BuildDaycareString(Equipment item)
+        private static string buildDaycareString(Equipment item)
         {
             var daycare = Plugin.Character.inventory.daycare;
             var dcId = -1;
@@ -308,12 +319,12 @@ namespace jshepler.ngu.mods
             return text;
         }
 
-        private static string BuildItemSourcesString(Equipment item)
+        private static string buildItemSourcesString(Equipment item)
         {
-            return BuildItemSourcesString(item.id);
+            return buildItemSourcesString(item.id);
         }
 
-        private static string BuildItemSourcesString(int itemId)
+        private static string buildItemSourcesString(int itemId)
         {
             var sources = new List<string>();
 
@@ -365,7 +376,7 @@ namespace jshepler.ngu.mods
         }
 
         private static List<int> _boosts = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000];
-        private static float GetAverageRecycledBoostValue(int startIndex, float boostBonus, float recycleChance)
+        private static float getAverageRecycledBoost(int startIndex, float boostBonus, float recycleChance)
         {
             var totalBoost = 0f;
             var probability = 1f;
@@ -379,7 +390,7 @@ namespace jshepler.ngu.mods
             return totalBoost;
         }
 
-        private static string BuildBoostValuesString(Equipment item)
+        private static string buildBoostValuesString(Equipment item)
         {
             var boostIndex = (item.id - 1) % 13;
             var boostBonus = Plugin.Character.allItemList.boostBonus();
@@ -393,7 +404,7 @@ namespace jshepler.ngu.mods
             var recycleChance = Math.Min(1f, Plugin.Character.totalRecycleBonus());
             if (recycleChance > 0)
             {
-                var avgBoostWithRecycling = GetAverageRecycledBoostValue(boostIndex, boostBonus, recycleChance);
+                var avgBoostWithRecycling = getAverageRecycledBoost(boostIndex, boostBonus, recycleChance);
                 var avgCubeBoostWithRecycling = avgBoostWithRecycling / InfinityCubeSoftCap.CubeBoostDivider;
 
                 var avgTag = (recycleChance > 0 && recycleChance < 1) ? " (avg)" : string.Empty;
@@ -404,7 +415,7 @@ namespace jshepler.ngu.mods
             return text;
         }
 
-        private static Equipment GetItemFromSlotId(int slotId)
+        private static Equipment getItemFromSlotId(int slotId)
         {
             var inventory = Plugin.Character.inventory;
 
@@ -425,6 +436,153 @@ namespace jshepler.ngu.mods
                 -69 => inventory.trash,
                 _ => inventory.inventory[slotId]
             };
+        }
+
+        private static string buildEstBoostTime(Equipment item)
+        {
+            var levelMulti = 1f + item.level / 100f;
+            var missingPower = Mathf.Floor(item.capAttack * levelMulti) - item.curAttack;
+            var missingToughness = Mathf.Floor(item.capDefense * levelMulti) - item.curDefense;
+            var missingSpecial1 = Mathf.Floor(item.spec1Cap * levelMulti) - item.spec1Cur;
+            var missingSpecial2 = Mathf.Floor(item.spec2Cap * levelMulti) - item.spec2Cur;
+            var missingSpecial3 = Mathf.Floor(item.spec3Cap * levelMulti) - item.spec3Cur;
+            var totalBoostMissing = missingPower + missingToughness + missingSpecial1 + missingSpecial2 + missingSpecial3;
+            if (totalBoostMissing <= 0)
+                return string.Empty;
+
+            var character = Plugin.Character;
+            var text = $"\n\n<b>Total Boosts Remaining:</b> {character.display(totalBoostMissing)}";
+
+            var zoneId = character.adventureController.zone;
+            if (zoneId == -1 || Zones.TitanZoneIds.Contains(zoneId))
+                return text;
+
+            var expectedBoostsPerKill = getAverageBoostPerKillFromZone(zoneId, out var charmed);
+            var color = charmed ? "blue" : "black";
+            text += $"\n<b>Avg. Boosts per Kill:</b> <color={color}>{expectedBoostsPerKill:#,##0.#}</color>";
+
+            if (expectedBoostsPerKill == 0f)
+                return text;
+
+            var ohKillsRemaining = totalBoostMissing / expectedBoostsPerKill;
+            var respawnTime = character.adventureController.respawnTime();
+            var idleAttackSpeed = character.adventure.attackSpeed;
+            var secondsPerKill = respawnTime + idleAttackSpeed;
+            var secondsRemaining = ohKillsRemaining * secondsPerKill;
+            text += $"\n<b>Est. Time Remaining (OHK):</b> <color={color}>{NumberOutput.timeOutput(secondsRemaining)}</color>";
+
+            return text;
+        }
+
+        private static List<int> _boostFloors = [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 700, 850, 1150, int.MaxValue];
+        private static List<DropItems> _itopodDrops = DropTable.BoostItems.Select(items => new DropItems(0.14f, 0.14f, items)).ToList();
+
+        private static float getAverageBoostPerKillFromZone(int zoneId, out bool charmed)
+        {
+            var character = Plugin.Character;
+
+            if (zoneId >= 1000) //itopod
+            {
+                var currentFloor = character.adventureController.itopodLevel;
+                var itopodBoostIndex = _boostFloors.FindLastIndex(i => currentFloor >= i);
+                var boostDrops = _itopodDrops[itopodBoostIndex];
+
+                return getAverageBoostPerKillFromDropItems([boostDrops], out charmed);
+            }
+
+            else //non itopod
+            {
+                var zone = DropTable.Zones[zoneId];
+                var boostDrops = zone.NormalDrops.Items.Where(item => item.ItemIds[0] > 0 && item.ItemIds[0] < 40);
+                var avgBoostPerKill = getAverageBoostPerKillFromDropItems(boostDrops, out charmed);
+
+                var enemies = character.adventureController.enemyList[zoneId];
+                float nCount = enemies.Count(e => e.enemyType == enemyType.normal);
+                var nRatio = nCount / enemies.Count;
+
+                return avgBoostPerKill * nRatio;
+            }
+        }
+
+        private static float getAverageBoostPerKillFromDropItems(IEnumerable<DropItems> boostDrops, out bool charmed)
+        {
+            var character = Plugin.Character;
+            var zoneId = character.adventureController.zone;
+            var rooted = zoneId >= 20;
+            var playerDcMulti = getPlayerDCMulti(rooted, out charmed);
+
+            var totalWeightedBoost = 0f;
+            var boostCount = 0;
+
+            foreach (var drop in boostDrops)
+            {
+                // if any of the boosts are filtered, the number of potential drops is reduced and needs to be accounted for
+                var unfilteredBoostsMulti = drop.ItemIds.Count(boostUnfiltered) / (float)drop.ItemIds.Length;
+                var moddedDC = drop.BaseDC * playerDcMulti + drop.BonuseDC;
+                var dc = Math.Min(moddedDC, drop.MaxDC) * unfilteredBoostsMulti;
+
+                var boostIndex = (drop.ItemIds[0] - 1) % 13;
+                var boostBonus = character.allItemList.boostBonus();
+                var recycleChance = character.totalRecycleBonus();
+                var avgBoost = dc * getAverageRecycledBoost(boostIndex, boostBonus, recycleChance);
+                if (avgBoost > 0)
+                {
+                    totalWeightedBoost += avgBoost;
+                    boostCount++;
+                }
+            }
+
+            var avgBoostPerKill = boostCount > 0 ? totalWeightedBoost : 0f;
+            return avgBoostPerKill;
+        }
+
+        private static float _rootedCharm = Mathf.Pow(2f, 1f / 3f);
+        private static float _rootedCharmWithBlueHeart = Mathf.Pow(2.2f, 1f / 3f);
+
+        private static float getPlayerDCMulti(bool rooted, out bool charmed)
+        {
+            charmed = false;
+
+            var character = Plugin.Character;
+            var isCharmActive = character.arbitrary.lootcharm1Time.totalseconds > 0.0;
+
+            var dcMulti = rooted ? character.lootFactorRooted() : character.lootFactor();
+            if (!Plugin.ShiftIsDown && character.arbitrary.lootcharm1Time.totalseconds == 0.0)
+                return dcMulti;
+
+            var blueHeartComplete = character.inventory.itemList.blueHeartComplete;
+            var charmMulti = 1f;
+
+            if (rooted)
+                charmMulti = blueHeartComplete ? _rootedCharmWithBlueHeart : _rootedCharm;
+            else
+                charmMulti = blueHeartComplete ? 2.2f : 2f;
+
+            dcMulti *= charmMulti;
+            charmed = true;
+
+            return dcMulti;
+        }
+
+        // doesn't check titan filter since titan drops are not currently being counted
+        private static bool boostUnfiltered(int itemId)
+        {
+            var character = Plugin.Character;
+            var settings = character.settings;
+
+            if (character.arbitrary.lootFilter && character.inventory.itemList.itemFiltered[itemId])
+                return false;
+
+            if (!character.purchases.hasFilter || !settings.filterOn)
+                return true;
+
+            if (itemId < 15)
+                return !settings.filterBoostAtk;
+
+            if (itemId < 27)
+                return !settings.filterBoostDef;
+
+            return !settings.filterBoostSpec;
         }
     }
 }

@@ -21,6 +21,8 @@ namespace jshepler.ngu.mods.GameData
         private static Items[] _boosts5k = [ Items.PowerBoost_5k, Items.ToughnessBoost_5k, Items.SpecialBoost_5k ];
         private static Items[] _boosts10k = [ Items.PowerBoost_10k, Items.ToughnessBoost_10k, Items.SpecialBoost_10k ];
 
+        internal static Items[][] BoostItems = [_boosts1, _boosts2, _boosts5, _boosts10, _boosts20, _boosts50, _boosts100, _boosts200, _boosts500, _boosts1k, _boosts2k, _boosts5k, _boosts10k];
+
         //internal ZoneDrops this[int zoneId] => Zones[zoneId];
         //internal int Count => Zones.Count;
 
