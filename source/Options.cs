@@ -89,7 +89,7 @@ namespace jshepler.ngu.mods
             LSCreminder.MaxMinutesToTarget = Config.Bind("LSCreminder", "MaxMinutesToTarget", 5, "max time to target for both laser sword and quadruple laser sword together, will light up Challenges button on Rebirth screen; 0 = disabled");
             Yggdrasil.ActivationIndicator = Config.Bind("Yggdrasil", "ActivationIndicator", false, "when enabled, the Yggdrasil button will light up red if any fruit needs activation");
             Yggdrasil.AutoHarvest = Config.Bind("Yggdrasil", "AutoHarvest", false, "enable auto harvest/eat fruits when fully grown (max tier)");
-            Yggdrasil.PoopAudioChance = Config.Bind("Yggdrasil", "PoopAudioChance", 0f, "chance a fart audio clip is played when gain fruit, 0.0 to 1.0");
+            Yggdrasil.PoopAudioChance = Config.Bind("Yggdrasil", "PoopAudioChance", 0f, "chance a fart audio clip is played when gain poop, 0.0 to 1.0");
 
             Experimental.AlwaysShowAT = Config.Bind("Experimental", "AlwaysShowAT", false, "if enabled, the AT button will always be visible; dislaimer: will not allow you to run AT before being unlocked");
             Experimental.StaplerNoECap = Config.Bind("Experimental", "StaplerNoECap", false, "if enabled, the cap special is removed from stapler (item 118)");

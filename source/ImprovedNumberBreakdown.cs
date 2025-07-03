@@ -64,9 +64,9 @@ namespace jshepler.ngu.mods
             var values = $"x {buildString(curBossMultiCombined, Data.LastBossMultiCombined)}"
                 + $"\n   {diffFactor:r} ^ {character.bossID} = {disp(character.bossMulti)}"
                 + $"\n   {diffFactor:r} ^ {lastBossId} = {disp(character.oldBossMulti)}"
-                + $"\nx {buildString(curTimeMultiCombined, Data.LastTimeMultiCombined, "#.########")}"
-                + $"\n   {character.timeMulti:#.########}"
-                + $"\n   {character.oldTimeMulti:#.########}"
+                + $"\nx {buildString(curTimeMultiCombined, Data.LastTimeMultiCombined, "0.000000")}"
+                + $"\n   {character.timeMulti:0.000000}"
+                + $"\n   {character.oldTimeMulti:0.000000}"
                 + $"\nx {buildString(trainingFactor, Data.LastTrainingFactor)}";
 
             if (character.bossID > 36)

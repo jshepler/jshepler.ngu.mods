@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
@@ -28,6 +29,27 @@ namespace jshepler.ngu.mods
         private static ButtonBar bbHyperRegen;
         private static ButtonBar bbMegaBuff;
         private static ButtonBar bbOhShit;
+
+        private static FieldInfo regularAttackTimer = typeof(RegularAttack).GetField("regularAttackTimer", BindingFlags.Instance | BindingFlags.NonPublic);
+        private static FieldInfo strongAttackTimer = typeof(StrongAttack).GetField("strongAttackTimer", BindingFlags.Instance | BindingFlags.NonPublic);
+        private static FieldInfo parryTimer = typeof(Parry).GetField("parryTimer", BindingFlags.Instance | BindingFlags.NonPublic);
+        private static FieldInfo piercingAttackTimer = typeof(PiercingAttack).GetField("attackTimer", BindingFlags.Instance | BindingFlags.NonPublic);
+        private static FieldInfo ultimateAttackTimer = typeof(UltimateAttack).GetField("ultimateAttackTimer", BindingFlags.Instance | BindingFlags.NonPublic);
+        private static FieldInfo blockTimer = typeof(Block).GetField("blockTimer", BindingFlags.Instance | BindingFlags.NonPublic);
+        //private static FieldInfo defenseBuffTimer = typeof(DefenseBuff).GetField("defenseBuffTimer", BindingFlags.Instance | BindingFlags.NonPublic);
+        //private static FieldInfo healTimer = typeof(Heal).GetField("healTimer", BindingFlags.Instance | BindingFlags.NonPublic);
+        //private static FieldInfo offenseBuffTimer = typeof(OffenseBuff).GetField("offenseBuffTimer", BindingFlags.Instance | BindingFlags.NonPublic);
+        private static FieldInfo chargeTimer = typeof(Charge).GetField("chargeTimer", BindingFlags.Instance | BindingFlags.NonPublic);
+        //private static FieldInfo ultimateBuffTimer = typeof(UltimateBuff).GetField("ultimateBuffTimer", BindingFlags.Instance | BindingFlags.NonPublic);
+        //private static FieldInfo paralyzeAttackTimer = typeof(Paralyze).GetField("attackTimer", BindingFlags.Instance | BindingFlags.NonPublic);
+        //private static FieldInfo hyperRegenHealTimer = typeof(HyperRegen).GetField("healTimer", BindingFlags.Instance | BindingFlags.NonPublic);
+        private static FieldInfo megaBuffTimer = typeof(MegaBuff).GetField("megaBuffTimer", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        private static FieldInfo blockDuration = typeof(Block).GetField("blockDuration", BindingFlags.Instance | BindingFlags.NonPublic);
+        private static FieldInfo defenseDuration = typeof(DefenseBuff).GetField("defenseDuration", BindingFlags.Instance | BindingFlags.NonPublic);
+        //private static FieldInfo offenseBuffDuration = typeof(OffenseBuff).GetField("offenseBuffDuration", BindingFlags.Instance | BindingFlags.NonPublic);
+        private static FieldInfo ultimateBuffDuration = typeof(UltimateBuff).GetField("ultimateBuffDuration", BindingFlags.Instance | BindingFlags.NonPublic);
+        private static FieldInfo megaBuffDuration = typeof(MegaBuff).GetField("megaBuffDuration", BindingFlags.Instance | BindingFlags.NonPublic);
 
         private static float paralyzeDuration;
         private static float enemyParalyzeDuration = 0f;
@@ -161,20 +183,20 @@ namespace jshepler.ngu.mods
 
         private static void resetCooldowns(bool resetBuffs)
         {
-            Traverse.Create(ac.regularAttackMove).Field<float>("regularAttackTimer").Value = character.regAttackCooldown() + 1;
-            Traverse.Create(ac.strongAttackMove).Field<float>("strongAttackTimer").Value = character.strongAttackCooldown() + 1;
-            Traverse.Create(ac.parryMove).Field<float>("parryTimer").Value = character.parryCooldown() + 1;
-            Traverse.Create(ac.pierceMove).Field<float>("attackTimer").Value = character.pierceAttackCooldown() + 1;
-            Traverse.Create(ac.ultimateAttackMove).Field<float>("ultimateAttackTimer").Value = character.ultimateAttackCooldown() + 1;
-            Traverse.Create(ac.blockMove).Field<float>("blockTimer").Value = character.blockCooldown() + 1;
-            Traverse.Create(ac.defenseBuffMove).Field<float>("defenseBuffTimer").Value = character.defenseBuffCooldown() + 1;
-            Traverse.Create(ac.healMove).Field<float>("healTimer").Value = character.healCooldown() + 1;
-            Traverse.Create(ac.offenseBuffMove).Field<float>("offenseBuffTimer").Value = character.offenseBuffCooldown() + 1;
-            Traverse.Create(ac.chargeMove).Field<float>("chargeTimer").Value = character.chargeCooldown() + 1;
-            Traverse.Create(ac.ultimateBuffMove).Field<float>("ultimateBuffTimer").Value = character.ultimateBuffCooldown() + 1;
-            Traverse.Create(ac.paralyzeMove).Field<float>("attackTimer").Value = character.paralyzeCooldown() + 1;
-            Traverse.Create(ac.hyperRegenMove).Field<float>("healTimer").Value = character.hyperRegenCooldown() + 1;
-            Traverse.Create(ac.megaBuffMove).Field<float>("megaBuffTimer").Value = character.megaBuffCooldown() + 1;
+            regularAttackTimer.SetValue(ac.regularAttackMove, character.regAttackCooldown() + 1f);
+            strongAttackTimer.SetValue(ac.strongAttackMove, character.strongAttackCooldown() + 1f);
+            parryTimer.SetValue(ac.parryMove, character.parryCooldown() + 1f);
+            piercingAttackTimer.SetValue(ac.pierceMove, character.pierceAttackCooldown() + 1f);
+            ultimateAttackTimer.SetValue(ac.ultimateAttackMove, character.ultimateAttackCooldown() + 1f);
+            blockTimer.SetValue(ac.blockMove, character.blockCooldown() + 1f);
+            ac.defenseBuffMove.defenseBuffTimer = character.defenseBuffCooldown() + 1f;
+            ac.healMove.healTimer = character.healCooldown() + 1f;
+            ac.offenseBuffMove.offenseBuffTimer = character.offenseBuffCooldown() + 1f;
+            chargeTimer.SetValue(ac.chargeMove, character.chargeCooldown() + 1f);
+            ac.ultimateBuffMove.ultimateBuffTimer = character.ultimateBuffCooldown() + 1f;
+            ac.paralyzeMove.attackTimer = character.paralyzeCooldown() + 1f;
+            ac.hyperRegenMove.healTimer = character.hyperRegenCooldown() + 1f;
+            megaBuffTimer.SetValue(ac.megaBuffMove, character.megaBuffCooldown() + 1f);
 
             if (!resetBuffs)
                 return;
@@ -182,18 +204,18 @@ namespace jshepler.ngu.mods
             var pc = ac.playerController;
             pc.isParrying = false;
             pc.blockTime = -1;
-            pc.defenseBuffTime = -1;
-            pc.offenseBuffTime = -1;
-            pc.ultimateBuffTime = -1;
-            pc.megaBuffTime = -1;
+            pc.defenseBuffTime = character.defenseBuffDuration() + 1;
+            pc.offenseBuffTime = character.offenseBuffDuration() + 1;
+            pc.ultimateBuffTime = character.ultimateBuffDuration() + 1;
+            pc.megaBuffTime = character.megaBuffDuration() + 1f;
             pc.hyperRegenTime = -1;
 
             // these timers are for the timed yellow borders
-            Traverse.Create(ac.blockMove).Field<float>("blockDuration").Value = character.blockDuration() + 1;
-            Traverse.Create(ac.defenseBuffMove).Field<float>("defenseDuration").Value = character.defenseBuffDuration() + 1f;
-            Traverse.Create(ac.offenseBuffMove).Field<float>("offenseBuffDuration").Value = character.offenseBuffDuration() + 1f;
-            Traverse.Create(ac.ultimateBuffMove).Field<float>("ultimateBuffDuration").Value = character.ultimateBuffDuration() + 1f;
-            Traverse.Create(ac.megaBuffMove).Field<float>("megaBuffDuration").Value = character.megaBuffDuration() + 1f;
+            blockDuration.SetValue(ac.blockMove, character.blockDuration() + 1f);
+            defenseDuration.SetValue(ac.defenseBuffMove, character.defenseBuffDuration() + 1f);
+            ac.offenseBuffMove.offenseBuffDuration = character.offenseBuffDuration() + 1f;
+            ultimateBuffDuration.SetValue(ac.ultimateBuffMove, character.ultimateBuffDuration() + 1f);
+            megaBuffDuration.SetValue(ac.megaBuffMove, character.megaBuffDuration() + 1f);
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(PlayerController), "paralyzed")]
