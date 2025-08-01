@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
@@ -26,6 +27,7 @@ namespace jshepler.ngu.mods
 
         private static float _curAdvPower => Plugin.Character.adventure.attack;
         private static float _lastAdvPower;
+        internal static Action Reset => () => _lastAdvPower = 0f;
 
         [HarmonyPostfix, HarmonyPatch(typeof(AdventurePurchases), "Start")]
         private static void AdventurePurchases_Start_postfix(AdventurePurchases __instance)

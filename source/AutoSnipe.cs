@@ -130,8 +130,6 @@ namespace jshepler.ngu.mods
             if (hpLoss > _hpMaxLoss)
                 _hpMaxLoss = hpLoss;
 
-            Controller.log.AddEvent($"[hpLoss: {hpLoss}, hpMaxLoss: {_hpMaxLoss}]");
-
             if (_curHP <= _hpMaxLoss)// _maxHP * 0.5f)
                 _stage = Stages.Healing;
             else

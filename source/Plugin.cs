@@ -54,7 +54,8 @@ namespace jshepler.ngu.mods
         internal static bool AltIsDown => Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
         internal static bool ControlIsDown => Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
         internal static bool ShiftIsDown => Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-        internal static bool InputFieldHasFocus = false;
+        
+        internal static bool InputFieldHasFocus => EventSystem.current?.currentSelectedGameObject?.GetComponent<InputField>()?.isFocused ?? false;
 
         private void Awake()
         {
@@ -90,8 +91,6 @@ namespace jshepler.ngu.mods
         {
             if (Character == null)
                 return;
-
-            InputFieldHasFocus = EventSystem.current.currentSelectedGameObject?.GetComponent<InputField>()?.isFocused ?? false;
 
             OnLateUpdate?.Invoke(null, EventArgs.Empty);
         }

@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using HarmonyLib;
 
 namespace jshepler.ngu.mods
@@ -36,6 +37,7 @@ namespace jshepler.ngu.mods
 
         private static float _lastP;
         private static float _lastT;
+        internal static Action Reset => () => _lastP = _lastT = 0f;
 
 
         [HarmonyPrepare]

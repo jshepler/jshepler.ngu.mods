@@ -81,21 +81,6 @@ namespace jshepler.ngu.mods
                 }
             }
 
-            if (eCapTotal > EM_CAP_HARDCAP)
-            {
-                sb.Append("\nexcess EC: ");
-
-                if (eCapNoEquip >= EM_CAP_HARDCAP)
-                    sb.Append($"{(eCapEquipBonus * 100f):#,##0.#}%");
-
-                else
-                {
-                    var eCapBonusNeeded = (EM_CAP_HARDCAP - eCapNoEquip) / eCapNoEquip;
-                    var eCapOver = eCapEquipBonus - eCapBonusNeeded;
-                    sb.Append($"{(eCapOver * 100f):#,##0.#}%");
-                }
-            }
-
             if (mPowTotal > EM_POW_HARDCAP)
             {
                 sb.Append("\nexcess MP: ");
@@ -108,6 +93,21 @@ namespace jshepler.ngu.mods
                     var mPowBonusNeeded = (EM_POW_HARDCAP - mPowNoEquip) / mPowNoEquip;
                     var mPowOver = mPowEquipBonus - mPowBonusNeeded;
                     sb.Append($"{(mPowOver * 100f):#,##0.#}%");
+                }
+            }
+
+            if (eCapTotal > EM_CAP_HARDCAP)
+            {
+                sb.Append("\nexcess EC: ");
+
+                if (eCapNoEquip >= EM_CAP_HARDCAP)
+                    sb.Append($"{(eCapEquipBonus * 100f):#,##0.#}%");
+
+                else
+                {
+                    var eCapBonusNeeded = (EM_CAP_HARDCAP - eCapNoEquip) / eCapNoEquip;
+                    var eCapOver = eCapEquipBonus - eCapBonusNeeded;
+                    sb.Append($"{(eCapOver * 100f):#,##0.#}%");
                 }
             }
 

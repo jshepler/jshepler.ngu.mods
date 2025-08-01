@@ -14,9 +14,6 @@ namespace jshepler.ngu.mods
         [HarmonyPrefix, HarmonyPatch(typeof(Character), "Update")]
         private static bool Character_Update_prefix(Character __instance)
         {
-            if (Plugin.InputFieldHasFocus)
-                return true;
-
             int numberKey;
 
             if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1))
@@ -41,6 +38,11 @@ namespace jshepler.ngu.mods
                 numberKey = 10;
             else
                 return true;
+
+            // because this uses GetComponent<>(), shouldn't check it every frame - only after an appropriate key has been pressed
+            if (Plugin.InputFieldHasFocus)
+                return true;
+
 
             switch (__instance.CurrentMenu())
             {

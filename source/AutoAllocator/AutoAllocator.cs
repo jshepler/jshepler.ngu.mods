@@ -133,7 +133,7 @@ namespace jshepler.ngu.mods.AutoAllocator
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(Rebirth), "engage", typeof(bool))]
-        private static void ClearAllAllocators()
+        internal static void ClearAllAllocators()
         {
             ClearEnergyAllocators();
             ClearMagicAllocators();

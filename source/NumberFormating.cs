@@ -19,7 +19,16 @@ namespace jshepler.ngu.mods
         {
             var abs = Math.Abs(number);
 
-            if (abs < 1.0)
+            if (double.IsPositiveInfinity(number))
+                __result = "Infinity";
+
+            else if (double.IsNegativeInfinity(number))
+                __result = "-Infinity";
+
+            else if (double.IsNaN(number))
+                __result = "NaN";
+
+            else if (abs < 1.0)
                 __result = number.ToString();
 
             else if (abs < 1000000.0)
@@ -42,13 +51,24 @@ namespace jshepler.ngu.mods
         private static bool engineerFormat_prefix(double number, ref string __result, Dictionary<int, string> ___suffixString)
         {
             var abs = Math.Abs(number);
-            if (abs < _threshold)
+
+            if (double.IsPositiveInfinity(number))
+                __result = "Infinity";
+
+            else if (double.IsNegativeInfinity(number))
+                __result = "-Infinity";
+
+            else if (double.IsNaN(number))
+                __result = "NaN";
+
+            else if (abs < _threshold)
                 realSuffixFormat_prefix(number, ref __result, ___suffixString);
 
             else
             {
                 var num = Math.Floor(Math.Log10(abs) / 3.0) * 3.0;
                 number /= Math.Pow(10.0, num);
+
                 __result = number.ToString("###.000") + "E+" + num;
             }
 
@@ -61,7 +81,17 @@ namespace jshepler.ngu.mods
         private static bool sciFormat_prefix(double number, ref string __result, Dictionary<int, string> ___suffixString)
         {
             var abs = Math.Abs(number);
-            if (abs < _threshold)
+
+            if (double.IsPositiveInfinity(number))
+                __result = "Infinity";
+
+            else if (double.IsNegativeInfinity(number))
+                __result = "-Infinity";
+
+            else if (double.IsNaN(number))
+                __result = "NaN";
+
+            else if (abs < _threshold)
                 realSuffixFormat_prefix(number, ref __result, ___suffixString);
 
             else

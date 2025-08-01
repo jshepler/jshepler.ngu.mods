@@ -24,6 +24,19 @@ namespace jshepler.ngu.mods
             Data.LastHackNumberBonus = character.hacksController.totalNumberBonus();
         }
 
+        [HarmonyPostfix, HarmonyPatch(typeof(Rebirth), "hardResetMultis")]
+        private static void Rebirth_hardResetMultis_postfix()
+        {
+            Data.LastBossMultiCombined = 1.0;
+            Data.LastTimeMultiCombined = 0.0;
+            Data.LastTrainingFactor = 1L;
+            Data.LastNGUNumberBonus = 1.0;
+            Data.LastBeardNumberBonus = 1.0f;
+            Data.LastYggNumberBonus = 1.0;
+            Data.LastGuffNumberBonus = 1.0f;
+            Data.LastHackNumberBonus = 1.0f;
+        }
+
         [HarmonyPostfix, HarmonyPatch(typeof(RebirthPowerDisplay), "Start")]
         private static void RebirthPowerDisplay_Start_postfix(RebirthPowerDisplay __instance)
         {

@@ -12,7 +12,9 @@ namespace jshepler.ngu.mods
             if (character == null)
                 return;
 
-            ___statsValue = ___statsValue.Insert(___statsValue.IndexOf("("), " ");
+            var i = ___statsValue.IndexOf("(");
+            if (i > -1)
+                ___statsValue = ___statsValue.Insert(i, " ");
 
             var nameIndex = ___statsName.IndexOf("Highest Boss Defeated:") + 22;
             var valueIndex = ___statsValue.IndexOf(")") + 1;
@@ -34,11 +36,14 @@ namespace jshepler.ngu.mods
 
             ___statsName = ___statsName.Replace("Total Earned PP:", "<b>Total Earned PP:</b>");
 
-            ___statsName = ___statsName.Insert(nameIndex, nameString);
-            __instance.statsBreakdown.text = ___statsName;
+            if (valueIndex > 0)
+            {
+                ___statsName = ___statsName.Insert(nameIndex, nameString);
+                __instance.statsBreakdown.text = ___statsName;
 
-            ___statsValue = ___statsValue.Insert(valueIndex, valueString);
-            __instance.statValue.text = ___statsValue;
+                ___statsValue = ___statsValue.Insert(valueIndex, valueString);
+                __instance.statValue.text = ___statsValue;
+            }
         }
     }
 }

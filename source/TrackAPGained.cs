@@ -40,6 +40,7 @@ namespace jshepler.ngu.mods
 
         private static long _curAP => Plugin.Character.arbitrary.curArbitraryPoints;
         private static long _lastAPCount;
+        internal static Action Reset => () => _lastAPCount = 0L;
 
         private static MethodInfo _addAP32 = typeof(Character).GetMethod("addAP", [typeof(int)]);
         private static MethodInfo _addAP64 = typeof(Character).GetMethod("addAP", [typeof(long)]);

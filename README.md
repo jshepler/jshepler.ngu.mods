@@ -986,3 +986,17 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
   - cooking
 
 244. (experimental) move cooldowns and buffs reset when player/enemy dies - option in cfg file, defaults to disabled
+
+245. heirloom mod - start a new game and take an item with you. ***Not fully tested. Please report any issues or things not properly reset for a new game***
+  - to take an item with you, put it in the trash before triggering THE END screen
+  - on THE END screen, on the last page, right-click the END button
+  - the mod will also add the following purchased packs: the 5 newbie packs, the R3 pack, and the portraits pack
+  - also fixes the glitch that let players view THE END from the cooking screen
+
+246. combat helper for T6 (The Beast) - shows current aura under enemy stats
+
+247. allows you to swap in another copy of the same equipped accessory item - works for loadouts when item is in same slot
+
+248. experimental option to disable the AP purchase confirmation box, and if enabled will do an auto save so can still recover if screw up
+
+249. fixed game bug with 24 hour challenges not properly applying the bonus exp to fight boss kills - was doing 2/0/0% per normal/evil/sad completions instead of the expected 10/4/2%

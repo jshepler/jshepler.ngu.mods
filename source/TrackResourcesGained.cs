@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.UI;
@@ -37,6 +38,7 @@ namespace jshepler.ngu.mods
 
         private static long _lastSeedCount;
         private static long _lastPoopCount;
+        internal static Action Reset => () => _lastSeedCount = _lastPoopCount = 0L;
 
         private static FieldInfo _tooltipText = typeof(HoverTooltip).GetField("tooltipText", BindingFlags.Instance | BindingFlags.NonPublic);
         private static Fart _fart;

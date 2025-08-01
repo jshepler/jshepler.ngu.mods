@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
@@ -36,18 +35,11 @@ namespace jshepler.ngu.mods
         private static FieldInfo piercingAttackTimer = typeof(PiercingAttack).GetField("attackTimer", BindingFlags.Instance | BindingFlags.NonPublic);
         private static FieldInfo ultimateAttackTimer = typeof(UltimateAttack).GetField("ultimateAttackTimer", BindingFlags.Instance | BindingFlags.NonPublic);
         private static FieldInfo blockTimer = typeof(Block).GetField("blockTimer", BindingFlags.Instance | BindingFlags.NonPublic);
-        //private static FieldInfo defenseBuffTimer = typeof(DefenseBuff).GetField("defenseBuffTimer", BindingFlags.Instance | BindingFlags.NonPublic);
-        //private static FieldInfo healTimer = typeof(Heal).GetField("healTimer", BindingFlags.Instance | BindingFlags.NonPublic);
-        //private static FieldInfo offenseBuffTimer = typeof(OffenseBuff).GetField("offenseBuffTimer", BindingFlags.Instance | BindingFlags.NonPublic);
         private static FieldInfo chargeTimer = typeof(Charge).GetField("chargeTimer", BindingFlags.Instance | BindingFlags.NonPublic);
-        //private static FieldInfo ultimateBuffTimer = typeof(UltimateBuff).GetField("ultimateBuffTimer", BindingFlags.Instance | BindingFlags.NonPublic);
-        //private static FieldInfo paralyzeAttackTimer = typeof(Paralyze).GetField("attackTimer", BindingFlags.Instance | BindingFlags.NonPublic);
-        //private static FieldInfo hyperRegenHealTimer = typeof(HyperRegen).GetField("healTimer", BindingFlags.Instance | BindingFlags.NonPublic);
         private static FieldInfo megaBuffTimer = typeof(MegaBuff).GetField("megaBuffTimer", BindingFlags.Instance | BindingFlags.NonPublic);
 
         private static FieldInfo blockDuration = typeof(Block).GetField("blockDuration", BindingFlags.Instance | BindingFlags.NonPublic);
         private static FieldInfo defenseDuration = typeof(DefenseBuff).GetField("defenseDuration", BindingFlags.Instance | BindingFlags.NonPublic);
-        //private static FieldInfo offenseBuffDuration = typeof(OffenseBuff).GetField("offenseBuffDuration", BindingFlags.Instance | BindingFlags.NonPublic);
         private static FieldInfo ultimateBuffDuration = typeof(UltimateBuff).GetField("ultimateBuffDuration", BindingFlags.Instance | BindingFlags.NonPublic);
         private static FieldInfo megaBuffDuration = typeof(MegaBuff).GetField("megaBuffDuration", BindingFlags.Instance | BindingFlags.NonPublic);
 
@@ -175,7 +167,7 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix,
             HarmonyPatch(typeof(AdventureController), "playerDeath"),
             HarmonyPatch(typeof(AdventureController), "enemyDeath")]
-        private static void AdventureController_onDeath_postfix()
+        private static void AdventureController_onDeath_postfix(MethodBase __originalMethod)
         {
             if (_resetCooldownsEnabled && !character.adventure.autoattacking)
                 resetCooldowns(resetBuffs: true);
@@ -204,11 +196,20 @@ namespace jshepler.ngu.mods
             var pc = ac.playerController;
             pc.isParrying = false;
             pc.blockTime = -1;
-            pc.defenseBuffTime = character.defenseBuffDuration() + 1;
-            pc.offenseBuffTime = character.offenseBuffDuration() + 1;
-            pc.ultimateBuffTime = character.ultimateBuffDuration() + 1;
-            pc.megaBuffTime = character.megaBuffDuration() + 1f;
             pc.hyperRegenTime = -1;
+
+            if (pc.defenseBuffTime > 0)
+                pc.defenseBuffTime = character.defenseBuffDuration() + 1;
+
+            if (pc.offenseBuffTime > 0)
+                pc.offenseBuffTime = character.offenseBuffDuration() + 1;
+
+            if (pc.ultimateBuffTime > 0)
+                pc.ultimateBuffTime = character.ultimateBuffDuration() + 1;
+
+            if (pc.megaBuffTime > 0)
+                pc.megaBuffTime = character.megaBuffDuration() + 1f;
+
 
             // these timers are for the timed yellow borders
             blockDuration.SetValue(ac.blockMove, character.blockDuration() + 1f);

@@ -49,7 +49,9 @@ namespace jshepler.ngu.mods
         private static bool showWarning(int fruitId)
         {
             var character = Plugin.Character;
-            if ((fruitId != FOK_ID && fruitId != FOR_ID) || !character.yggdrasil.fruits[fruitId].eatFruit)
+            if ((fruitId != FOK_ID && fruitId != FOR_ID)
+                || !character.yggdrasil.fruits[fruitId].activated
+                || !character.yggdrasil.fruits[fruitId].eatFruit)
                 return false;
 
             var currentTier = character.yggdrasilController.fruits[0].harvestTier(fruitId);

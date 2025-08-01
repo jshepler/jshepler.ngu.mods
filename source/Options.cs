@@ -95,6 +95,7 @@ namespace jshepler.ngu.mods
             Experimental.StaplerNoECap = Config.Bind("Experimental", "StaplerNoECap", false, "if enabled, the cap special is removed from stapler (item 118)");
             Experimental.LoadoutSwapKeepsAutoAllocators = Config.Bind("Experimental", "LoadoutSwapKeepsAutoAllocators", false, "if enabled, and have the game setting 'Unassign E/M on Loadout Swap' enabled, auto allocators won't disable on loadout swap");
             Experimental.ResetCooldownsOnFightEnd = Config.Bind("Experimental", "ResetCooldownsOnFightEnd", false, "if enabled, manual combat move cooldowns and buffs are reset on player/enemy death");
+            Experimental.DisableAPConfirmation = Config.Bind("Experimental", "DisableAPConfirmation", false, "if enabled, the confirmation for AP purchases will be skipped, but an auto save will be made before doing the purchase");
 
             // when loading an old version of the cfg file, some options may have changed or been removed;
             // this will check for known things that have changed and copy values if appropriate,
@@ -359,6 +360,7 @@ namespace jshepler.ngu.mods
             internal static ConfigEntry<bool> AlwaysShowAT;
             internal static ConfigEntry<bool> LoadoutSwapKeepsAutoAllocators;
             internal static ConfigEntry<bool> ResetCooldownsOnFightEnd;
+            internal static ConfigEntry<bool> DisableAPConfirmation;
         }
     }
 }
