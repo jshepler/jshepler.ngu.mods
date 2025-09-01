@@ -106,16 +106,23 @@ namespace jshepler.ngu.mods.Popups
             set => Options.Cards.AutoProtectChonkers.Value = value;
         }
 
-        public AutoCardsPopup()
-            : base(new Rect(Screen.width / 2 - (WIDTH / 2), Screen.height / 2 - (HEIGHT / 2), WIDTH, HEIGHT))
-        {
+        //public AutoCardsPopup()
+        //    : base(new Rect(Screen.width / 2 - (WIDTH / 2), Screen.height / 2 - (HEIGHT / 2), WIDTH, HEIGHT))
+        //{
 
-        }
+        //}
+
+        //protected override void UpdateRect()
+        //{
+        //    base.UpdateRectCentered(WIDTH, HEIGHT);
+        //}
+
+        internal AutoCardsPopup() : base(WIDTH, HEIGHT) { }
 
         internal override void Open()
         {
-            base.WindowRect.x = Screen.width / 2 - (WIDTH / 2);
-            base.WindowRect.y = Screen.height / 2 - (HEIGHT / 2);
+            //base.WindowRect.x = Screen.width / 2 - (WIDTH / 2);
+            //base.WindowRect.y = Screen.height / 2 - (HEIGHT / 2);
 
             _lastSortBy = AutoSortBy;
             _lastSortDirection = AutoSortDirection;

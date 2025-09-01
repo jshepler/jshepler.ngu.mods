@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Text;
 using HarmonyLib;
 using UnityEngine;
 
@@ -340,24 +342,63 @@ namespace jshepler.ngu.mods
             return long.Parse($"{num:0}");
         }
 
-        // provided by discord user Erunion
-        internal static float MinimumAdditional(this float current)
+        // 32bit versions of BitConverter.DoubleToInt64Bits and .Int64BitsToDouble
+        // because .net framework doesn't have a 32bit versions
+        private static unsafe int FloatToInt32Bits(float value)
         {
-            float next = current.NextFloat();
-
-            // This difference should always be a power of two
-            float difference = next - current;
-            //Plugin.LogInfo($"diff: {difference:r}");
-            if (difference <= 1.0f)
-                return 1.0f;
-
-            // while difference is the actual difference between the values, anything
-            // more than half of that difference should round up to the next value
-            var min = difference / 2.0f + 1.0f;
-            //Plugin.LogInfo($"min: {min:r}");
-
-            return min;
+            return *(int*)(&value);
         }
+
+        private static unsafe float Int32BitsToFloat(int value)
+        {
+            return *(float*)(&value);
+        }
+
+        // from ChatGPT
+        // ULP is derived from a float's exponent and instead of doing floor(log2(x)), doing this because
+        // 1) it's more accurate since the result of log2() is a float/double, and so could be rounded
+        //      whereas this extracts the actual (biased) exponent from the bits
+        // 2) this is much faster
+        internal static int ExtractExponent(this float value)
+        {
+            var bits = FloatToInt32Bits(value);
+            var exponent = ((bits >> 23) & 0xFF) - 127; // -127 to remove the bias and get the actual exponent
+
+            return exponent;
+        }
+
+        // from ChatGPT
+        // could be useful to know at which number ULP changes - might add this to wish tooltip to know when min increases
+        internal static float MinFloatOfNextExponent(this float value)
+        {
+            var bits = FloatToInt32Bits(value);
+            var currentExp = ((bits >> 23) & 0xFF) - 127;
+            var nextExp = currentExp + 1;
+            var nextBits = (nextExp + 127) << 23;
+            var smallestNext = Int32BitsToFloat(nextBits);
+
+            return smallestNext;
+        }
+
+        // provided by discord user Erunion
+        // (not using this since doing +1 will only work for numbers where ULP > 2)
+        //internal static float MinimumAdditional(this float current)
+        //{
+        //    float next = current.NextFloat();
+
+        //    // This difference should always be a power of two
+        //    float difference = next - current;
+        //    //Plugin.LogInfo($"diff: {difference:r}");
+        //    if (difference <= 1.0f)
+        //        return 1.0f;
+
+        //    // while difference is the actual difference between the values, anything
+        //    // more than half of that difference should round up to the next value
+        //    var min = difference / 2.0f + 1.0f;
+        //    //Plugin.LogInfo($"min: {min:r}");
+
+        //    return min;
+        //}
 
         // provided by discord user Erunion
         internal static float NextFloat(this float value)
@@ -369,16 +410,27 @@ namespace jshepler.ngu.mods
             return next;
         }
 
-        // 32bit versions of BitConverter.DoubleToInt64Bits and .Int64BitsToDouble
-        // because .net framework doesn't have a 32bit versions
-        private static unsafe int FloatToInt32Bits(float value)
+        // spacing (or ULP) is the delta to the next representable value - the value from incrementing the LSB
+        internal static float ULP(this float value)
         {
-            return *(int*)(&value);
+            // could do math to calculate it
+            //var ulp = (float)Math.Pow(2, value.GetFloatExponent() - 23);
+
+            // but this is faster than doing bit manipulation to get the exponent and doing Math.Pow()
+            return value.NextFloat() - value;
         }
 
-        private static unsafe float Int32BitsToFloat(int value)
+        internal static float MinNeededToRoundToNextFloat(this float value)
         {
-            return *(float*)(&value);
+            var halfULP = value.ULP() / 2f;
+
+            // rounding in floats uses nearest-to-even, so sometimes half will round up and sometimes down
+            // check if half is enough and if not, return next float of half
+            // (half will be a much smaller scale so its ULP < value's ULP)
+            if (value + halfULP > value)
+                return halfULP;
+
+            return halfULP.NextFloat();
         }
 
         #endregion

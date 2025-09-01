@@ -6,6 +6,35 @@ namespace jshepler.ngu.mods
     [HarmonyPatch]
     internal class HackTargets
     {
+        [HarmonyPrefix, HarmonyPatch(typeof(HacksController), "nextMilestoneTarget")]
+        private static bool HacksController_nextMilestoneTarget_prefix(int id, ref long __result, HacksController __instance)
+        {
+            var hacks = __instance.character.hacks.hacks;
+            if (id < 0 || id >= hacks.Count)
+                return true;
+
+            var hack = hacks[id];
+            var hardCap = __instance.hardCapLevel(id);
+
+            if (hack.level >= hardCap)
+                __result = hardCap;
+
+            else if (hack.target < hack.level)
+                __result = hack.level + __instance.levelsToNextMilestone(id);
+
+            else
+            {
+                var threshold = __instance.milestoneThreshold(id);
+                var target = (hack.target / threshold + 1) * threshold;
+                if (target > hardCap)
+                    target = hardCap;
+
+                __result = target;
+            }
+
+            return false;
+        }
+
         [HarmonyPrefix, HarmonyPatch(typeof(HackUIController), "setToNextMilestone")]
         private static bool HackUIController_setToNextMilestone_prefix(HackUIController __instance)
         {

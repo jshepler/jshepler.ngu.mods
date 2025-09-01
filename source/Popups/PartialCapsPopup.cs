@@ -9,7 +9,7 @@ namespace jshepler.ngu.mods.Popups
         private static GUIStyle _buttonStyle;
         private List<long> _caps;
 
-        internal PartialCapsPopup() : base(new Rect(0, 0, 200, 356))
+        internal PartialCapsPopup() : base(0, 0, 150, 250)
         {
         }
 
@@ -23,14 +23,18 @@ namespace jshepler.ngu.mods.Popups
             _caps = caps;
 
             pos.x += 30;
+            base.MoveTo(pos);
 
-            if (pos.x > Screen.width - base.WindowRect.width - 5)
-                pos.x = Screen.width - base.WindowRect.width - 5;
+            //if (pos.x > Screen.width - base.WindowRect.width - 5)
+            //    pos.x = Screen.width - base.WindowRect.width - 5;
 
-            if (pos.y > Screen.height - base.WindowRect.height - 5)
-                pos.y = Screen.height - base.WindowRect.height - 5;
+            //if (pos.y > Screen.height - base.WindowRect.height - 5)
+            //    pos.y = Screen.height - base.WindowRect.height - 5;
 
-            base.WindowRect.position = pos;
+            //base.WindowRect.position = pos;
+
+
+
             base.Open();
         }
 
@@ -43,7 +47,7 @@ namespace jshepler.ngu.mods.Popups
                 _windowStyle.normal.background = Popup.CreateSolidColorTexture(windowRect, new Color32(30, 30, 30, 255));
 
                 _buttonStyle = new GUIStyle("button");
-                _buttonStyle.padding.top = 10;
+                //_buttonStyle.padding.top = 10;
                 _buttonStyle.margin.top = 6;
                 _buttonStyle.margin.bottom = 6;
             }
@@ -52,7 +56,7 @@ namespace jshepler.ngu.mods.Popups
             GUILayout.BeginVertical();
 
             for (var x = 0; x < _caps.Count; x++)
-                if (GUILayout.Button($"<size=18>{_caps[x]:e3} ({100 / (x + 2)}%)</size>", _buttonStyle))
+                if (GUILayout.Button($"{_caps[x]:e3} ({100 / (x + 2)}%)", _buttonStyle))
                     Close(_caps[x]);
 
             GUILayout.EndVertical();

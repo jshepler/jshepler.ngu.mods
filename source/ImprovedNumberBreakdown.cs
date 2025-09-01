@@ -35,6 +35,7 @@ namespace jshepler.ngu.mods
             Data.LastYggNumberBonus = 1.0;
             Data.LastGuffNumberBonus = 1.0f;
             Data.LastHackNumberBonus = 1.0f;
+            Plugin.Character.stats.lastBloodMagic = 1.0;
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(RebirthPowerDisplay), "Start")]

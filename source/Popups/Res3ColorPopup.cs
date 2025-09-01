@@ -17,7 +17,7 @@ namespace jshepler.ngu.mods.Popups
         private static string _g;
         private static string _b;
 
-        public Res3ColorPopup() : base(new Rect(0, 0, 230, 100))
+        public Res3ColorPopup() : base(0, 0, 230, 100)
         {
             Plugin.OnUpdate += (o, e) =>
             {

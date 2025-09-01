@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Emit;
 using HarmonyLib;
 using UnityEngine.UI;
 
@@ -66,7 +65,9 @@ namespace jshepler.ngu.mods
             //for (var x = 0; x < codes.Count; x++)
             //{
 
-            //    if (codes[x].LoadsField(targetField)) start = x;
+            //    if (codes[x].LoadsField(targetField))
+            //      start = x;
+
             //    if (codes[x].Calls(setTextMethod))
             //    {
             //        end = x + 1; // include the ldarg.0 that follows
@@ -93,11 +94,15 @@ namespace jshepler.ngu.mods
             //            break;
 
             //        case 1: // skip instructions until (and including) the callvirt
-            //            if (i.Calls(setTextMethod)) state++;
+            //            if (i.Calls(setTextMethod))
+            //              state++;
+
             //            continue;
 
             //        case 2: // and skip the ldarg.0 following callvirt, then yield remaining instructions
-            //            if (i.IsLdarg(0)) state++;
+            //            if (i.IsLdarg(0))
+            //              state++;
+
             //            continue;
             //    }
 
@@ -131,9 +136,12 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(AdvancedTrainingController), "refresh")]
         private static void AdvancedTrainingController_refresh_postfix(AdvancedTrainingController __instance)
         {
-            if (!__instance.character.InMenu(Menu.AdvancedTraining)) return;
+            if (!__instance.character.InMenu(Menu.AdvancedTraining))
+                return;
 
-            if ((__instance.id == 3 || __instance.id == 4) && !__instance.character.settings.wandoos98On) return;
+            if ((__instance.id == 3 || __instance.id == 4)
+                && !__instance.character.settings.wandoos98On)
+                return;
 
             __instance.target.text = __instance.character.advancedTraining.levelTarget[__instance.id].ToString();
         }

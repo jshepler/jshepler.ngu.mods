@@ -989,7 +989,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 245. heirloom mod - start a new game and take an item with you. ***Not fully tested. Please report any issues or things not properly reset for a new game***
   - to take an item with you, put it in the trash before triggering THE END screen
-  - on THE END screen, on the last page, right-click the END button
+  - on THE END screen, on the last page, right-click THE END button
   - the mod will also add the following purchased packs: the 5 newbie packs, the R3 pack, and the portraits pack
   - also fixes the glitch that let players view THE END from the cooking screen
 
@@ -1000,3 +1000,12 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 248. experimental option to disable the AP purchase confirmation box, and if enabled will do an auto save so can still recover if screw up
 
 249. fixed game bug with 24 hour challenges not properly applying the bonus exp to fight boss kills - was doing 2/0/0% per normal/evil/sad completions instead of the expected 10/4/2%
+
+250. autosave 30s before muffin ends - useful if missed/forgot the rebirth before it ends
+
+251. ygg breakdowns - hold alt on eat/harvest tooltips - uses current numbers/gear/settings
+
+252. proper scaling of mod popups based on game window resolution and windows dpi scaling
+  - experimental option in cfg file to apply an additional modifier to scale mod pops more/less
+
+253. changed when advancing hack targets to stay at hardcap instead of wrapping around back to 0

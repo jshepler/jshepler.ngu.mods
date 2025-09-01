@@ -19,7 +19,7 @@ namespace jshepler.ngu.mods
         private static float totalRegenWithoutAdvDef;
 
         [HarmonyPostfix, HarmonyPatch(typeof(ButtonShower), "Start")]
-        private static void ButtonShower_showTitanTimer_Start(ButtonShower __instance)
+        private static void ButtonShower_Start_postfix(ButtonShower __instance)
         {
             character = __instance.character;
             _advancedTraining = character.advancedTrainingController;

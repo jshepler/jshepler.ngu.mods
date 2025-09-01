@@ -96,6 +96,7 @@ namespace jshepler.ngu.mods
             Experimental.LoadoutSwapKeepsAutoAllocators = Config.Bind("Experimental", "LoadoutSwapKeepsAutoAllocators", false, "if enabled, and have the game setting 'Unassign E/M on Loadout Swap' enabled, auto allocators won't disable on loadout swap");
             Experimental.ResetCooldownsOnFightEnd = Config.Bind("Experimental", "ResetCooldownsOnFightEnd", false, "if enabled, manual combat move cooldowns and buffs are reset on player/enemy death");
             Experimental.DisableAPConfirmation = Config.Bind("Experimental", "DisableAPConfirmation", false, "if enabled, the confirmation for AP purchases will be skipped, but an auto save will be made before doing the purchase");
+            Experimental.ModPopupScaling = Config.Bind("Experimental", "ModPopupScaling", 1.0f, "additional scaling multiplier on mod popups, applied after game resolution and dpi (windows scaling)");
 
             // when loading an old version of the cfg file, some options may have changed or been removed;
             // this will check for known things that have changed and copy values if appropriate,
@@ -361,6 +362,7 @@ namespace jshepler.ngu.mods
             internal static ConfigEntry<bool> LoadoutSwapKeepsAutoAllocators;
             internal static ConfigEntry<bool> ResetCooldownsOnFightEnd;
             internal static ConfigEntry<bool> DisableAPConfirmation;
+            internal static ConfigEntry<float> ModPopupScaling;
         }
     }
 }

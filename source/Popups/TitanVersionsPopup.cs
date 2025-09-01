@@ -27,16 +27,21 @@ namespace jshepler.ngu.mods.Popups
 
         private static List<Titan> _killedTitans;
 
-        internal TitanVersionsPopup(Character c)
-            : base(new Rect(Screen.width / 2 - 200, Screen.height / 2 - 130, 400, 260))
+        internal TitanVersionsPopup(Character c) : base(400f, 260f)
+            //: base(new Rect(Screen.width / 2 - 200, Screen.height / 2 - 130, 400, 260))
         {
             _character = c;
         }
 
+        //protected override void UpdateRect()
+        //{
+        //    base.UpdateRectCentered(400, 260);
+        //}
+
         internal override void Open()
         {
-            base.WindowRect.x = Screen.width / 2 - 200;
-            base.WindowRect.y = Screen.height / 2 - 130;
+            //base.WindowRect.x = Screen.width / 2 - 200;
+            //base.WindowRect.y = Screen.height / 2 - 130;
 
             _killedTitans = _titans.Where(t => t.HasKilled()).ToList();
             base.Open();

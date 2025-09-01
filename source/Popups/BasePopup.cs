@@ -9,6 +9,9 @@ namespace jshepler.ngu.mods.Popups
         const string ROOTCANVAS = "Canvas";
         private GameObject _blocker;
 
+        private Rect designRect;
+        private bool isCentered = false;
+        private bool needsRecalc = true;
         protected Rect WindowRect;
 
         private bool _isOpen = false;
@@ -26,13 +29,78 @@ namespace jshepler.ngu.mods.Popups
         internal EventHandler Closed;
 #pragma warning restore CS0649 // Field 'BasePopup.Closed' is never assigned to, and will always have its default value null
 
-        internal BasePopup(Rect windowRect)
+        internal BasePopup(float width, float height)
         {
-            WindowRect = windowRect;
             _blocker = buildBLocker();
             IsOpen = false;
 
+            designRect = new Rect(0, 0, width, height);
+            isCentered = true;
+
             Plugin.onGUI += OnGUI;
+            UIScaler.OnScaleChanged += () => needsRecalc = true;
+        }
+
+        internal BasePopup(float x, float y, float width, float height)
+        {
+            _blocker = buildBLocker();
+            IsOpen = false;
+
+            designRect = new Rect(x, y, width, height);
+            isCentered = false;
+
+            Plugin.onGUI += OnGUI;
+            UIScaler.OnScaleChanged += () => needsRecalc = true;
+        }
+
+        protected void RecalcRect()
+        {
+            if (!needsRecalc)
+                return;
+
+            var scale = UIScaler.CurrentScale();
+
+            WindowRect = designRect;
+
+            if (isCentered)
+            {
+                WindowRect.x = (Screen.width / scale - designRect.width) / 2f;
+                WindowRect.y = (Screen.height / scale - designRect.height) / 2f;
+            }
+            else
+            {
+                var customScale = Options.Experimental.ModPopupScaling.Value;
+                WindowRect.x /= customScale;
+                WindowRect.y /= customScale;
+            }
+
+                needsRecalc = false;
+        }
+
+        internal static Rect MakeCenteredRect(float width, float height)
+        {
+            var scale = UIScaler.CurrentScale();
+
+            var x = (Screen.width / scale - width) / 2f;
+            var y = (Screen.height / scale - height) / 2f;
+
+            return new Rect(x, y, width, height);
+        }
+
+        protected void MoveTo(Vector2 screenPosition)
+        {
+            var scale = UIScaler.CurrentScale();
+
+            // convert everything to design units
+            var x = screenPosition.x / scale;
+            var y = screenPosition.y / scale;
+            var screenWidthDesign = Screen.width / scale;
+            var screenHeightDesign = Screen.height / scale;
+
+            designRect.x = Mathf.Clamp(x, 0, screenWidthDesign - designRect.width);
+            designRect.y = Mathf.Clamp(y, 0, screenHeightDesign - designRect.height);
+
+            needsRecalc = true;
         }
 
         private void OnGUI(object sender, EventArgs e)
@@ -41,9 +109,15 @@ namespace jshepler.ngu.mods.Popups
                 return;
 
             if (Input.GetKeyDown(KeyCode.Escape))
+            {
                 Close();
-            else
-                DrawWindow(WindowRect);
+                return;
+            }
+
+            RecalcRect();
+            UIScaler.Begin();
+            DrawWindow(WindowRect);
+            UIScaler.End();
         }
 
         protected abstract void DrawWindow(Rect windowRect);
@@ -87,7 +161,8 @@ namespace jshepler.ngu.mods.Popups
             var blockerButton = blocker.AddComponent<Button>();
             blockerButton.onClick.AddListener(() =>
             {
-                if (!WindowRect.Contains(Event.current.mousePosition))
+                var unscaledMousePosition = Event.current.mousePosition / UIScaler.CurrentScale();
+                if (!WindowRect.Contains(unscaledMousePosition))
                     Close();
             });
 

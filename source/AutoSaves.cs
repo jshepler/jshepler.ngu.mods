@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -33,6 +34,11 @@ namespace jshepler.ngu.mods
         {
             if (original != null)
                 return;
+
+            Plugin.OnGameStart += (o, e) =>
+            {
+                Plugin.BeginCoroutine(checkForMuffinAutoSave());
+            };
 
             Plugin.OnUpdate += (o, e) =>
             {
@@ -200,6 +206,26 @@ namespace jshepler.ngu.mods
                 .Repeat(m => m.SetInstruction(Transpilers.EmitDelegate(ModifiedPersistentDataPath)));
 
             return cm.InstructionEnumeration();//.DumpToLog() ;
+        }
+
+        private static IEnumerator checkForMuffinAutoSave()
+        {
+            var delay = new WaitForSeconds(1f);
+            var lastSaved = DateTime.UtcNow;
+
+            while (true)
+            {
+                yield return delay;
+
+                var secondsSinceLastSaved = (DateTime.UtcNow - lastSaved).TotalSeconds;
+                var muffinTimerSeconds = Plugin.Character.arbitrary.macGuffinBooster1Time.totalseconds;
+
+                if (muffinTimerSeconds <= 0.0 || muffinTimerSeconds > 30.0 || secondsSinceLastSaved < 60.0)
+                    continue;
+
+                DoSave("Muffin_About_To_End");
+                lastSaved = DateTime.UtcNow;
+            }
         }
     }
 }

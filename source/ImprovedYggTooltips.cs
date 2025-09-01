@@ -2,7 +2,6 @@
 using System.Reflection.Emit;
 using HarmonyLib;
 using jshepler.ngu.mods.GameData;
-using UnityEngine.TextCore;
 
 namespace jshepler.ngu.mods
 {

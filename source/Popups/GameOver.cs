@@ -23,13 +23,26 @@ namespace jshepler.ngu.mods.Popups
         {
             _open = true;
             _blocker.SetActive(true);
-            _windowRect = new Rect(Screen.width / 2 - 300, Screen.height / 2 - 50, 600, 100);
+            _windowRect = BasePopup.MakeCenteredRect(600, 100);
+        }
+
+        internal static void Toggle()
+        {
+            if (_open)
+            {
+                _open = false;
+                _blocker.SetActive(false);
+            }
+            else
+                Show();
         }
 
         private static void OnGUI(object sender, EventArgs e)
         {
             if (!_open)
                 return;
+
+            UIScaler.Begin();
 
             // these must only happen during OnGUI for some reason
             if (_windowStyle == null)
@@ -50,6 +63,8 @@ namespace jshepler.ngu.mods.Popups
 
             GUILayout.EndVertical();
             GUILayout.EndArea();
+
+            UIScaler.End();
         }
 
         // modeled after https://github.com/AppertaFoundation/IXN_IBM_MIND/blob/8aa21d78bfe90e6feeab3cce6256e7fbb6036734/Whack-A-Mole/Library/PackageCache/com.unity.textmeshpro%402.0.0/Scripts/Runtime/TMP_Dropdown.cs#L847

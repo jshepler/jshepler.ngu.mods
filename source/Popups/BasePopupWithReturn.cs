@@ -7,7 +7,7 @@ namespace jshepler.ngu.mods.Popups
     {
         internal new EventHandler<PopupClosedEventArgs<TReturn>> Closed;
 
-        internal BasePopupWithReturn(Rect windowRect) : base(windowRect)
+        internal BasePopupWithReturn(float x, float y, float width, float height) : base(x, y, width, height)
         {
         }
 

@@ -7,6 +7,9 @@ namespace jshepler.ngu.mods.Popups
 {
     internal class WishListPopup : BasePopup
     {
+        const float RECT_WIDTH = 660f;
+        const float RECT_HEIGHT = 340f;
+
         private static List<int> _wishes => Data.WishList;
         private static List<int> _targets => Data.WishTargets;
         private static List<int> _lastRunning => Data.WishesLastRunning;
@@ -36,16 +39,19 @@ namespace jshepler.ngu.mods.Popups
             set => Options.WishList.AutoAdvance.Value = value;
         }
 
-        internal WishListPopup()
-            : base(new Rect(Screen.width / 2f - 330f, Screen.height / 2f - 170f, 660, 340))
-        {
-        }
+        //internal WishListPopup() : base(GetCenteredRect(RECT_WIDTH, RECT_HEIGHT))
+        //{
+        //}
+
+        //protected override void UpdateRect()
+        //{
+        //    base.UpdateRectCentered(RECT_WIDTH, RECT_HEIGHT);
+        //}
+
+        internal WishListPopup() : base(RECT_WIDTH, RECT_HEIGHT) { }
 
         internal override void Open()
         {
-            base.WindowRect.x = Screen.width / 2f - 330f;
-            base.WindowRect.y = Screen.height / 2f - 170f;
-
             _blacklistToggle = _blacklistMode;
             base.Open();
         }

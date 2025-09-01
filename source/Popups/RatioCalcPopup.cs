@@ -24,10 +24,12 @@ namespace jshepler.ngu.mods.Popups
         private static MagicPurchases _magicPurchases;
         private static Resource3Purchases _res3Purchases;
 
-        internal RatioCalcPopup()
-            : base(new Rect(0, 0, 500, 300))
-        {
-        }
+        internal RatioCalcPopup() : base(400f, 95f, 500f, 300f) { }
+
+        //protected override void UpdateRect()
+        //{
+        //    base.UpdateRectCentered(500f, 300f);
+        //}
 
         internal void Open(Menu menu)
         {
@@ -60,9 +62,9 @@ namespace jshepler.ngu.mods.Popups
 
             updateCalculated();
 
-            var sf = Plugin.Character.tooltip.canvas.scaleFactor;
-            base.WindowRect.x = 400 * sf;// Screen.width / 2f - (base.WindowRect.width / 2f);
-            base.WindowRect.y = 95 * sf;// Screen.height / 2f - (base.WindowRect.height / 2f);
+            //var sf = UIScaler.CurrentScale();// Plugin.Character.tooltip.canvas.scaleFactor;
+            //base.WindowRect.x = 400 * sf;// Screen.width / 2f - (base.WindowRect.width / 2f);
+            //base.WindowRect.y = 95 * sf;// Screen.height / 2f - (base.WindowRect.height / 2f);
 
             base.Open();
         }

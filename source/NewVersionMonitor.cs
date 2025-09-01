@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Reflection;
 using HarmonyLib;
+using jshepler.ngu.mods.Popups;
 using SimpleJSON;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -70,14 +71,14 @@ namespace jshepler.ngu.mods
 
         private static void Init()
         {
-            _area = new Rect(20, 5, 340, 30);
+            _area = new Rect(20, 5, 300, 30);
 
             _areaStyle = new GUIStyle("box");
-            _areaStyle.normal.background = Popups.Popup.CreateSolidColorTexture(_area, Color.cyan);
+            _areaStyle.normal.background = Popup.CreateSolidColorTexture(_area, Color.cyan);
 
             _labelStyle = new GUIStyle("label");
             _labelStyle.normal.textColor = Color.blue;
-            _labelStyle.fontSize = 16;
+            //_labelStyle.fontSize = 12;
         }
 
         private static string _version;
@@ -92,6 +93,8 @@ namespace jshepler.ngu.mods
 
             if (_areaStyle == null)
                 Init();
+
+            UIScaler.Begin();
 
             GUILayout.BeginArea(_area, _areaStyle);
             GUILayout.BeginHorizontal();
@@ -110,6 +113,8 @@ namespace jshepler.ngu.mods
 
             GUILayout.EndHorizontal();
             GUILayout.EndArea();
+
+            UIScaler.End();
         }
     }
 }

@@ -37,10 +37,10 @@ namespace jshepler.ngu.mods.GameData
             new AK(826, 370, 2, "RL v2", new PTR(9E+31f, 3E+31f, 6E+29f), 5),
             new AK(826, 371, 3, "RL v3", new PTR(3.6E+32f, 1.2E+32f, 2.5E+30f), 5),
             new AK(826, 372, 4, "RL v4", new PTR(1.1E+33f, 3.6E+32f, 7.5E+30f), 5),
-            new AK(848, 373, 1, "AMAL v1", new PTR(3E+33f, 1E+33f, 2E+31f), 5),
-            new AK(848, 374, 2, "AMAL v2", new PTR(1.2E+34f, 4E+33f, 8E+31f), 5),
-            new AK(848, 375, 3, "AMAL v3", new PTR(3.6E+34f, 1.2E+34f, 2.4E+32f), 5),
-            new AK(848, 376, 4, "AMAL v4", new PTR(7.2E+34f, 2.4E+34f, 4.8E+32f), 5)
+            new AK(850, 373, 1, "AMAL v1", new PTR(3E+33f, 1E+33f, 2E+31f), 5),
+            new AK(850, 374, 2, "AMAL v2", new PTR(1.2E+34f, 4E+33f, 8E+31f), 5),
+            new AK(850, 375, 3, "AMAL v3", new PTR(3.6E+34f, 1.2E+34f, 2.4E+32f), 5),
+            new AK(850, 376, 4, "AMAL v4", new PTR(7.2E+34f, 2.4E+34f, 4.8E+32f), 5)
         ];
     }
 

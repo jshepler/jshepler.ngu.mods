@@ -118,21 +118,29 @@ namespace jshepler.ngu.mods
             if (altDown)
             {
                 var prog = _wish(id).Progress;
+                var min = prog.MinNeededToRoundToNextFloat();
+
                 text += $"\n\n<b>Progress:</b> {prog * 100f:00.00000000000000000}%"
                     + $"\n     per tick: {curPPT * 100f:00.00000000000000000}%"
-                    + $"\n           min: {getMinPPT(prog) * 100f:00.00000000000000000}%";
+                    + $"\n           min: {min * 100f:00.00000000000000000}%";
+
+                //if (prog < .5)
+                //{
+                //    var next = prog.MinFloatOfNextExponent();
+                //    text += $"\n        inc at: {next * 100f:r}% progress";
+                //}
             }
 
             return text;
         }
 
-        private static float getMinPPT(float curProgress)
-        {
-            var next = curProgress.NextFloat();
-            var halfDiff = (next - curProgress) / 2f;
-            var min = halfDiff.NextFloat();
+        //private static float getMinPPT(float curProgress)
+        //{
+        //    var next = curProgress.NextFloat();
+        //    var halfDiff = (next - curProgress) / 2f;
+        //    var min = halfDiff.NextFloat();
 
-            return min;
-        }
+        //    return min;
+        //}
     }
 }

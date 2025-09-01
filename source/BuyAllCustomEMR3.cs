@@ -124,7 +124,7 @@ namespace jshepler.ngu.mods
         private static Coroutine _cr;
         private static void StartRepeatBuyAll(Action buyAll, long customCost)
         {
-            if (_cr != null)
+            if (_cr != null || customCost == 0)
                 return;
 
             ToastNotifications.IgnoreNewToasts = true;
