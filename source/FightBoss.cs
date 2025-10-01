@@ -37,7 +37,7 @@ namespace jshepler.ngu.mods
                 + $"\nAttack: {numberFormat.suffixFormat(character.bossAttack)}"
                 + $"\nDefense: {numberFormat.suffixFormat(character.bossDefense)}"
                 + $"\nMax HP: {numberFormat.suffixFormat(character.bossMaxHP)}"
-                + $"\nRegen: {numberFormat.suffixFormat(character.bossRegen)}";
+                + $"\nRegen: {numberFormat.suffixFormat(character.bossRegen * 50.0)}\\s";
 
             __instance.tooltip.showTooltip(message);
             return false;

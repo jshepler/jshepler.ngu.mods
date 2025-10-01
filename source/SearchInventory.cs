@@ -11,9 +11,11 @@ namespace jshepler.ngu.mods
     [HarmonyPatch]
     internal class SearchInventory
     {
+        private static Rect _designRect = new Rect(326f, 278f, 220f, 28f);
+
         private static bool _showInput = false;
         private static GUIStyle _windowStyle;
-        private static Rect _window = new Rect(400, 370, 200, 30);
+        private static Rect _window;// = new Rect(400, 370, 200, 30);
         private static string _searchString;
         private static string _lastString;
         private static bool _setFocus = false;
@@ -44,12 +46,17 @@ namespace jshepler.ngu.mods
 
             if (!_showInput && Input.GetKeyDown(KeyCode.S) && !Plugin.InputFieldHasFocus)
             {
-                var sf = Plugin.Character.tooltip.canvas.scaleFactor;
-                _window = new Rect(324 * sf, 282 * sf, 200 * sf, 26);
+                _window = _designRect;
+
+                var additionalScaling = Options.Experimental.ModPopupScaling.Value;
+                _window.x /= additionalScaling;
+                _window.y /= additionalScaling;
+
                 _showInput = true;
                 _setFocus = true;
                 _searchString = string.Empty;
                 _lastString = string.Empty;
+
                 Plugin.Character.inventoryController.updateInventory();
             }
 
@@ -76,6 +83,7 @@ namespace jshepler.ngu.mods
                 _windowStyle.normal.background = Popup.CreateSolidColorTexture(_window, new Color32(30, 30, 30, 255));
             }
 
+            UIScaler.Begin();
             GUILayout.BeginArea(_window, _windowStyle);
             GUILayout.BeginHorizontal();
 
@@ -92,6 +100,7 @@ namespace jshepler.ngu.mods
 
             GUILayout.EndHorizontal();
             GUILayout.EndArea();
+            UIScaler.End();
 
             if (_lastString != _searchString)
             {

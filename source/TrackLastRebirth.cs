@@ -21,8 +21,12 @@ namespace jshepler.ngu.mods
         private static bool RebirthButtonHover_showTooltip_prefix(RebirthButtonHover __instance)
         {
             var character = __instance.character;
-            var message = $"<b>Current Rebirth Time:</b> {character.rebirthTime.timeDisplayColon()}"
-                + $"\n<b>      Last Rebirth Time:</b> {NumberOutput.timeOutput(TrackLastRebirth.LastRebirthTotalSeconds)}";
+            var message = $"<b>Current Rebirth Time:</b> {character.rebirthTime.timeDisplayColon()}";
+
+            if (PauseGame.IsPaused)
+                message += " (PAUSED)";
+
+            message += $"\n<b>      Last Rebirth Time:</b> {NumberOutput.timeOutput(TrackLastRebirth.LastRebirthTotalSeconds)}";
 
             if (character.challenges.inChallenge)
                 message += $"\n\n{__instance.challengeInfo.challengeInfoMessage()}";

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Text;
 using HarmonyLib;
 using UnityEngine;
@@ -503,6 +504,22 @@ namespace jshepler.ngu.mods
             }
 
             return path;
+        }
+
+        internal static string FormatRoundTripWithSeparators(this float value)
+        {
+            var s = value.ToString("R");
+
+            var dotIndex = s.IndexOf('.');
+            if (dotIndex < 0)
+                return int.Parse(s).ToString("N0");
+
+            var intPart = s.Substring(0, dotIndex);
+            intPart = long.Parse(intPart).ToString("N0");
+
+            var fracPart = s.Substring(dotIndex); // includes the dot
+
+            return intPart + fracPart;
         }
     }
 }

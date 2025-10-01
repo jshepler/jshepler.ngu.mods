@@ -406,6 +406,24 @@ namespace jshepler.ngu.mods.ModSave
             set => Set("LastHackNumberBonus", value);
         }
 
+        internal static bool AdventureAdvancerDisabled
+        {
+            get => Get("AdventureAdvancerDisabled", false);
+            set => Set("AdventureAdvancerDisabled", value);
+        }
+
+        internal static List<int> PerkList
+        {
+            get => Get("PerkList", new List<int>());
+            set => Set("PerkList", value);
+        }
+
+        internal static List<int> QuirkList
+        {
+            get => Get("QuirkList", new List<int>());
+            set => Set("QuirkList", value);
+        }
+
         // REMINDER: NO TYPES DEFINED IN MODS ELSE NOT LOADABLE IN VANILLA
     }
 }

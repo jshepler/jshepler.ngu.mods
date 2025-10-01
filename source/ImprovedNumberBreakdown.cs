@@ -125,6 +125,7 @@ namespace jshepler.ngu.mods
 
             __instance.RebirthInfoText.text = labels;
             __instance.rebirthInfoValues.text = values;
+            __instance.rebirthInfoValues.horizontalOverflow = HorizontalWrapMode.Overflow;
 
             var time = (long)__instance.character.rebirthTime.totalseconds - 3600;
             if (time < 0)

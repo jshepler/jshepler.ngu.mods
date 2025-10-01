@@ -84,7 +84,7 @@ namespace jshepler.ngu.mods.Popups
 
             GUILayout.BeginHorizontal();
             GUILayout.Label("Res3 Color RGB Input", _titleStyle);
-            if (GUILayout.Button("×", GUILayout.Width(25)))
+            if (GUILayout.Button("×", GUILayout.ExpandWidth(false)))
                 Close();
             GUILayout.EndHorizontal();
 

@@ -1,10 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
 using HarmonyLib;
 using jshepler.ngu.mods.GameData;
-using UnityEngine;
-using UnityEngine.TextCore;
 
 namespace jshepler.ngu.mods
 {
@@ -139,11 +138,13 @@ namespace jshepler.ngu.mods
         [HarmonyPrefix, HarmonyPatch(typeof(ZoneForwardClick), "goToMaxZone", [])]
         private static bool ZoneForwardClick_goToMaxZone_prefix(ZoneForwardClick __instance)
         {
-            if (Plugin.Character.arbitrary.advAdvancerBought
-                && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)))
-                return ZoneForwardClick_goToMaxZone_int_prefix(Plugin.Character.arbitrary.advAdvancerZone, __instance);
+            var maxZone = Zones.MAXZONEID;
 
-            return ZoneForwardClick_goToMaxZone_int_prefix(Zones.MAXZONEID, __instance);
+            if (Plugin.Character.arbitrary.advAdvancerBought && Plugin.ShiftIsDown)
+                maxZone = __instance.character.arbitrary.advAdvancerZone;
+
+            __instance.goToMaxZone(maxZone);
+            return false;
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(ZoneForwardClick), "goToMaxZone", [typeof(int)])]
@@ -156,8 +157,8 @@ namespace jshepler.ngu.mods
             if (maxZone == null)
                 return false; // is possible just after rebirth before any bosses are fought
 
-            var newZoneId = maxZone.id;
-            while (newZoneId > cap || Zones.TitanZoneIds.Contains(newZoneId))
+            var newZoneId = Math.Min(maxZone.id, cap);
+            while (Zones.TitanZoneIds.Contains(newZoneId))
                 newZoneId--;
 
             __instance.ac.zoneSelector.changeZone(newZoneId);

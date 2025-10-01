@@ -70,6 +70,7 @@ namespace jshepler.ngu.mods.Popups
         }
 
         private static GUIStyle _windowStyle;
+        private static GUIStyle _centeredLabel;
         private static GUIStyle _rightAlignedLabel;
         private static GUIStyle _rightAlignedTextField;
         private static GUIStyle _rightAlignedTextFieldError;
@@ -78,6 +79,9 @@ namespace jshepler.ngu.mods.Popups
         {
             _windowStyle = new GUIStyle("box");
             _windowStyle.normal.background = Popup.CreateSolidColorTexture(windowRect, new Color32(30, 30, 30, 255));
+
+            _centeredLabel = new GUIStyle("label");
+            _centeredLabel.alignment = TextAnchor.MiddleCenter;
 
             _rightAlignedLabel = new GUIStyle("label");
             _rightAlignedLabel.alignment = TextAnchor.LowerRight;
@@ -118,11 +122,9 @@ namespace jshepler.ngu.mods.Popups
         {
             GUILayout.BeginHorizontal();
 
-            GUILayout.FlexibleSpace();
-            GUILayout.Label($"{_resource} Ratio Calculator");
-            GUILayout.FlexibleSpace();
+            GUILayout.Label($"{_resource} Ratio Calculator", _centeredLabel);
 
-            if (GUILayout.Button("×"))
+            if (GUILayout.Button("×", GUILayout.ExpandWidth(false)))
                 base.Close();
 
             GUILayout.EndHorizontal();

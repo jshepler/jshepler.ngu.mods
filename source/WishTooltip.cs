@@ -142,5 +142,38 @@ namespace jshepler.ngu.mods
 
         //    return min;
         //}
+
+
+
+        // monitor the state of the game object that triggered the tooltip
+        // if a pod deactivates while its tooltip is being displayed, the tooltip remains because
+        // Unity doesn't trigger the OnPointerExit event and since that game object is inactive,
+        // moving the mouse away won't trigger it either
+        private static GameObject _lastTooltipSource;
+
+        [HarmonyPostfix, HarmonyPatch(typeof(WishPodUIController), "enterWishTooltip")]
+        private static void WishPodUIController_enterWishTooltip_postfix(WishPodUIController __instance)
+        {
+            _lastTooltipSource = __instance.gameObject;
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(WishPodUIController), "exitWishTooltip")]
+        private static void WishPodUIController_exitWishTooltip_postfix()
+        {
+            _lastTooltipSource = null;
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(WishPodUIController), "startWishTooltip")]
+        private static bool WishPodUIController_startWishTooltip_prefix(WishPodUIController __instance)
+        {
+            if (_lastTooltipSource == null)
+                return true;
+
+            if (__instance.gameObject != _lastTooltipSource || _lastTooltipSource.activeInHierarchy)
+                return true;
+
+            __instance.exitWishTooltip();
+            return false;
+        }
     }
 }

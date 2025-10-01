@@ -22,19 +22,11 @@ namespace jshepler.ngu.mods.Popups
         {
             _caps = caps;
 
-            pos.x += 30;
+            var additionalScaling = Options.Experimental.ModPopupScaling.Value;
+            pos.x = pos.x * additionalScaling + 30f;
+            pos.y = pos.y * additionalScaling;
+
             base.MoveTo(pos);
-
-            //if (pos.x > Screen.width - base.WindowRect.width - 5)
-            //    pos.x = Screen.width - base.WindowRect.width - 5;
-
-            //if (pos.y > Screen.height - base.WindowRect.height - 5)
-            //    pos.y = Screen.height - base.WindowRect.height - 5;
-
-            //base.WindowRect.position = pos;
-
-
-
             base.Open();
         }
 

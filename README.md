@@ -897,7 +897,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 211. fix game bug that wasn't displaying total PP gained on misc stats screen
 
-212. fix game but that would show empty tooltip on loadout items that were in daycare
+212. fix game bug that would show empty tooltip on loadout items that were in daycare
 
 213. warning indication of when potions are about to expire
      - sellout shop button flashes red when less than configred time is remaining
@@ -1009,3 +1009,41 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
   - experimental option in cfg file to apply an additional modifier to scale mod pops more/less
 
 253. changed when advancing hack targets to stay at hardcap instead of wrapping around back to 0
+
+254. added total gold tossed (into money pit) to the Info 'n Stuff | Misc Stats screen (vanilla already tracks it, may as well display it)
+
+255. pause/unpause game using the pause key - only pauses game timers, can still go around looking at stuff and doing things that don't rely on timers
+
+256. shift-click the `Set Autoadvancer Zone` to toggle if it triggers 20s after start of rebirth or not (red = disabled); useful during challenges
+
+257. shows a second row of page buttons for wishes using pgdn/pgup keys - there are 11 pages of wishes in total, but vanilla only shows 9 page buttons
+
+258. added a 4th wish filter - search; press the s key on the wishes screen, press esc to close, matches against wish names and descriptions
+
+259. adds perk/quirk lists - right now, mostly useful to plan future purchases, but I might add more features to this later
+  - shift-click perks/quirks to add/remove to the list (has aqua border when in list)
+  - press F1 to toggle the popup to manage the list
+  - buy = buy 1 level, bulk = buy all it can (same as right-click)
+  - for fib perk, bulk only buys up to next reward (same as shift-right-click)
+
+260. on adventure screen, press F3 to go to the last zone you were in; "last zone" is set whenever your zone changes, including from pressing F3
+
+261. when player/enemy dies, shows the total damage player did and dps in combat log
+
+262. on the purchase EMR3 screens (exp shop), the tooltip over the base power value shows the minimum number of levels to buy
+
+      This has to do with floats and when they get big enough, the spacing between values get larger and rounding starts to happen. It becomes possible to spend exp and not get anything for it because it wasn't enough levels to get to the next valid float value.
+  
+      This mod will show the minimum amount to add that will cause it to round up to the next possible value. This takes advantage of the rounding in our favor - you can spend less exp to get the full jump to the next valid float value.
+
+      This is done by taking the current spacing between valid float values, dividing by 2, and adding 1 to ensure it always rounds up.
+
+      The min starts going up > 1 near the end of evil, at around 16m base power. This is mostly helpful in sadistic.
+
+263. changes the display of base EMR3 power in the exp shop to show the actual value (when spacing >= 1) instead of the rounded value .net normally shows; doesn't affect the base powers displayed in stat breakdowns - those are still rounded.
+
+264. fixes bug that would start showing T12's spawn timer (adventure button tooltip) upon defeating boss 246 instead of 248
+
+265. fixes bug that wouldn't let daycare shockwaves give a level to guffs when their (original) level >= 100
+
+266. fixes bug with perk 34 that would only give the bonus for 2/5/8 **online** manual/idle kills instead of 3/6/9

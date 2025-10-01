@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using jshepler.ngu.mods.ModSave;
 using UnityEngine;
 
@@ -57,13 +56,19 @@ namespace jshepler.ngu.mods.Popups
         }
 
         private static GUIStyle _windowStyle;
+        private static GUIStyle _titleLabelStyle;
         private static GUIStyle _activeWishStyle;
         private static GUIStyle _trackedWishStyle;
         private static Vector2 _scrollView;
+
         private static void initStyles(Rect windowRect)
         {
             _windowStyle = new GUIStyle("box");
             _windowStyle.normal.background = Popup.CreateSolidColorTexture(windowRect, new Color32(30, 30, 30, 255));
+
+            _titleLabelStyle = new GUIStyle("label");
+            _titleLabelStyle.alignment = TextAnchor.MiddleCenter;
+            _titleLabelStyle.wordWrap = false;
 
             _activeWishStyle = new GUIStyle("label");
             _activeWishStyle.normal.textColor = Color.green;
@@ -72,44 +77,6 @@ namespace jshepler.ngu.mods.Popups
             _trackedWishStyle.normal.textColor = Color.yellow;
         }
 
-        private static Texture2D _arrow_up;
-        private static Texture2D _arrow_top;
-        private static Texture2D _arrow_down;
-        private static Texture2D _arrow_bottom;
-        internal static void loadImages()
-        {
-            var au = Resources.arrow_up;
-            using (var ms = new MemoryStream())
-            {
-                au.Save(ms, au.RawFormat);
-                _arrow_up = new Texture2D(au.Width, au.Height);
-                _arrow_up.LoadImage(ms.ToArray());
-            }
-
-            var at = Resources.arrow_top;
-            using (var ms = new MemoryStream())
-            {
-                at.Save(ms, at.RawFormat);
-                _arrow_top = new Texture2D(at.Width, at.Height);
-                _arrow_top.LoadImage(ms.ToArray());
-            }
-
-            var ad = Resources.arrow_down;
-            using (var ms = new MemoryStream())
-            {
-                ad.Save(ms, ad.RawFormat);
-                _arrow_down = new Texture2D(ad.Width, ad.Height);
-                _arrow_down.LoadImage(ms.ToArray());
-            }
-
-            var ab = Resources.arrow_bottom;
-            using (var ms = new MemoryStream())
-            {
-                ab.Save(ms, ab.RawFormat);
-                _arrow_bottom = new Texture2D(ab.Width, ab.Height);
-                _arrow_bottom.LoadImage(ms.ToArray());
-            }
-        }
 
         protected override void DrawWindow(Rect windowRect)
         {
@@ -130,14 +97,9 @@ namespace jshepler.ngu.mods.Popups
         private void DrawTitleBar()
         {
             GUILayout.BeginHorizontal();
-
-            GUILayout.FlexibleSpace();
-            GUILayout.Label("WISH LIST");
-            GUILayout.FlexibleSpace();
-
-            if (GUILayout.Button("×"))
+            GUILayout.Label("WISH LIST", _titleLabelStyle);
+            if (GUILayout.Button("×", GUILayout.ExpandWidth(false)))
                 Close();
-
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
@@ -210,16 +172,16 @@ namespace jshepler.ngu.mods.Popups
                 if (int.TryParse(GUILayout.TextField(target.ToString(), GUILayout.Width(30)), out target))
                     _targets[index] = target;
 
-                if (GUILayout.Button(_arrow_top))
+                if (GUILayout.Button(Assets.Arrow_top))
                     MoveTop(index);
 
-                if (GUILayout.Button(_arrow_up))
+                if (GUILayout.Button(Assets.Arrow_up))
                     MoveUp(index);
 
-                if (GUILayout.Button(_arrow_down))
+                if (GUILayout.Button(Assets.Arrow_down))
                     MoveDown(index);
 
-                if (GUILayout.Button(_arrow_bottom))
+                if (GUILayout.Button(Assets.Arrow_bottom))
                     MoveBottom(index);
             }
 

@@ -378,6 +378,11 @@ namespace jshepler.ngu.mods
         private static List<int> _boosts = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000];
         private static float getAverageRecycledBoost(int startIndex, float boostBonus, float recycleChance)
         {
+            // should never be above 100%, but bug in vanilla's Character.totalRecycleBonus()
+            // counts ALL n/e/s basic challenge completions, including any over the 5
+            if (recycleChance > 1f)
+                recycleChance = 1f;
+
             var totalBoost = 0f;
             var probability = 1f;
 
@@ -398,10 +403,7 @@ namespace jshepler.ngu.mods
             var cubeBoost = boostValue / InfinityCubeSoftCap.CubeBoostDivider;
             var text = $"\n     <b>To Cube:</b> {cubeBoost:#,##0.##}";
 
-            // totalRecycleBonus() is bugged and counts more than challenge completions and could return > 100%
-            // need to cap it at 100% since it's being used in probability math
-            // but need to keep using this method as it's what the game uses when doing recycling
-            var recycleChance = Math.Min(1f, Plugin.Character.totalRecycleBonus());
+            var recycleChance = Plugin.Character.totalRecycleBonus();
             if (recycleChance > 0)
             {
                 var avgBoostWithRecycling = getAverageRecycledBoost(boostIndex, boostBonus, recycleChance);
@@ -510,30 +512,27 @@ namespace jshepler.ngu.mods
             var zoneId = character.adventureController.zone;
             var rooted = zoneId >= 20;
             var playerDcMulti = getPlayerDCMulti(rooted, out charmed);
+            var boostBonus = character.allItemList.boostBonus();
+            var recycleChance = Plugin.Character.totalRecycleBonus();
 
             var totalWeightedBoost = 0f;
-            var boostCount = 0;
-
             foreach (var drop in boostDrops)
             {
+                var boostIndex = (drop.ItemIds[0] - 1) % 13;
+                var avgRecycledBoost = getAverageRecycledBoost(boostIndex, boostBonus, recycleChance);
+
+                var moddedDC = drop.BaseDC * playerDcMulti + drop.BonuseDC;
+                var dc = Math.Min(moddedDC, drop.MaxDC);
+
                 // if any of the boosts are filtered, the number of potential drops is reduced and needs to be accounted for
                 var unfilteredBoostsMulti = drop.ItemIds.Count(boostUnfiltered) / (float)drop.ItemIds.Length;
-                var moddedDC = drop.BaseDC * playerDcMulti + drop.BonuseDC;
-                var dc = Math.Min(moddedDC, drop.MaxDC) * unfilteredBoostsMulti;
 
-                var boostIndex = (drop.ItemIds[0] - 1) % 13;
-                var boostBonus = character.allItemList.boostBonus();
-                var recycleChance = character.totalRecycleBonus();
-                var avgBoost = dc * getAverageRecycledBoost(boostIndex, boostBonus, recycleChance);
+                var avgBoost = avgRecycledBoost * dc * unfilteredBoostsMulti;
                 if (avgBoost > 0)
-                {
                     totalWeightedBoost += avgBoost;
-                    boostCount++;
-                }
             }
 
-            var avgBoostPerKill = boostCount > 0 ? totalWeightedBoost : 0f;
-            return avgBoostPerKill;
+            return totalWeightedBoost;
         }
 
         private static float _rootedCharm = Mathf.Pow(2f, 1f / 3f);

@@ -74,7 +74,8 @@ namespace jshepler.ngu.mods.Popups
 
             GUILayout.BeginHorizontal();
             GUILayout.Label("<b>Change Titan Versions</b>", _titleStyle);
-            if (GUILayout.Button("×", GUILayout.Width(25))) Close();
+            if (GUILayout.Button("×", GUILayout.ExpandWidth(false)))
+                Close();
             GUILayout.EndHorizontal();
 
             _killedTitans.Do(DrawTitan);

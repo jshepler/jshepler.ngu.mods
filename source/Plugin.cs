@@ -97,6 +97,9 @@ namespace jshepler.ngu.mods
             // https://github.com/aedenthorn/PlanetCrafterMods/issues/7
             // not needed for all games, but I'm not currently aware of anything that it would hurt
             this.gameObject.hideFlags = HideFlags.HideAndDontSave;
+
+            // enables virtual terminal mode so that ANSI escape sequences are rendered correctly
+            EnableVT.Init();
             
             Log = base.Logger;
             Options.Init(base.Config);

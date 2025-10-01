@@ -195,7 +195,7 @@ namespace jshepler.ngu.mods
 
             var pc = ac.playerController;
             pc.isParrying = false;
-            pc.blockTime = -1;
+            pc.blockTime = 3f;
             pc.hyperRegenTime = -1;
 
             if (pc.defenseBuffTime > 0)

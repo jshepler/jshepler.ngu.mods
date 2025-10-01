@@ -59,19 +59,24 @@ namespace jshepler.ngu.mods.Popups
                 return;
 
             var scale = UIScaler.CurrentScale();
+            var screenWidthDesign = Screen.width / scale;
+            var screenHeightDesign = Screen.height / scale;
 
             WindowRect = designRect;
 
             if (isCentered)
             {
-                WindowRect.x = (Screen.width / scale - designRect.width) / 2f;
-                WindowRect.y = (Screen.height / scale - designRect.height) / 2f;
+                WindowRect.x = (screenWidthDesign - designRect.width) / 2f;
+                WindowRect.y = (screenHeightDesign - designRect.height) / 2f;
             }
             else
             {
-                var customScale = Options.Experimental.ModPopupScaling.Value;
-                WindowRect.x /= customScale;
-                WindowRect.y /= customScale;
+                var additionalScaling = Options.Experimental.ModPopupScaling.Value;
+                var x = WindowRect.x / additionalScaling;
+                var y = WindowRect.y / additionalScaling;
+
+                WindowRect.x = Mathf.Clamp(x, 0, (screenWidthDesign - designRect.width));
+                WindowRect.y = Mathf.Clamp(y, 0, (screenHeightDesign - designRect.height));
             }
 
                 needsRecalc = false;
@@ -89,17 +94,7 @@ namespace jshepler.ngu.mods.Popups
 
         protected void MoveTo(Vector2 screenPosition)
         {
-            var scale = UIScaler.CurrentScale();
-
-            // convert everything to design units
-            var x = screenPosition.x / scale;
-            var y = screenPosition.y / scale;
-            var screenWidthDesign = Screen.width / scale;
-            var screenHeightDesign = Screen.height / scale;
-
-            designRect.x = Mathf.Clamp(x, 0, screenWidthDesign - designRect.width);
-            designRect.y = Mathf.Clamp(y, 0, screenHeightDesign - designRect.height);
-
+            designRect.position = screenPosition / UIScaler.CurrentScale();
             needsRecalc = true;
         }
 

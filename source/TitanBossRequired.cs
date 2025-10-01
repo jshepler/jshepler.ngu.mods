@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Reflection.Emit;
 using HarmonyLib;
 
@@ -10,6 +11,7 @@ namespace jshepler.ngu.mods
         [HarmonyTranspiler, HarmonyPriority(1), HarmonyPatch(typeof(ButtonShower), "showTitanTimer")]
         private static IEnumerable<CodeInstruction> ButtonShower_showTitanTimer_transpiler(IEnumerable<CodeInstruction> instructions)
         {
+            var bosses = GameData.TitanAK.Requirements.Select(req => req.effectiveBossId).Distinct().ToArray();
             var cm = new CodeMatcher(instructions)
                 .SearchForward(i => i.opcode == OpCodes.Ldstr)
                 .Advance(1)
@@ -17,72 +19,72 @@ namespace jshepler.ngu.mods
                 // T1 - ready
                 .SearchForward(i => i.opcode == OpCodes.Ldstr)
                 .Advance(1)
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, 58), Transpilers.EmitDelegate(insertBoss))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, bosses[0]), Transpilers.EmitDelegate(insertBoss))
 
                 // T1 - time until
                 .SearchForward(i => i.opcode == OpCodes.Ldstr)
                 .Advance(1)
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, 58), Transpilers.EmitDelegate(insertBoss))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, bosses[0]), Transpilers.EmitDelegate(insertBoss))
 
                 // T2 - ready
                 .SearchForward(i => i.opcode == OpCodes.Ldstr)
                 .Advance(1)
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, 66), Transpilers.EmitDelegate(insertBoss))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, bosses[1]), Transpilers.EmitDelegate(insertBoss))
 
                 // T2 - time until
                 .SearchForward(i => i.opcode == OpCodes.Ldstr)
                 .Advance(1)
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, 66), Transpilers.EmitDelegate(insertBoss))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, bosses[1]), Transpilers.EmitDelegate(insertBoss))
 
                 // T3 - ready
                 .SearchForward(i => i.opcode == OpCodes.Ldstr)
                 .Advance(1)
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, 82), Transpilers.EmitDelegate(insertBoss))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, bosses[2]), Transpilers.EmitDelegate(insertBoss))
 
                 // T3 - time until
                 .SearchForward(i => i.opcode == OpCodes.Ldstr)
                 .Advance(1)
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, 82), Transpilers.EmitDelegate(insertBoss))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, bosses[2]), Transpilers.EmitDelegate(insertBoss))
 
                 // T4 - ready
                 .SearchForward(i => i.opcode == OpCodes.Ldstr)
                 .Advance(1)
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, 100), Transpilers.EmitDelegate(insertBoss))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, bosses[3]), Transpilers.EmitDelegate(insertBoss))
 
                 // T4 - time until
                 .SearchForward(i => i.opcode == OpCodes.Ldstr)
                 .Advance(1)
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, 100), Transpilers.EmitDelegate(insertBoss))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, bosses[3]), Transpilers.EmitDelegate(insertBoss))
 
                 // T5 - ready
                 .SearchForward(i => i.opcode == OpCodes.Ldstr)
                 .Advance(1)
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, 116), Transpilers.EmitDelegate(insertBoss))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, bosses[4]), Transpilers.EmitDelegate(insertBoss))
 
                 // T5 - time until
                 .SearchForward(i => i.opcode == OpCodes.Ldstr)
                 .Advance(1)
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, 116), Transpilers.EmitDelegate(insertBoss))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, bosses[4]), Transpilers.EmitDelegate(insertBoss))
 
                 // T6 - ready
                 .SearchForward(i => i.opcode == OpCodes.Ldstr)
                 .Advance(1)
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, 132), Transpilers.EmitDelegate(insertBoss))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, bosses[5]), Transpilers.EmitDelegate(insertBoss))
 
                 // T6 - time until
                 .SearchForward(i => i.opcode == OpCodes.Ldstr)
                 .Advance(1)
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, 132), Transpilers.EmitDelegate(insertBoss))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, bosses[5]), Transpilers.EmitDelegate(insertBoss))
 
                 // T7 - ready
                 .SearchForward(i => i.opcode == OpCodes.Ldstr)
                 .Advance(1)
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, 426), Transpilers.EmitDelegate(insertBoss))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, bosses[6]), Transpilers.EmitDelegate(insertBoss))
 
                 // T7 - time until
                 .SearchForward(i => i.opcode == OpCodes.Ldstr)
                 .Advance(1)
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, 426), Transpilers.EmitDelegate(insertBoss))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, bosses[6]), Transpilers.EmitDelegate(insertBoss))
 
                 .SearchForward(i => i.opcode == OpCodes.Ldstr)
                 .Advance(1)
@@ -102,52 +104,56 @@ namespace jshepler.ngu.mods
                 // T8 - ready
                 .SearchForward(i => i.opcode == OpCodes.Ldstr)
                 .Advance(1)
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, 467), Transpilers.EmitDelegate(insertBoss))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, bosses[7]), Transpilers.EmitDelegate(insertBoss))
 
                 // T8 - time until
                 .SearchForward(i => i.opcode == OpCodes.Ldstr)
                 .Advance(1)
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, 467), Transpilers.EmitDelegate(insertBoss))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, bosses[7]), Transpilers.EmitDelegate(insertBoss))
 
                 // T9 - ready
                 .SearchForward(i => i.opcode == OpCodes.Ldstr)
                 .Advance(1)
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, 491), Transpilers.EmitDelegate(insertBoss))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, bosses[8]), Transpilers.EmitDelegate(insertBoss))
 
                 // T9 - time until
                 .SearchForward(i => i.opcode == OpCodes.Ldstr)
                 .Advance(1)
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, 491), Transpilers.EmitDelegate(insertBoss))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, bosses[8]), Transpilers.EmitDelegate(insertBoss))
 
                 // T10 - ready
                 .SearchForward(i => i.opcode == OpCodes.Ldstr)
                 .Advance(1)
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, 777), Transpilers.EmitDelegate(insertBoss))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, bosses[9]), Transpilers.EmitDelegate(insertBoss))
 
                 // T10 - time until
                 .SearchForward(i => i.opcode == OpCodes.Ldstr)
                 .Advance(1)
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, 777), Transpilers.EmitDelegate(insertBoss))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, bosses[9]), Transpilers.EmitDelegate(insertBoss))
 
                 // T11 - ready
                 .SearchForward(i => i.opcode == OpCodes.Ldstr)
                 .Advance(1)
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, 826), Transpilers.EmitDelegate(insertBoss))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, bosses[10]), Transpilers.EmitDelegate(insertBoss))
 
                 // T11 - time until
                 .SearchForward(i => i.opcode == OpCodes.Ldstr)
                 .Advance(1)
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, 826), Transpilers.EmitDelegate(insertBoss))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, bosses[10]), Transpilers.EmitDelegate(insertBoss))
+
+                // fixes vanilla bug that was showing T12 starting at boss 246 instead of 248
+                .SearchForward(i => i.opcode == OpCodes.Ldc_I4 && (int)i.operand == 848)
+                .SetOperandAndAdvance(bosses[11])
 
                 // T12 - ready
                 .SearchForward(i => i.opcode == OpCodes.Ldstr)
                 .Advance(1)
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, 848), Transpilers.EmitDelegate(insertBoss))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, bosses[11]), Transpilers.EmitDelegate(insertBoss))
 
                 // T12 - time until
                 .SearchForward(i => i.opcode == OpCodes.Ldstr)
                 .Advance(1)
-                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, 848), Transpilers.EmitDelegate(insertBoss))
+                .InsertAndAdvance(new CodeInstruction(OpCodes.Ldc_I4, bosses[11]), Transpilers.EmitDelegate(insertBoss))
 
                 // T13 - ready
                 .SearchForward(i => i.opcode == OpCodes.Ldstr)

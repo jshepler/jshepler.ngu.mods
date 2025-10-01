@@ -45,10 +45,10 @@ namespace jshepler.ngu.mods
 
         internal static void AddTime(double totalSeconds, bool offline = false)
         {
-            // if game wasn't started with this mod, start it with current playtime;
-            // if current difficulty isn't normal, there's no way to know how much was normal,
-            // so make it all normal
-            if (Data.TotalTimePlayedNormal == 0.0)
+            // I don't know of a way to know how much of current play time is in what difficulty,
+            // but if player is in normal, assume all of it is normal;
+            // otherwise, just start tracking from this point on
+            if (Data.TotalTimePlayedNormal == 0.0 && Plugin.Character.settings.rebirthDifficulty == difficulty.normal)
             {
                 Data.TotalTimePlayedNormal = Plugin.Character.totalPlaytime.totalseconds;
                 return;

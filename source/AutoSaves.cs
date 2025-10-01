@@ -142,7 +142,7 @@ namespace jshepler.ngu.mods
                 return;
 
             var folder = new DirectoryInfo(saveFolder);
-            var files = folder.GetFiles().Where(f => f.LastWriteTimeUtc < DateTime.UtcNow.AddDays(-daysToKeep));
+            var files = folder.GetFiles().Where(f => f.Extension == ".txt" && f.LastWriteTimeUtc < DateTime.UtcNow.AddDays(-daysToKeep));
             foreach (var f in files)
                 f.Delete();
         }

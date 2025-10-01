@@ -169,7 +169,7 @@ namespace jshepler.ngu.mods
             if(poopMulti > 1.0f)
                 text += $"\n<b>Poop:</b> {showMulti(poopMulti)}";
 
-            text += Seeds(fc, tierFactor, poopMulti);
+            text += Seeds(fc, (int)tierFactor, poopMulti);
             return text;
         }
 
