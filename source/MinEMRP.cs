@@ -111,7 +111,7 @@ namespace jshepler.ngu.mods
         [HarmonyTranspiler, HarmonyPatch(typeof(Resource3Purchases), "updateRes3Purchases")]
         private static IEnumerable<CodeInstruction> Resource3Purchases_updateRes3Purchases_transpiler(IEnumerable<CodeInstruction> instructions)
         {
-            var res3Power = typeof(Character).GetField("res3Power");
+            var res3Power = typeof(Resource3).GetField("res3Power");
             var cm = new CodeMatcher(instructions)
                 .MatchForward(false, new CodeMatch(OpCodes.Ldflda, res3Power))
                 .SetOpcodeAndAdvance(OpCodes.Ldfld)

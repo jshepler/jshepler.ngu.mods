@@ -510,7 +510,7 @@ namespace jshepler.ngu.mods
         {
             var s = value.ToString("R");
 
-            var dotIndex = s.IndexOf('.');
+            var dotIndex = s.IndexOf(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator);
             if (dotIndex < 0)
                 return int.Parse(s).ToString("N0");
 
