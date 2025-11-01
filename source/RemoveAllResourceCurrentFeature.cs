@@ -105,8 +105,13 @@ namespace jshepler.ngu.mods
         [HarmonyPrefix, HarmonyPatch(typeof(WishesController), "clearSelectedWish")]
         private static bool WishesController_clearSelectedWish_prefix(WishesController __instance)
         {
-            if (!Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift))
+            if (!Plugin.ShiftIsDown)
+            {
+                WishList.ClearTracked(__instance.curSelectedWish);
                 return true;
+            }
+
+            WishList.ClearAllTracked();
 
             __instance.removeAllResources();
             __instance.updateText();

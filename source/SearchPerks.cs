@@ -7,9 +7,9 @@ using UnityEngine;
 namespace jshepler.ngu.mods
 {
     [HarmonyPatch]
-    internal class WishSearch
+    internal class SearchPerks
     {
-        private static Rect _designRect = new Rect(769f, 248f, 220f, 28f);
+        private static Rect _designRect = new Rect(724f, 105f, 220f, 28f);
         private static GUIStyle _windowStyle;
         private static Rect _window;
         private static bool _setFocus;
@@ -17,41 +17,44 @@ namespace jshepler.ngu.mods
         private static bool _showInput = false;
         private static string _searchString;
 
-        private static Action updateMenu = () => Plugin.Character.wishesController.updateMenu();
+        private static Action updateMenu = () => Plugin.Character.adventureController.itopod.updateMenu();
+        private static bool hasSearchPerksMod = BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.leo.searchitopodperks");
 
         [HarmonyPrepare]
         private static void prep(MethodBase method)
         {
-            if (method != null)
+            if (hasSearchPerksMod || method != null)
                 return;
 
             Plugin.OnUpdate += onUpdate;
             Plugin.onGUI += onGUI;
         }
 
-        private static bool excludeWish(int wishId)
+        private static bool excludePerk(int perkId)
         {
-            var p = Plugin.Character.wishesController.properties[wishId];
+            var controller = Plugin.Character.adventureController.itopod;
+            var name = controller.perkName[perkId];
+            var desc = controller.perkDesc[perkId];
 
-            return p.wishName.IndexOf(_searchString, StringComparison.OrdinalIgnoreCase) == -1
-                && p.WishDesc.IndexOf(_searchString, StringComparison.OrdinalIgnoreCase) == -1;
+            return name.IndexOf(_searchString, StringComparison.OrdinalIgnoreCase) == -1
+                && desc.IndexOf(_searchString, StringComparison.OrdinalIgnoreCase) == -1;
         }
 
-        [HarmonyPostfix, HarmonyPatch(typeof(WishesController), "constructFullList")]
-        private static void WishesController_constructFullList_postfix(WishesController __instance)
+        [HarmonyPostfix, HarmonyPatch(typeof(ItopodPerkController), "constructList")]
+        private static void ItopodPerkController_constructList_postfix(ItopodPerkController __instance)
         {
-            if (!_showInput || string.IsNullOrWhiteSpace(_searchString))
+            if (hasSearchPerksMod || !_showInput || string.IsNullOrWhiteSpace(_searchString))
                 return;
 
-            var wishIds = __instance.curValidUpgradesList;
-            for (var x = wishIds.Count - 1; x >= 0; x--)
-                if (excludeWish(wishIds[x]))
-                    wishIds.RemoveAt(x);
+            var perkIds = __instance.curValidUpgradesList;
+            for (var x = perkIds.Count - 1; x >= 0; x--)
+                if (excludePerk(perkIds[x]))
+                    perkIds.RemoveAt(x);
         }
 
         private static void onUpdate(object sender, EventArgs e)
         {
-            if (!Plugin.Character.InMenu(Menu.Wishes))
+            if (!Plugin.Character.InMenu(Menu.Perks))
                 return;
 
             if (!_showInput && Input.GetKeyDown(KeyCode.S) && !Plugin.InputFieldHasFocus)
@@ -67,21 +70,16 @@ namespace jshepler.ngu.mods
                 _searchString = string.Empty;
             }
 
-            switch (Event.current.keyCode)
+            else if (_showInput && Event.current.keyCode == KeyCode.Escape)
             {
-                case KeyCode.Escape:
-                    if (_showInput)
-                    {
-                        _showInput = false;
-                        updateMenu();
-                    }
-                    break;
+                _showInput = false;
+                updateMenu();
             }
         }
 
         private static void onGUI(object sender, EventArgs e)
         {
-            if (!_showInput || !Plugin.Character.InMenu(Menu.Wishes))
+            if (!_showInput || !Plugin.Character.InMenu(Menu.Perks))
                 return;
 
             if (_windowStyle == null)

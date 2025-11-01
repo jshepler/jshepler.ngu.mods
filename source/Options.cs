@@ -50,12 +50,16 @@ namespace jshepler.ngu.mods
             NotificationToasts.TopDown = Config.Bind("NotificationToasts", "TopDown", true, "if true, toasts are displayed top-right and go down; if false, toasts are displayed bottom-right and go up");
             OverrideCulture.Enabled = Config.Bind("OverrideCulture", "Enabled", false, "if enabled, uses the specified locale string to override your system's current culture for the game - ONLY AFFECTS NUMBER FORMATTING");
             OverrideCulture.Locale = Config.Bind("OverrideCulture", "Locale", "en-US", "locale string used if OverrideCulture.Enabled is true; examples: de-DE, fr-FR");
-            ResourceNames.ShowFullName = Config.Bind("ResourceNames", "ShowFullName", ShowFullResourceName.None, "Which of the top-left bars to show full names instead of first letter");
 
+            PerkList.FilterEnabled = Config.Bind("PerkList", "Filter.Enabled", false, "When enabled, perks page will be filtered to the listed perks");
+            PerkList.OrderEnabled = Config.Bind("PerkList", "Sort.Enabled", false, "When enabled, perks page will have listed perks first and in list order");
             PotionWarning.ExpireSeconds = Config.Bind("PotionWarning", "ExpireSeconds", 60f, "when potion timer drops below this number of seconds, the Sellout Shop button flashes red; 0 = disabled");
             PruneSaves.DaysToKeep = Config.Bind("PruneSaves", "DaysToKeep", 0, "When quick/auto saving, will delete saves older than value; 0 = disabled");
             Questing.AlwaysRandom = Config.Bind("Questing", "AlwaysRandom", false, "If true, new quests will always be random instead of targeting current zone");
             Questing.AutoButter = Config.Bind("Questing", "AutoButter", false, "If true, will automatically use butter when starting a major quest");
+            QuirkList.FilterEnabled = Config.Bind("QuirkList", "Filter.Enabled", false, "When enabled, quirks page will be filtered to the listed quirks");
+            QuirkList.OrderEnabled = Config.Bind("QuirkList", "Sort.Enabled", false, "When enabled, quirks page will have listed quirks first and in list order");
+            ResourceNames.ShowFullName = Config.Bind("ResourceNames", "ShowFullName", ShowFullResourceName.None, "Which of the top-left bars to show full names instead of first letter");
 
             RemoteTriggers.Enabled = Config.Bind("RemoteTriggers", "Enabled", false, "enables receiving of remote commands");
             RemoteTriggers.UrlPrefix = Config.Bind("RemoteTriggers", "Prefix", "http://localhost:8088/ngu/", "urls must start with this prefix else will be ignored");
@@ -97,6 +101,7 @@ namespace jshepler.ngu.mods
             Experimental.ResetCooldownsOnFightEnd = Config.Bind("Experimental", "ResetCooldownsOnFightEnd", false, "if enabled, manual combat move cooldowns and buffs are reset on player/enemy death");
             Experimental.DisableAPConfirmation = Config.Bind("Experimental", "DisableAPConfirmation", false, "if enabled, the confirmation for AP purchases will be skipped, but an auto save will be made before doing the purchase");
             Experimental.ModPopupScaling = Config.Bind("Experimental", "ModPopupScaling", 1.0f, "additional scaling multiplier on mod popups, applied after game resolution and dpi (windows scaling)");
+            Experimental.ShepsTheme = Config.Bind("Experimental", "ShepsTheme", false, "modifies the normal theme for the adventure and rebirth screens: background color changed to the game's blue-ish color and the data panels to use the dark theme sprites");
 
             // when loading an old version of the cfg file, some options may have changed or been removed;
             // this will check for known things that have changed and copy values if appropriate,
@@ -363,6 +368,19 @@ namespace jshepler.ngu.mods
             internal static ConfigEntry<bool> ResetCooldownsOnFightEnd;
             internal static ConfigEntry<bool> DisableAPConfirmation;
             internal static ConfigEntry<float> ModPopupScaling;
+            internal static ConfigEntry<bool> ShepsTheme;
+        }
+
+        internal static class PerkList
+        {
+            internal static ConfigEntry<bool> FilterEnabled;
+            internal static ConfigEntry<bool> OrderEnabled;
+        }
+
+        internal static class QuirkList
+        {
+            internal static ConfigEntry<bool> FilterEnabled;
+            internal static ConfigEntry<bool> OrderEnabled;
         }
     }
 }

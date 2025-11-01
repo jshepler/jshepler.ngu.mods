@@ -403,7 +403,7 @@ namespace jshepler.ngu.mods
             var cubeBoost = boostValue / InfinityCubeSoftCap.CubeBoostDivider;
             var text = $"\n     <b>To Cube:</b> {cubeBoost:#,##0.##}";
 
-            var recycleChance = Plugin.Character.totalRecycleBonus();
+            var recycleChance = Math.Min(Plugin.Character.totalRecycleBonus(), 1f);
             if (recycleChance > 0)
             {
                 var avgBoostWithRecycling = getAverageRecycledBoost(boostIndex, boostBonus, recycleChance);

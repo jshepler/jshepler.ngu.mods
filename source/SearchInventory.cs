@@ -12,14 +12,14 @@ namespace jshepler.ngu.mods
     internal class SearchInventory
     {
         private static Rect _designRect = new Rect(326f, 278f, 220f, 28f);
+        private static GUIStyle _windowStyle;
+        private static Rect _window;
+        private static bool _setFocus;
 
         private static bool _showInput = false;
-        private static GUIStyle _windowStyle;
-        private static Rect _window;// = new Rect(400, 370, 200, 30);
         private static string _searchString;
-        private static string _lastString;
-        private static bool _setFocus = false;
-        private static Dictionary<specType, string> _effNames = new();
+
+        private static Action updateMenu = () => Plugin.Character.inventoryController.updateInventory();
 
         [HarmonyPatch, HarmonyPrepare]
         private static void prep(MethodBase method)
@@ -28,15 +28,7 @@ namespace jshepler.ngu.mods
                 return;
 
             Plugin.OnUpdate += OnUpdate;
-            Plugin.onGUI += OnGUI;
-
-            Plugin.OnGameStart += (o, e) =>
-            {
-                var getEffectNameMethod = typeof(InventoryController).GetMethod("effectName", BindingFlags.Instance | BindingFlags.NonPublic);
-                var getEffectName = (specType t) => (string)getEffectNameMethod.Invoke(Plugin.Character.inventoryController, [t]);
-                var types = Enum.GetValues(typeof(specType)).Cast<specType>();
-                _effNames = types.ToDictionary(t => t, t => getEffectName(t).ToLowerInvariant().Replace("butts", "{0}"));
-            };
+            Plugin.onGUI += onGUI;
         }
 
         private static void OnUpdate(object sender, EventArgs e)
@@ -55,24 +47,18 @@ namespace jshepler.ngu.mods
                 _showInput = true;
                 _setFocus = true;
                 _searchString = string.Empty;
-                _lastString = string.Empty;
 
-                Plugin.Character.inventoryController.updateInventory();
+                updateMenu();
             }
 
-            switch (Event.current.keyCode)
+            else if (_showInput && Event.current.keyCode == KeyCode.Escape)
             {
-                case KeyCode.Escape:
-                    if (_showInput)
-                    {
-                        _showInput = false;
-                        Plugin.Character.inventoryController.updateInventory();
-                    }
-                    break;
+                _showInput = false;
+                updateMenu();
             }
         }
 
-        private static void OnGUI(object sender, EventArgs e)
+        private static void onGUI(object sender, EventArgs e)
         {
             if (!_showInput || !Plugin.Character.InMenu(Menu.Inventory))
                 return;
@@ -90,7 +76,7 @@ namespace jshepler.ngu.mods
             GUILayout.Label("Search: ", GUILayout.ExpandWidth(false));
 
             GUI.SetNextControlName("searchInput");
-            _lastString = GUILayout.TextField(_lastString, GUILayout.ExpandWidth(true));
+            _searchString = GUILayout.TextField(_searchString, GUILayout.ExpandWidth(true));
 
             if (_setFocus)
             {
@@ -102,11 +88,8 @@ namespace jshepler.ngu.mods
             GUILayout.EndArea();
             UIScaler.End();
 
-            if (_lastString != _searchString)
-            {
-                _searchString = _lastString;
-                Plugin.Character.inventoryController.updateInventory();
-            }
+            if (GUI.changed)
+                updateMenu();
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(ItemController), "updateItem")]
@@ -136,7 +119,7 @@ namespace jshepler.ngu.mods
 
         private static MethodInfo _getEffectName = typeof(InventoryController).GetMethod("effectName", BindingFlags.Instance | BindingFlags.NonPublic);
         private static string getEffectName(specType t) => (string)_getEffectName.Invoke(Plugin.Character.inventoryController, [t]);
-        private static bool specHasMatch(specType t, string search) => getEffectName(t).ToLowerInvariant().Contains(search);
+        private static bool specHasMatch(specType t, string search) => getEffectName(t).IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0;
         private static ItemNameDesc _data;
 
         private static bool hasMatch(int itemId)
@@ -144,21 +127,19 @@ namespace jshepler.ngu.mods
             if (_data == null)
                 _data = Plugin.Character.itemInfo;
 
-            if (_searchString == string.Empty)
+            if (string.IsNullOrWhiteSpace(_searchString))
                 return false;
 
-            var ss = _searchString.ToLowerInvariant();
-
-            if (_data.itemName[itemId].ToLowerInvariant().Contains(ss))
+            if (_data.itemName[itemId].IndexOf(_searchString, StringComparison.OrdinalIgnoreCase) >= 0)
                 return true;
 
-            if (specHasMatch(_data.specType1[itemId], ss))
+            if (specHasMatch(_data.specType1[itemId], _searchString))
                 return true;
 
-            if (specHasMatch(_data.specType2[itemId], ss))
+            if (specHasMatch(_data.specType2[itemId], _searchString))
                 return true;
 
-            if (specHasMatch(_data.specType3[itemId], ss))
+            if (specHasMatch(_data.specType3[itemId], _searchString))
                 return true;
 
             return false;

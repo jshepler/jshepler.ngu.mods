@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace jshepler.ngu.mods.Popups
 {
@@ -8,34 +7,7 @@ namespace jshepler.ngu.mods.Popups
         const float WIDTH = 660f;
         const float HEIGHT = 340f;
 
-        internal delegate bool CanBuyQuirkDelegate(int quirkId);
-        internal delegate void BuyQuirkDelegate(int quirkId);
-        internal delegate void BulkBuyQuirkDelegate(int quirkId);
-        internal delegate void MoveQuirkDelegate(int quirkId, bool moveDown);
-        internal delegate void RemoveQuirkDelegate(int quirkId);
-
-        private List<int> _quirkIDs;
-        private CanBuyQuirkDelegate _canBuyQuirk;
-        private BuyQuirkDelegate _buyQuirk;
-        private BulkBuyQuirkDelegate _bulkBuyQuirk;
-        private MoveQuirkDelegate _moveQuirk;
-        private RemoveQuirkDelegate _removeQuirk;
-
-        internal QuirkListPopup(CanBuyQuirkDelegate CanBuyQuirk, BuyQuirkDelegate BuyQuirk, BulkBuyQuirkDelegate BulkBuyQuirk, MoveQuirkDelegate MoveQuirk, RemoveQuirkDelegate RemoveQuirk)
-            : base(WIDTH, HEIGHT)
-        {
-            _canBuyQuirk = CanBuyQuirk;
-            _buyQuirk = BuyQuirk;
-            _bulkBuyQuirk = BulkBuyQuirk;
-            _moveQuirk = MoveQuirk;
-            _removeQuirk = RemoveQuirk;
-        }
-
-        internal void Open(List<int> quirkIDs)
-        {
-            _quirkIDs = quirkIDs;
-            base.Open();
-        }
+        internal QuirkListPopup() : base(WIDTH, HEIGHT) { }
 
         private static GUIStyle _windowStyle;
         private static GUIStyle _titleLabelStyle;
@@ -68,10 +40,32 @@ namespace jshepler.ngu.mods.Popups
 
         private void drawTitle()
         {
+            var controller = Plugin.Character.beastQuestPerkController;
+
             GUILayout.BeginHorizontal();
             GUILayout.Label("QUIRK LIST", _titleLabelStyle);
             if (GUILayout.Button("×", GUILayout.ExpandWidth(false)))
                 Close();
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+
+            QuirkList.FilterEnabled = GUILayout.Toggle(QuirkList.FilterEnabled, "Filtered   ");
+            if (GUI.changed)
+                controller.onFilterChange();
+
+            QuirkList.OrderEnabled = GUILayout.Toggle(QuirkList.OrderEnabled, "Ordered   ");
+            if (GUI.changed)
+            {
+                controller.onOrderChange();
+                controller.updateFilters();
+            }
+
+            GUILayout.FlexibleSpace();
+
+            if (GUILayout.Button("Clear"))
+                QuirkList.ClearQuirks();
+
             GUILayout.EndHorizontal();
         }
 
@@ -83,34 +77,34 @@ namespace jshepler.ngu.mods.Popups
 
             _scrollView = GUILayout.BeginScrollView(_scrollView, false, false, GUILayout.ExpandHeight(true));
 
-            for (var x = 0; x < _quirkIDs.Count; x++)
+            for (var x = 0; x < QuirkList.Quirks.Count; x++)
             {
-                var quirkId = _quirkIDs[x];
+                var quirkId = QuirkList.Quirks[x];
 
                 GUILayout.BeginHorizontal("box");
 
                 GUILayout.Label($"({quirkId}) {controller.quirkName[quirkId]}");
                 GUILayout.Label($"{beastQuest.quirkLevel[quirkId]}/{controller.maxLevel[quirkId]}", GUILayout.ExpandWidth(false));
 
-                if (!_canBuyQuirk(quirkId))
+                if (!QuirkList.CanBuyQuirk(quirkId))
                     GUI.enabled = false;
 
                 if (GUILayout.Button("Buy", GUILayout.ExpandWidth(false)))
-                    _buyQuirk(quirkId);
+                    QuirkList.BuyQuirk(quirkId);
 
                 if (GUILayout.Button("Bulk", GUILayout.ExpandWidth(false)))
-                    _bulkBuyQuirk(quirkId);
+                    QuirkList.BulkBuyQuirk(quirkId);
 
                 GUI.enabled = true;
 
                 if (GUILayout.Button(Assets.Arrow_up, GUILayout.ExpandWidth(false)))
-                    _moveQuirk(quirkId, false);
+                    QuirkList.MoveQuirk(quirkId, false);
 
                 if (GUILayout.Button(Assets.Arrow_down, GUILayout.ExpandWidth(false)))
-                    _moveQuirk(quirkId, true);
+                    QuirkList.MoveQuirk(quirkId, true);
 
                 if (GUILayout.Button("×", GUILayout.ExpandWidth(false)))
-                    _removeQuirk(quirkId);
+                    QuirkList.RemoveQuirk(quirkId);
 
                 GUILayout.EndHorizontal();
             }

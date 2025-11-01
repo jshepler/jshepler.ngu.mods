@@ -424,6 +424,12 @@ namespace jshepler.ngu.mods.ModSave
             set => Set("QuirkList", value);
         }
 
+        internal static float Move69Timer
+        {
+            get => Get("Move69Timer", 0f);
+            set => Set("Move69Timer", value);
+        }
+
         // REMINDER: NO TYPES DEFINED IN MODS ELSE NOT LOADABLE IN VANILLA
     }
 }

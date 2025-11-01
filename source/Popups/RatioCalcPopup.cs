@@ -159,7 +159,7 @@ namespace jshepler.ngu.mods.Popups
 
             if (long.TryParse(GUILayout.TextField(_ratio.cap.ToString(), _capRatioNot250 ? _rightAlignedTextFieldError : _rightAlignedTextField, GUILayout.Width(COL3)), out long rc))
             {
-                if (rc > 0 && rc != _ratio.cap)
+                if (rc >= 0 && rc != _ratio.cap)
                 {
                     _capRatioNot250 = rc % 250 > 0;
                     _ratio.cap = rc;
@@ -169,7 +169,7 @@ namespace jshepler.ngu.mods.Popups
 
             if (long.TryParse(GUILayout.TextField(_ratio.bars.ToString(), _rightAlignedTextField, GUILayout.Width(COL4)), out long rb))
             {
-                if (rb > 0 && rb != _ratio.bars)
+                if (rb >= 0 && rb != _ratio.bars)
                 {
                     _ratio.bars = rb;
                     updateCalculated();
@@ -268,41 +268,43 @@ namespace jshepler.ngu.mods.Popups
             GUILayout.EndVertical();
         }
 
+        private static long divCeil(long n, long d) => (n + d - 1) / d;
+
         private static void updateCalculated()
         {
-            var root = ((float)_base.power / _ratio.power).CeilToLong();
+            var root = divCeil(_base.power, _ratio.power);//  ((float)_base.power / _ratio.power).CeilToLong();
             _shouldBe.power = root * _ratio.power;
-            _shouldBe.cap = root * _ratio.cap;
-            _shouldBe.bars = root * _ratio.bars;
+            _shouldBe.cap = _ratio.cap == 0L ? 0L : root * _ratio.cap;
+            _shouldBe.bars = _ratio.bars == 0L ? 0L : root * _ratio.bars;
 
-            if (_base.cap > _shouldBe.cap)
+            if (_ratio.cap > 0L && _base.cap > _shouldBe.cap)
             {
-                root = ((double)_base.cap / _ratio.cap).CeilToLong();
+                root = divCeil(_base.cap, _ratio.cap);// ((double)_base.cap / _ratio.cap).CeilToLong();
                 _shouldBe.cap = root * _ratio.cap;
                 _shouldBe.power = root * _ratio.power;
-                _shouldBe.bars = root * _ratio.bars;
+                _shouldBe.bars = _ratio.bars == 0L ? 0L : root * _ratio.bars;
             }
 
-            if (_base.bars > _shouldBe.bars)
+            if (_ratio.bars > 0L && _base.bars > _shouldBe.bars)
             {
-                root = ((float)_base.bars / _ratio.bars).CeilToLong();
+                root = divCeil(_base.bars, _ratio.bars);// ((float)_base.bars / _ratio.bars).CeilToLong();
                 _shouldBe.bars = root * _ratio.bars;
                 _shouldBe.power = root * _ratio.power;
-                _shouldBe.cap = root * _ratio.cap;
+                _shouldBe.cap = _ratio.cap == 0L ? 0L : root * _ratio.cap;
             }
 
             // cap can only be in multiples of 250
             if (_shouldBe.cap % 250L != 0)
             {
-                _shouldBe.cap = (_shouldBe.cap / 250f).CeilToLong() * 250L;
+                _shouldBe.cap = divCeil(_shouldBe.cap, 250L) * 250L;// (_shouldBe.cap / 250f).CeilToLong() * 250L;
                 root = _shouldBe.cap / _ratio.cap;
                 _shouldBe.power = root * _ratio.power;
                 _shouldBe.bars = root * _ratio.bars;
             }
 
             _levelsNeeded.power = _shouldBe.power - _base.power;
-            _levelsNeeded.cap = _shouldBe.cap - _base.cap;
-            _levelsNeeded.bars = _shouldBe.bars - _base.bars;
+            _levelsNeeded.cap = _ratio.cap == 0L ? 0L : _shouldBe.cap - _base.cap;
+            _levelsNeeded.bars = _ratio.bars == 0L ? 0L : _shouldBe.bars - _base.bars;
 
             _expNeeded.power = powerCost(_levelsNeeded.power);
             _expNeeded.cap = capCost(_levelsNeeded.cap);

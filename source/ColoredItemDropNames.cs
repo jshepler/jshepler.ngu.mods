@@ -1,4 +1,6 @@
-﻿using HarmonyLib;
+﻿using System.Collections.Generic;
+using System.Reflection.Emit;
+using HarmonyLib;
 
 namespace jshepler.ngu.mods
 {
@@ -20,6 +22,42 @@ namespace jshepler.ngu.mods
 
             var newResult = __result.Insert(index, $"<b><color={Options.Colors.LootItemNames.Value}>") + " </color></b>";
             __result = newResult;
+        }
+
+        [HarmonyTranspiler,
+            HarmonyPatch(typeof(LootDrop), "dropMacguffin"),
+            HarmonyPatch(typeof(LootDrop), "dropRandomMacguffin", [typeof(string), typeof(int)])]
+        private static IEnumerable<CodeInstruction> LootDrop_dropMacguffin_transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var match1 = " also dropped ";
+            var replace1 = $" also dropped <b><color={Options.Colors.LootItemNames.Value}>";
+
+            var match2 = " Power Macguffin Fragment";
+            var replace2 = " Power Macguffin Fragment</color></b>";
+
+            var match3 = " Cap Macguffin Fragment";
+            var replace3 = " Cap Macguffin Fragment</color></b>";
+
+            var match4 = " Bar Macguffin Fragment";
+            var replace4 = " Bar Macguffin Fragment</color></b>";
+
+            var cm = new CodeMatcher(instructions)
+                .MatchForward(false, new CodeMatch(OpCodes.Ldstr, match1))
+                .SetOperandAndAdvance(replace1)
+                .MatchForward(false, new CodeMatch(OpCodes.Ldstr, match2))
+                .SetOperandAndAdvance(replace2)
+
+                .MatchForward(false, new CodeMatch(OpCodes.Ldstr, match1))
+                .SetOperandAndAdvance(replace1)
+                .MatchForward(false, new CodeMatch(OpCodes.Ldstr, match3))
+                .SetOperandAndAdvance(replace3)
+
+                .MatchForward(false, new CodeMatch(OpCodes.Ldstr, match1))
+                .SetOperandAndAdvance(replace1)
+                .MatchForward(false, new CodeMatch(OpCodes.Ldstr, match4))
+                .SetOperandAndAdvance(replace4);
+
+            return cm.InstructionEnumeration();
         }
     }
 }

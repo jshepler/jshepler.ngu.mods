@@ -452,6 +452,17 @@ namespace jshepler.ngu.mods
             }
         }
 
+        internal static void ClearTracked(int wishId)
+        {
+            if (_lastRunning.Contains(wishId))
+                _lastRunning.Remove(wishId);
+        }
+
+        internal static void ClearAllTracked()
+        {
+            _lastRunning.Clear();
+        }
+
         internal static bool WishTargetReached(int wishId)
         {
             return WishTargetReached(Wishes.AllWishes[wishId]);

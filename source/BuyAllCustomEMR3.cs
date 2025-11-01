@@ -87,7 +87,6 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(EnergyPurchases), "updateEnergyPurchases")]
         private static void EnergyPurchases_updateEnergyPurchases_postfix(EnergyPurchases __instance)
         {
-
             var character = __instance.character;
             if (!character.InMenu(Menu.EXP_Energy) || !_shiftDown)
                 return;
@@ -185,12 +184,14 @@ namespace jshepler.ngu.mods
             character.energyPower = Math.Min(character.energyPower + customEnergyPowerAmount, hardCapPowBar);
             character.capEnergy = Math.Min(character.capEnergy + customEnergyCapAmount, hardCap);
             character.energyBars = Math.Min(character.energyBars + customEnergyBarAmount, hardCapPowBar);
+            character.energyPurchases.refresh();
 
             if (magicUnlocked)
             {
                 character.magic.magicPower = Math.Min(character.magic.magicPower + customMagicPowerAmount, hardCapPowBar);
                 character.magic.capMagic = Math.Min(character.magic.capMagic + customMagicCapAmount, hardCap);
                 character.magic.magicPerBar = Math.Min(character.magic.magicPerBar + customMagicBarAmount, hardCapPowBar);
+                character.magicPurchases.refresh();
             }
 
             if (res3Unlocked)
@@ -198,11 +199,8 @@ namespace jshepler.ngu.mods
                 character.res3.res3Power = Math.Min(character.res3.res3Power + customRes3PowerAmount, hardCapPowBar);
                 character.res3.capRes3 = Math.Min(character.res3.capRes3 + customRes3CapAmount, hardCap);
                 character.res3.res3PerBar = Math.Min(character.res3.res3PerBar + customRes3BarAmount, hardCapPowBar);
+                character.res3Purchases.refresh();
             }
-
-            var ep = character.energyPurchases;
-            ep.refresh();
-            EnergyPurchases_updateEnergyPurchases_postfix(ep);
 
             return;
         }

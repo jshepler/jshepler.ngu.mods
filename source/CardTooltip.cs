@@ -60,6 +60,8 @@ namespace jshepler.ngu.mods
             }
         }
 
+        // from CardsController.generateRarity()
+        private static float[] _rarityMaxVariances = [0.9f, 1.0f, 1.08f, 1.14f, 1.17f, 1.19f, 1.2f];
         private static WaitForSeconds _delay = new WaitForSeconds(.2f);
 
         private static IEnumerator ShowTooltip(int podId)
@@ -197,39 +199,5 @@ namespace jshepler.ngu.mods
             { cardBonus.PP, (0.6f, 1.11f, 0.0001f, 0.0002f) },
             { cardBonus.QP, (0.6f, 1.08f, 0.0001f, 0.0002f) }
         };
-
-        // from CardsController.generateRarity()
-        private static float[] _rarityMaxVariances = [0.9f, 1.0f, 1.08f, 1.14f, 1.17f, 1.19f, 1.2f];
-
-        [HarmonyPrefix, HarmonyPatch(typeof(ButtonShower), "showCardStatus")]
-        private static bool ButtonShower_showCardStatus_prefix(ButtonShower __instance)
-        {
-            var character = __instance.character;
-            if (!character.cards.cardsOn)
-                return false;
-
-            var controller = character.cardsController;
-            var cardSpeed = controller.totalCardSpeed();
-
-            var cardSpawnTime = controller.cardSpawnTime() / cardSpeed;
-            var timeToNextCard = cardSpawnTime - character.cards.cardSpawnTimer.totalseconds / cardSpeed;
-            var cardsPerDay = 86400f / cardSpawnTime;
-
-            var text = $"<b>Card Spawn Time:</b> {NumberOutput.timeOutput(cardSpawnTime)}"
-                + $"\n<b>Time to Next Card:</b> {NumberOutput.timeOutput(timeToNextCard)}"
-                + $"\n<b>Cards per Day:</b> {cardsPerDay:#,##0.#}";
-
-            if (character.cardsController.unlockedChonkers())
-            {
-                var chonkerSpawnTime = controller.chonkerSpawnTime() / cardSpeed;
-                var timeToNextChonker = chonkerSpawnTime - character.cards.chonkerSpawnTimer.totalseconds / cardSpeed;
-
-                text += $"\n\n<b>CHONKER Spawn Time:</b> {NumberOutput.timeOutput(chonkerSpawnTime)}"
-                    + $"\n<b>Time to Next CHONKER:</b> {NumberOutput.timeOutput(timeToNextChonker)}";
-            }
-
-            __instance.tooltip.showTooltip(text);
-            return false;
-        }
     }
 }

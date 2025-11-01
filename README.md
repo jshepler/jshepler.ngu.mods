@@ -870,7 +870,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 
 199. when an item in daycare (that's not a guff) reaches 100, the daycare button lights up green
 
-200. fixes bugs with walerp's hide-n-seek game:
+200. fixes bugs with walderp's hide-n-seek game:
      - while hiding, going offline would still advance walderp's respawn timer (sounds great, but causes some conflicts where he's both hiding and spawned)
      - the 3 minute timer for moving where walderp hides is done in a way that prevents him from being in any menu for up to 3 minutes after being killed
      - when found, the timer isn't reset so on next kill don't get the full 3 minutes
@@ -1047,3 +1047,21 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 265. fixes bug that wouldn't let daycare shockwaves give a level to guffs when their (original) level >= 100
 
 266. fixes bug with perk 34 that would only give the bonus for 2/5/8 **online** manual/idle kills instead of 3/6/9
+
+267. filter and order options to perk and quirk lists and affect the list of perks/quirks on the screen (not the f1 popup)
+  - checkboxes are added to the perks/quirks screen (next to the filter options) as well as the f1 popup
+  - if filter is enabled, an *additional* filter is applied to include on those perks/quirks in the list
+  - if order is enabled, the perks/quirks in the list are shown in list order before the other perks which will be in the selected base order
+  - if filter is enabled, but order is not, the displayed perks/quirks will be in the selected base order, *not in list order*
+
+268. adds total ITOPOD kills to the info 'n stuff - misc stats screen, replacing Highest Damage in a Single Hit
+
+269. modified the normal theme for the rebirth and adventure screens to make the background blue and the info panels the dark theme
+
+      added as an experimental option (ShepsTheme), default disabled
+
+270. perks and quirks search, press s to open, esc to close
+
+      the perk search mod will be disabled if the other [perk search mod](https://github.com/postEntropy/NGU_Mods) is installed so won't conflict with it
+
+271. added alt-tooltip to the cards button to show tag order and next card/chonker and if it comes from being tagged or not

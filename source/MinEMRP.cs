@@ -123,11 +123,16 @@ namespace jshepler.ngu.mods
 
         private static string getPowerString(float power)
         {
-            var ulp = power.ULP();
-            if (ulp < 1)
-                return power.FormatRoundTripWithSeparators();
+            var asFloat = power.ToString("#,##0.#");
+            if (power.ULP() < 2)
+                return asFloat;
 
-            return ((ulong)power).ToString("N0");
+            var asLong = ((long)power).ToString("#,##0");
+            return asLong;
+            //if (asLong.Equals(asFloat))
+            //    return asFloat;
+
+            //return $"{asFloat}\n({asLong})";
         }
     }
 }

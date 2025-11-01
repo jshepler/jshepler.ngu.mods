@@ -332,7 +332,8 @@ namespace jshepler.ngu.mods
             if (num >= long.MaxValue)
                 return long.MaxValue;
 
-            return long.Parse($"{num:0}");
+            //return long.Parse($"{num:0}");
+            return (long)Math.Round(num, MidpointRounding.AwayFromZero);
         }
 
         internal static long RoundToLong(this double num)

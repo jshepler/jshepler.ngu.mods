@@ -34,10 +34,10 @@ namespace jshepler.ngu.mods
         private const int WS_MAXIMIZEBOX = 0x10000;
 
         [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr", SetLastError = true)]
-        private static extern long SetWindowLongPtr(IntPtr hWnd, int nIndex, long dwNewLong);
+        private static extern IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
         [DllImport("user32.dll", EntryPoint = "GetWindowLongPtr", SetLastError = true)]
-        private static extern long GetWindowLongPtr(IntPtr hWnd, int nIndex);
+        private static extern IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex);
 
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -64,7 +64,8 @@ namespace jshepler.ngu.mods
             if (!_fullscreen && _maximized)
             {
                 yield return toggleMaximized();
-                yield return new WaitForFixedUpdate();
+                yield return null;
+                yield return null;
             }
 
             _fullscreen = !_fullscreen;
@@ -76,7 +77,8 @@ namespace jshepler.ngu.mods
             if (!_maximized && _fullscreen)
             {
                 yield return toggleFullscreen();
-                yield return new WaitForFixedUpdate();
+                yield return null;
+                yield return null;
             }
 
             if (_windowHandle == IntPtr.Zero)
@@ -109,15 +111,16 @@ namespace jshepler.ngu.mods
         private static void EnableMaximizeBox()
         {
             var current = GetWindowLongPtr(_windowHandle, GWL_STYLE);
-            if (current == 0)
+            if (current == IntPtr.Zero)
             {
                 var error = Marshal.GetLastWin32Error();
                 Plugin.LogInfo($"error calling GetWindowLongPtr: {error}");
                 return;
             }
 
-            var modified = SetWindowLongPtr(_windowHandle, GWL_STYLE, (current | WS_MAXIMIZEBOX));
-            if (modified == 0)
+            var style = new IntPtr(current.ToInt64() | WS_MAXIMIZEBOX);
+            var modified = SetWindowLongPtr(_windowHandle, GWL_STYLE, style);
+            if (modified == IntPtr.Zero)
             {
                 var error = Marshal.GetLastWin32Error();
                 Plugin.LogInfo($"error calling GetWindowLongPtr: {error}");

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace jshepler.ngu.mods.Popups
 {
@@ -8,34 +7,7 @@ namespace jshepler.ngu.mods.Popups
         const float WIDTH = 660f;
         const float HEIGHT = 340f;
 
-        internal delegate bool CanBuyPerkDelegate(int perkId);
-        internal delegate void BuyPerkDelegate(int perkId);
-        internal delegate void BulkBuyPerkDelegate(int perkId);
-        internal delegate void MovePerkDelegate(int perkId, bool moveDown);
-        internal delegate void RemovePerkDelegate(int perkId);
-
-        private List<int> _perkIDs;
-        private CanBuyPerkDelegate _canBuyPerk;
-        private BuyPerkDelegate _buyPerk;
-        private BulkBuyPerkDelegate _bulkBuyPerk;
-        private MovePerkDelegate _movePerk;
-        private RemovePerkDelegate _removePerk;
-
-        internal PerkListPopup(CanBuyPerkDelegate CanBuyPerk, BuyPerkDelegate BuyPerk, BulkBuyPerkDelegate BulkBuyPerk, MovePerkDelegate MovePerk, RemovePerkDelegate RemovePerk)
-            : base(WIDTH, HEIGHT)
-        {
-            _canBuyPerk = CanBuyPerk;
-            _buyPerk = BuyPerk;
-            _bulkBuyPerk = BulkBuyPerk;
-            _movePerk = MovePerk;
-            _removePerk = RemovePerk;
-        }
-
-        internal void Open(List<int> perkIDs)
-        {
-            _perkIDs = perkIDs;
-            base.Open();
-        }
+        internal PerkListPopup() : base(WIDTH, HEIGHT) { }
 
         private static GUIStyle _windowStyle;
         private static GUIStyle _titleLabelStyle;
@@ -63,15 +35,36 @@ namespace jshepler.ngu.mods.Popups
 
             GUILayout.EndVertical();
             GUILayout.EndArea();
-
         }
 
         private void drawTitle()
         {
+            var controller = Plugin.Character.adventureController.itopod;
+
             GUILayout.BeginHorizontal();
             GUILayout.Label("PERK LIST", _titleLabelStyle);
             if (GUILayout.Button("×", GUILayout.ExpandWidth(false)))
                 Close();
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+
+            PerkList.FilterEnabled = GUILayout.Toggle(PerkList.FilterEnabled, "Filtered   ");
+            if (GUI.changed)
+                controller.onFilterChange();
+
+            PerkList.OrderEnabled = GUILayout.Toggle(PerkList.OrderEnabled, "Ordered   ");
+            if (GUI.changed)
+            {
+                controller.onOrderChange();
+                controller.updateFilters();
+            }
+
+            GUILayout.FlexibleSpace();
+
+            if (GUILayout.Button("Clear"))
+                PerkList.ClearPerks();
+
             GUILayout.EndHorizontal();
         }
 
@@ -83,34 +76,37 @@ namespace jshepler.ngu.mods.Popups
 
             _scrollView = GUILayout.BeginScrollView(_scrollView, false, false, GUILayout.ExpandHeight(true));
 
-            for (var x = 0; x < _perkIDs.Count; x++)
+            // can't do foreach because the list can be changed, causing foreach to throw an exception
+            // and technically, yes, the list displayed could be incorrect, but would only be for 1 frame
+            // I'm ok with sacrificing that 1 frame of incorrectness to save the complexity of a more proper implementation
+            for (var x = 0; x < PerkList.Perks.Count; x++)
             {
-                var perkId = _perkIDs[x];
+                var perkId = PerkList.Perks[x];
 
                 GUILayout.BeginHorizontal("box");
 
                 GUILayout.Label($"({perkId}) {itopod.perkName[perkId]}");
                 GUILayout.Label($"{level[perkId]}/{itopod.maxLevel[perkId]}", GUILayout.ExpandWidth(false));
 
-                if (!_canBuyPerk(perkId))
+                if (!PerkList.CanBuyPerk(perkId))
                     GUI.enabled = false;
 
                 if (GUILayout.Button("Buy", GUILayout.ExpandWidth(false)))
-                    _buyPerk(perkId);
+                    PerkList.BuyPerk(perkId);
 
                 if (GUILayout.Button("Bulk", GUILayout.ExpandWidth(false)))
-                    _bulkBuyPerk(perkId);
+                    PerkList.BulkBuyPerk(perkId);
 
                 GUI.enabled = true;
 
                 if (GUILayout.Button(Assets.Arrow_up, GUILayout.ExpandWidth(false)))
-                    _movePerk(perkId, false);
+                    PerkList.MovePerk(perkId, false);
 
                 if (GUILayout.Button(Assets.Arrow_down, GUILayout.ExpandWidth(false)))
-                    _movePerk(perkId, true);
+                    PerkList.MovePerk(perkId, true);
 
                 if (GUILayout.Button("×", GUILayout.ExpandWidth(false)))
-                    _removePerk(perkId);
+                    PerkList.RemovePerk(perkId);
 
                 GUILayout.EndHorizontal();
             }
