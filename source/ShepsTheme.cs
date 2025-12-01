@@ -67,7 +67,10 @@ namespace jshepler.ngu.mods
             }
 
             else
+            {
                 __instance.ui[84].GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
+                __instance.ui[63].GetComponent<Image>().color = new Color(1f, 1f, 1f, 1f);
+            }
         }
     }
 }

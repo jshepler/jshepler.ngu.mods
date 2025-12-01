@@ -154,15 +154,15 @@ namespace jshepler.ngu.mods.ModSave
             set => Set("SeedsGainedThisRB", value);
         }
 
-        internal static long PoopGainedLastRB
+        internal static int PoopGainedLastRB
         {
-            get => Get("PoopGainedLastRB", 0L);
+            get => Get("PoopGainedLastRB", 0);
             set => Set("PoopGainedLastRB", value);
         }
 
-        internal static long PoopGainedThisRB
+        internal static int PoopGainedThisRB
         {
-            get => Get("PoopGainedThisRB", 0L);
+            get => Get("PoopGainedThisRB", 0);
             set => Set("PoopGainedThisRB", value);
         }
 
@@ -252,13 +252,13 @@ namespace jshepler.ngu.mods.ModSave
 
         internal static long[] ExpSourcesThisRB
         {
-            get => Get<long[]>("ExpSourcesThisRB", [0L, 0L, 0L, 0L]);
+            get => Get<long[]>("ExpSourcesThisRB", new long[TrackExpGained.SOURCE_COUNT]);
             set => Set("ExpSourcesThisRB", value);
         }
 
         internal static long[] ExpSourcesLastRB
         {
-            get => Get<long[]>("ExpSourcesLastRB", [0L, 0L, 0L, 0L]);
+            get => Get<long[]>("ExpSourcesLastRB", new long[TrackExpGained.SOURCE_COUNT]);
             set => Set("ExpSourcesLastRB", value);
         }
 
@@ -296,6 +296,18 @@ namespace jshepler.ngu.mods.ModSave
         {
             get => Get("APSourcesLastRB", new long[TrackAPGained.SOURCE_COUNT]);
             set => Set("APSourcesLastRB", value);
+        }
+
+        internal static int[] PoopSourcesThisRB
+        {
+            get => Get("PoopSourcesThisRB", new int[TrackPoopAndSeedsGained.POOP_SOURCE_COUNT]);
+            set => Set("PoopSourcesThisRB", value);
+        }
+
+        internal static int[] PoopSourcesLastRB
+        {
+            get => Get("PoopSourcesLastRB", new int[TrackPoopAndSeedsGained.POOP_SOURCE_COUNT]);
+            set => Set("PoopSourcesLastRB", value);
         }
 
         internal static float BaseAdvPowerGained
@@ -428,6 +440,13 @@ namespace jshepler.ngu.mods.ModSave
         {
             get => Get("Move69Timer", 0f);
             set => Set("Move69Timer", value);
+        }
+
+        // [11 challenges][3 difficulties][max completions]
+        internal static int[][][] ChallengeCompletionTimes
+        {
+            get => Get("ChallengeCompletionTimes", ChallengeTimes.BaseChallenge.InitCompletionTimes());
+            set => Set("ChallengeCompletionTimes", value);
         }
 
         // REMINDER: NO TYPES DEFINED IN MODS ELSE NOT LOADABLE IN VANILLA

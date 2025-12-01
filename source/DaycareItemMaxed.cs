@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Linq;
 using HarmonyLib;
 using UnityEngine;
@@ -11,13 +12,22 @@ namespace jshepler.ngu.mods
     {
         private static Button _dkButton;
         private static WaitForSeconds _wait = new WaitForSeconds(0.1f);
-        //private static int[] _lastLevelsAdded = new int[6];
+        private static int[] _lastLevelsAdded = new int[6];
+        private static bool _saveLoaded = false;
 
         [HarmonyPostfix, HarmonyPatch(typeof(AllDaycareController), "Start")]
         private static void AllDaycareController_Start_postfix(AllDaycareController __instance)
         {
             _dkButton = __instance.button;
             Plugin.BeginCoroutine(watchForMaxedItem());
+
+            Plugin.OnOfflineProgressionComplete += afterFirstLoad;
+        }
+
+        private static void afterFirstLoad(object sender, EventArgs e)
+        {
+            _saveLoaded = true;
+            Plugin.OnOfflineProgressionComplete -= afterFirstLoad;
         }
 
         private static IEnumerator watchForMaxedItem()
@@ -34,51 +44,62 @@ namespace jshepler.ngu.mods
 
             while (true)
             {
+                yield return _wait;
+                if (!_saveLoaded)
+                    continue;
+
                 if (character.InMenu(Menu.Inventory))
                     _dkButton.image.color = maxedItems.Any() ? Plugin.ButtonColor_Green : Color.white;
 
-                //var doUpdate = false;
-                //for (var x = 0; x < daycareControllers.Count; x++)
-                //{
-                //    Plugin.LogInfo($"x:{x}");
-                //    var levelsAdded = daycareControllers[x].levelsAdded();
-                //    if (levelsAdded != _lastLevelsAdded[x])
-                //    {
-                //        _lastLevelsAdded[x] = levelsAdded;
-                //        doUpdate = true;
-                //    }
-                //}
+                // want to trigger an update of inventory items for the green border whenever
+                // a daycare item "gains" a level - this tracks levelsAdded() per item to
+                // notice when they change and trigger an update
+                var doUpdate = false;
+                for (var x = 0; x < daycareControllers.Count; x++)
+                {
+                    var controller = daycareControllers[x];
+                    if (controller.id >= character.inventory.daycare.Count)
+                    {
+                        _lastLevelsAdded[x] = 0;
+                        continue;
+                    }
 
-                //if (doUpdate)
-                //    character.inventoryController.updateInventory();
+                    var levelsAdded = controller.levelsAdded();
+                    if (levelsAdded != _lastLevelsAdded[x])
+                    {
+                        _lastLevelsAdded[x] = levelsAdded;
+                        doUpdate = true;
+                    }
+                }
 
-                yield return _wait;
+                if (doUpdate)
+                    character.inventoryController.updateInventory();
             }
         }
 
-        //[HarmonyPostfix, HarmonyPatch(typeof(ItemController), "updateItem")]
-        private static void ItemController_updateItem_postfix(ItemController __instance)
+        [HarmonyPostfix,
+            HarmonyPatch(typeof(ItemController), "updateItem"),
+            HarmonyPatch(typeof(LoadoutController), "updateItem")]
+        private static void ItemController_updateItem_postfix(int ___id, Image ___border)
         {
-            var inventory = __instance.character.inventory;
-
-            var slotId = __instance.id;
-            if (slotId >= inventory.inventory.Count)
+            var character = Plugin.Character;
+            if (character == null)
                 return;
 
-            var item = inventory.GetItem(slotId);
-            if (!item.isEquipment())
+            var item = character.inventory.GetItem(___id);
+            if (item == null || !item.isEquipment())
                 return;
 
-            var dcSlotId = inventory.daycare.FindIndex(e => e.id == item.id);
+            var dcSlotId = character.inventory.daycare.FindIndex(e => e.id == item.id);
             if (dcSlotId == -1)
                 return;
 
-            var controller = Plugin.Character.inventoryController.daycares[dcSlotId];
-            var dcLevel = inventory.daycare[dcSlotId].level + controller.levelsAdded();
+            var levelsAdded = character.inventoryController.daycares[dcSlotId].levelsAdded();
+            var dcLevel = character.inventory.daycare[dcSlotId].level + levelsAdded;
             if (dcLevel + item.level < 99)
                 return;
 
-            __instance.border.color = Plugin.ButtonColor_Green;
+            ___border.color = Color.green;
         }
     }
 }

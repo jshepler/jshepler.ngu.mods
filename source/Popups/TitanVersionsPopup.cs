@@ -28,21 +28,12 @@ namespace jshepler.ngu.mods.Popups
         private static List<Titan> _killedTitans;
 
         internal TitanVersionsPopup(Character c) : base(400f, 260f)
-            //: base(new Rect(Screen.width / 2 - 200, Screen.height / 2 - 130, 400, 260))
         {
             _character = c;
         }
 
-        //protected override void UpdateRect()
-        //{
-        //    base.UpdateRectCentered(400, 260);
-        //}
-
         internal override void Open()
         {
-            //base.WindowRect.x = Screen.width / 2 - 200;
-            //base.WindowRect.y = Screen.height / 2 - 130;
-
             _killedTitans = _titans.Where(t => t.HasKilled()).ToList();
             base.Open();
         }
@@ -89,18 +80,17 @@ namespace jshepler.ngu.mods.Popups
             GUILayout.BeginHorizontal("box");
 
             GUILayout.Label(titan.name);
-            GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button("Easy", titan.version == 0 ? _selected : _notSelected))
+            if (GUILayout.Button("Easy", titan.version == 0 ? _selected : _notSelected, GUILayout.ExpandWidth(false)))
                 titan.version = 0;
 
-            if (GUILayout.Button("Normal", titan.version == 1 ? _selected : _notSelected))
+            if (GUILayout.Button("Normal", titan.version == 1 ? _selected : _notSelected, GUILayout.ExpandWidth(false)))
                 titan.version = 1;
 
-            if (GUILayout.Button("Hard", titan.version == 2 ? _selected : _notSelected))
+            if (GUILayout.Button("Hard", titan.version == 2 ? _selected : _notSelected, GUILayout.ExpandWidth(false)))
                 titan.version = 2;
 
-            if (GUILayout.Button("Brutal", titan.version == 3 ? _selected : _notSelected))
+            if (GUILayout.Button("Brutal", titan.version == 3 ? _selected : _notSelected, GUILayout.ExpandWidth(false)))
                 titan.version = 3;
 
             GUILayout.EndHorizontal();

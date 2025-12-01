@@ -252,6 +252,15 @@ namespace jshepler.ngu.mods
             _tooltipText = ___tooltipText;
         }
 
+        // some of the mods change the font to fixed-width to show a table in the tooltip
+        // and sometimes doesn't get reset when that tooltip gets hidden - this ensures all
+        // the other regular tooltips are in the default font
+        [HarmonyPostfix, HarmonyPatch(typeof(HoverTooltip), "hideTooltip")]
+        private static void HoverTooltip_hideTooltip_postfix()
+        {
+            ResetTooltipFont();
+        }
+
         internal static void SetTooltipFont(Font font)
         {
             _tooltipText.font = font;
@@ -259,7 +268,8 @@ namespace jshepler.ngu.mods
 
         internal static void ResetTooltipFont()
         {
-            _tooltipText.font = Fonts.LiberationSans_Regular;
+            if(_tooltipText != null)
+                _tooltipText.font = Fonts.LiberationSans_Regular;
         }
 
         internal static Coroutine BeginCoroutine(IEnumerator routine)
@@ -291,6 +301,28 @@ namespace jshepler.ngu.mods
                 .SetInstruction(new CodeInstruction(OpCodes.Ldc_I8, 50L));
 
             return cm.InstructionEnumeration();
+        }
+
+        //[HarmonyTranspiler, HarmonyPatch(typeof(LootDrop), "itopodDrop")]
+        private static IEnumerable<CodeInstruction> itopodDrop_trans(IEnumerable<CodeInstruction> instructions)
+        {
+            var perkLevel = typeof(ITOPOD).GetField("perkLevel");
+
+            var cm = new CodeMatcher(instructions)
+                .MatchForward(false, new CodeMatch(OpCodes.Ldfld, perkLevel))
+                .MatchBack(false, new CodeMatch(OpCodes.Stloc_0))
+                .Insert(Transpilers.EmitDelegate(logPoopRoll));
+
+            return cm.InstructionEnumeration();
+        }
+
+        private static float logPoopRoll(float roll)
+        {
+            var poopChance = Plugin.Character.adventureController.itopod.effectPerLevel[30];
+
+            LogInfo($"poop roll: {roll:0.00000000}{(roll < poopChance ? " (+1 POOP)" : string.Empty)}");
+
+            return roll;
         }
     }
 }

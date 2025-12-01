@@ -27,17 +27,29 @@ namespace jshepler.ngu.mods
             __instance.bloodText.text += $"\n<size={fontSize}><b>Gain:</b> +{__instance.character.display(_totalBPS)}/s</size>";
         }
 
-        [HarmonyPrefix, HarmonyPatch(typeof(RebirthPowerSpell), "lootSpellTooltip")]
-        private static bool RebirthPowerSpells_lootSpellTooltip_prefix(RebirthPowerSpell __instance, ref string ___message)
+        //[HarmonyPostfix, HarmonyPatch(typeof(RebirthPowerSpell), "spellTooltip")]
+        private static void RebirthPowerSpell_spellTooltip_postfix(RebirthPowerSpell __instance, ref string ___message)
         {
+            if (_totalBPS <= 0)
+                return;
+
+            var curBlood = __instance.character.bloodMagic.bloodPoints;
+            var curBonus = bloodToAdvStats(curBlood);
+            var oneMinBlood = curBlood + _totalBPS * 60f;
+            var oneMinBonus = bloodToAdvStats(oneMinBlood);
+
+            ___message += $"\n\n+{Plugin.Character.display(oneMinBonus - curBonus)}/min";
+            __instance.tooltip.showTooltip(___message);
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(RebirthPowerSpell), "lootSpellTooltip")]
+        private static void RebirthPowerSpells_lootSpellTooltip_postfix(RebirthPowerSpell __instance, ref string ___message)
+        {
+            if (!__instance.IsInvoking("lootSpellTooltip"))
+                __instance.InvokeRepeating("lootSpellTooltip", 0, 0.1f);
+
             var bm = __instance.character.bloodMagic;
             var bloodInvested = bm.lootSpellBlood;
-
-            ___message = "<b>Blood Spaghetti</b>"
-                + "\n\nGather up all of your Blood and form it into something resembling spaghetti. You can slip spaghetti into a foe's pockets, causing it (and whatever loot they're holding onto) to fall out more often!"
-                + $"\n\nFor you math nerds, it's log2(Blood/{MINBLOOD_LOOT}) % better drop chance."
-                + $"\n\n<b>Minimum Blood Required: </b>{MINBLOOD_LOOT}"
-                + $"\n<b>Total Blood Invested: </b>{__instance.character.display(bloodInvested)}";
 
             var curBonus = bloodToLootBonus(bloodInvested);
             var autoCount = getAutoCastCount();
@@ -56,30 +68,22 @@ namespace jshepler.ngu.mods
             }
 
             __instance.tooltip.showTooltip(___message);
-            if (!__instance.IsInvoking("lootSpellTooltip"))
-                __instance.InvokeRepeating("lootSpellTooltip", 0, 0.1f);
-
-            return false;
         }
 
-        [HarmonyPrefix, HarmonyPatch(typeof(RebirthPowerSpell), "goldSpellTooltip")]
-        private static bool RebirthPowerSpells_goldSpellTooltip_prefix(RebirthPowerSpell __instance, ref string ___message)
+        [HarmonyPostfix, HarmonyPatch(typeof(RebirthPowerSpell), "goldSpellTooltip")]
+        private static void RebirthPowerSpells_goldSpellTooltip_postfix(RebirthPowerSpell __instance, ref string ___message)
         {
+            if (!__instance.IsInvoking("goldSpellTooltip"))
+                __instance.InvokeRepeating("goldSpellTooltip", 0, 0.1f);
+
             var bm = __instance.character.bloodMagic;
             var bloodInvested = bm.goldSpellBlood;
-
-            ___message = "<b>Counterfeit Gold</b>"
-                + "\n\nUse the power of Blood to create some counterfeit gold, and slip it into the time machine's time bubble to increase gold production! Lasts until rebirth."
-                + $"\n\nWARNING: MATH. Your bonus GPS is equal to log2(Blood/{MINBLOOD_GOLD})^2%."
-                + $"\n\n<b>Minimum Blood Required: </b>{MINBLOOD_GOLD}"
-                + $"\n<b>Total Blood Invested: </b>{__instance.character.display(bloodInvested)}";
 
             var curBonus = bloodToGoldBonus(bloodInvested);
             var autoCount = getAutoCastCount();
             var totalBlood = bloodInvested + (bm.bloodPoints / Math.Max(1, autoCount));
             var newBonus = bloodToGoldBonus(totalBlood);
             ___message += $"\n\n<b>Total bonus if used now:</b> {newBonus:#,##0.#}% (+{(newBonus - curBonus):#,##0.#}%)";
-
 
             if (_totalBPS > 0)
             {
@@ -92,10 +96,25 @@ namespace jshepler.ngu.mods
             }
 
             __instance.tooltip.showTooltip(___message);
-            if (!__instance.IsInvoking("goldSpellTooltip"))
-                __instance.InvokeRepeating("goldSpellTooltip", 0, 0.1f);
+        }
 
-            return false;
+        [HarmonyPostfix, HarmonyPatch(typeof(RebirthPowerSpell), "endSpellTooltip")]
+        private static void RebirthPowerSpell_endSpellTooltip_postfix(RebirthPowerSpell __instance, ref string ___message)
+        {
+            if (!__instance.IsInvoking("endSpellTooltip"))
+                __instance.InvokeRepeating("endSpellTooltip", 0, 0.1f);
+
+            if (_totalBPS <= 0)
+                return;
+
+            var bloodRemaining = 5e+22 - __instance.character.bloodMagic.bloodPoints;
+            if (bloodRemaining <= 0)
+                return;
+
+            var secondsRemaining = bloodRemaining / _totalBPS;
+            ___message += $"\n\n<b>Time Remaining:</b> {NumberOutput.timeOutput(secondsRemaining)}";
+
+            __instance.tooltip.showTooltip(___message);
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(RebirthPowerSpell), "hideTooltip")]
@@ -103,6 +122,7 @@ namespace jshepler.ngu.mods
         {
             __instance.CancelInvoke("lootSpellTooltip");
             __instance.CancelInvoke("goldSpellTooltip");
+            __instance.CancelInvoke("endSpellTooltip");
         }
 
         // persist iron pill's last adventure amount gained (info purpose only)
@@ -119,6 +139,16 @@ namespace jshepler.ngu.mods
             GameObject.Find("Canvas/Blood Magic Spells Canvas/Blood Magic Spells Menu /Auto Spell Button/Text")
                 .GetComponent<Text>()
                 .raycastTarget = true;
+        }
+
+        // from RebirthPowerSpells.spellTooltip()
+        private static float bloodToAdvStats(double blood)
+        {
+            var bonus = (float)Math.Floor(Math.Pow(blood, 0.25));
+            if (Plugin.Character.settings.rebirthDifficulty >= difficulty.evil)
+                bonus *= Plugin.Character.adventureController.itopod.ironPillBonus();
+
+            return bonus;
         }
 
         // AllBloodMagicController.lootBonus()

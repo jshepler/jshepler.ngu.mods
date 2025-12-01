@@ -193,7 +193,8 @@ namespace jshepler.ngu.mods
                 sources.Add(("Other", other, _totalGained == 0 ? 0f : other / _totalGained));
 
             sources.Sort(sorter);
-            var sourcesText = sources.Join(s => $"  <b>{s.source}:</b> {Plugin.Character.display(s.value)} <color=blue>({s.pct * 100f:0.#}%)</color>", "\n");
+            var lines = sources.Select(s => $"  <b>{s.source}:</b> {Plugin.Character.display(s.value)} <color=blue>({s.pct * 100f:0.#}%)</color>");
+            var sourcesText = string.Join("\n", lines);
 
             __instance.SetMessage($"{_baseMessage}\n\n<b>Total Base Gained:</b> {Plugin.Character.display(_totalGained)}\n{sourcesText}");
         }

@@ -125,7 +125,7 @@ namespace jshepler.ngu.mods
             TrackAPGained.Reset();
             TrackBaseAdvPowerGained.Reset();
             TrackCubeBoosts.Reset();
-            TrackResourcesGained.Reset();
+            TrackPoopAndSeedsGained.Reset();
 
             // copy over purchased packs: the 5 newbie packs, the res3 pack, the portait pack, and ITOPOD pack(s)
             if (oldArbitrary.boughtNewbiePack)

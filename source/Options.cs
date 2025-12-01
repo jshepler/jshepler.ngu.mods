@@ -37,7 +37,7 @@ namespace jshepler.ngu.mods
             DefaultPlayerPortait.Filename = Config.Bind("DefaultPlayerPortait", "Filename", "", "filename of 184x184 image in config folder, used to replace default player portrait (overrides BossId option), leave empty to disable");
             TrollKitty.Filename = Config.Bind("TrollKitty", "Filename", "", "filename of 900x600 image in config folder, used to replace troll kitty sprite, leave empty to disable");
 
-            DiggerUpggradeIndicator.Enabled = Config.Bind("DiggerUpggradeIndicator", "Enabled", false, "if enabled, digger button will light up yellow if any digger can be upgraded");
+            DiggerUpgradeIndicator.Enabled = Config.Bind("DiggerUpgradeIndicator", "Enabled", false, "if enabled, digger button will light up yellow if any digger can be upgraded");
             DropTableTooltip.Enabled = Config.Bind("DropTableTooltip", "Enabled", true, "enables display of zones' Drop Table tooltip by holding the alt key");
             DropTableTooltip.OnlyUnlocked = Config.Bind("DropTableTooltip", "OnlyUnlocked", true, "if true, only items that meet their drop conditions will be displayed");
             DropTableTooltip.UnknownItems = Config.Bind("DropTableTooltip", "UnknownItems", DropTableTooltip.UnknownItemDisplay.Blur, "how unknown items (not yet dropped) are displayed; Blur replaces names with \"????\"");
@@ -141,14 +141,19 @@ namespace jshepler.ngu.mods
                 if (orphaned.TryGetValue("AutoCards", "AutoProtectChonkers", out value))
                     Cards.AutoProtectChonkers.Value = value == "true";
 
+                if (orphaned.TryGetValue("Cards", "AutoYeet.Enabled", out value))
+                    Cards.AutoYeetMode.Value = value == "false" ? CardYeetMode.Disabled : Cards.AutoYeetMode.Value;
+
+                // AutoHarvest and FruitActivationIndicator combined into Yggdrasil in 1.18
                 if (orphaned.TryGetValue("AutoHarvest", "Enabled", out value))
                     Yggdrasil.AutoHarvest.Value = value == "true";
 
                 if (orphaned.TryGetValue("FruitActivationIndicator", "Enabled", out value))
                     Yggdrasil.ActivationIndicator.Value = value == "true";
 
-                if (orphaned.TryGetValue("Cards", "AutoYeet.Enabled", out value))
-                    Cards.AutoYeetMode.Value = value == "false" ? CardYeetMode.Disabled : Cards.AutoYeetMode.Value;
+                // DiggerUpggradeIndicator renamed to DiggerUpgradeIndicator in 1.29
+                if (orphaned.TryGetValue("DiggerUpggradeIndicator", "Enabled", out value))
+                    DiggerUpgradeIndicator.Enabled.Value = value == "true";
 
                 orphaned.Clear();
                 Config.Save();
@@ -285,7 +290,7 @@ namespace jshepler.ngu.mods
             internal static ConfigEntry<bool> Enabled;
         }
 
-        internal static class DiggerUpggradeIndicator
+        internal static class DiggerUpgradeIndicator
         {
             internal static ConfigEntry<bool> Enabled;
         }

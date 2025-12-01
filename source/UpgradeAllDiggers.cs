@@ -19,7 +19,7 @@ namespace jshepler.ngu.mods
         [HarmonyPostfix, HarmonyPatch(typeof(ButtonShower), "updateButtons")]
         private static void ButtonShower_updateButtons_postfix(ButtonShower __instance)
         {
-            if (Options.DiggerUpggradeIndicator.Enabled.Value == false)
+            if (Options.DiggerUpgradeIndicator.Enabled.Value == false)
                 return;
 
             var character = __instance.character;
@@ -33,9 +33,10 @@ namespace jshepler.ngu.mods
         internal static bool CanUpgradeAnyDigger()
         {
             var character = Plugin.Character;
+            var diggers = character.diggers.diggers;
 
-            for (var x = 0; x < character.diggers.diggers.Count; x++)
-                if (_controller.upgradeCost(x) <= character.realGold)
+            for (var x = 0; x < diggers.Count; x++)
+                if (diggers[x].maxLevel > 0 && _controller.upgradeCost(x) <= character.realGold)
                     return true;
 
             return false;

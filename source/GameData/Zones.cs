@@ -7,7 +7,7 @@ namespace jshepler.ngu.mods.GameData
     internal static class Zones
     {
         internal const int MAXZONEID = 45;
-        internal static List<int> TitanZoneIds = [6, 8, 11, 14, 16, 19, 23, 26, 30, 34, 38, 42];
+        internal static List<int> TitanZoneIds = [6, 8, 11, 14, 16, 19, 23, 26, 30, 34, 38, 42, 44, 45];
 
         internal static List<ZoneData> Zone;
         internal static ZoneData SafeZone = new(-1, "Safe Zone: Awakening Site", difficulty.normal, 0, 0);

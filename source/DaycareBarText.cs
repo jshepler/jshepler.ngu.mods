@@ -80,9 +80,10 @@ namespace jshepler.ngu.mods
             var r = (double)__instance.daycareRate(item);
             var b = (double)character.allDiggers.totalDaycareBonus();
             var secondsPerLevel = r / b;
+            var levelsPerDay = 86400.0 / secondsPerLevel;
             var baseTime = character.itemInfo.daycareRate[item.id];
 
-            __result += $"\n<b>Time per level:</b> {NumberOutput.timeOutput(secondsPerLevel)}";
+            __result += $"\n<b>Time per level:</b> {NumberOutput.timeOutput(secondsPerLevel)} ({levelsPerDay:#,##0.0} levels/day)";
 
             if(Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt))
                 __result += $"\n   base: {NumberOutput.timeOutput(baseTime)}"

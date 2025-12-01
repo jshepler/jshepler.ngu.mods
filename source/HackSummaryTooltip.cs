@@ -68,9 +68,8 @@ namespace jshepler.ngu.mods
                 var col1 = _names.Max(s => s.Length);
                 var col2 = levels.Max(s => s.Length);
                 var col3 = bonuses.Max(s => s.Length);
-                var text = Enumerable.Range(0, 15)
-                    .Select(i => $"<b>{_names[i].PadLeft(col1)}:</b> {levels[i].PadLeft(col2)} {bonuses[i].PadLeft(col3)}")
-                    .Join(s => s, "\n");
+                var lines = Enumerable.Range(0, 15).Select(i => $"<b>{_names[i].PadLeft(col1)}:</b> {levels[i].PadLeft(col2)} {bonuses[i].PadLeft(col3)}");
+                var text = string.Join("\n", lines);
 
                 if (totalSecondsToTargets > 0.0)
                     text += $"\n\n<b>{"Total Time".PadLeft(col1 + col2 + 1)}:</b> {bonuses[15].PadLeft(col3)}";

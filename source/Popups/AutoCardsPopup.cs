@@ -97,7 +97,7 @@ namespace jshepler.ngu.mods.Popups
         private static bool[] AlwaysYeet
         {
             get => Options.Cards.AlwaysYeetCSV.Value.Split(',').Select(s => s == "1").ToArray();
-            set => Options.Cards.AlwaysYeetCSV.Value = value.Select(b => b ? "1" : "0").Join(s => s, ",");
+            set => Options.Cards.AlwaysYeetCSV.Value = string.Join(",", value.Select(b => b ? "1" : "0"));
         }
 
         private static bool AutoProtectChonkers

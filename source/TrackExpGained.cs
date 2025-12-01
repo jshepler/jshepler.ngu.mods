@@ -49,6 +49,20 @@ namespace jshepler.ngu.mods
             {
                 _altIsDown = Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt);
             };
+
+            Plugin.OnSaveLoaded += (o, e) =>
+            {
+                if (_sourcesLastRB.Length < SOURCE_COUNT)
+                {
+                    var ar = new long[SOURCE_COUNT];
+                    _sourcesLastRB.CopyTo(ar, 0);
+                    _sourcesLastRB = ar;
+
+                    ar = new long[SOURCE_COUNT];
+                    _sourcesThisRB.CopyTo(ar, 0);
+                    _sourcesThisRB = ar;
+                }
+            };
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(Rebirth), "engage", typeof(bool))]
@@ -58,13 +72,27 @@ namespace jshepler.ngu.mods
             _expThisRB = 0L;
 
             _sourcesLastRB = _sourcesThisRB;
-            _sourcesThisRB = [0L, 0L, 0L, 0L];
+            _sourcesThisRB = new long[SOURCE_COUNT];
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(BossController), "rewardExp")]
         private static void BossController_rewardExp_prefix()
         {
-            _nextSource = ExpSource.Bosses;
+            _nextSource = ExpSource.FightBoss;
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(AdventureController), "dropLoot")]
+        private static void AdventureController_dropLoot_prefix(AdventureController __instance)
+        {
+            if (__instance.zone == 1000)
+                _nextSource = ExpSource.ITOPOD;
+
+            // online AKs don't go through AdventureController::dropLoot, need to do them in LootDrop::zone_X_Drop
+            //else if (Zones.TitanZoneIds.Contains(__instance.zone))
+            //    _nextSource = ExpSource.Titans;
+
+            else if (__instance.currentEnemy.enemyType == enemyType.boss)
+                _nextSource = ExpSource.AdvBosses;
         }
 
         [HarmonyPrefix,
@@ -100,11 +128,11 @@ namespace jshepler.ngu.mods
             return cm.InstructionEnumeration();
         }
 
-        [HarmonyPrefix, HarmonyPatch(typeof(LootDrop), "itopodDrop")]
-        private static void LootDrop_itopodDrop_prefix()
-        {
-            _nextSource = ExpSource.ITOPOD;
-        }
+        //[HarmonyPrefix, HarmonyPatch(typeof(LootDrop), "itopodDrop")]
+        //private static void LootDrop_itopodDrop_prefix()
+        //{
+        //    _nextSource = ExpSource.ITOPOD;
+        //}
 
         [HarmonyPrefix, HarmonyPatch(typeof(FruitController), "consumeKnowledgeFruit")]
         private static void FruitController_consumeKnowledgeFruit_prefix()
@@ -114,6 +142,7 @@ namespace jshepler.ngu.mods
 
         [HarmonyPostfix,
             HarmonyPatch(typeof(Character), "adventureOfflineProgress"),
+            HarmonyPatch(typeof(AdventureController), "dropLoot"),
             HarmonyPatch(typeof(LootDrop), "zone6Drop"),
             HarmonyPatch(typeof(LootDrop), "zone8Drop"),
             HarmonyPatch(typeof(LootDrop), "zone11Drop"),
@@ -217,7 +246,7 @@ namespace jshepler.ngu.mods
                     List<(string, long, float)> dataThisRB = [];
                     List<(string, long, float)> dataLastRB = [];
 
-                    for (var source = 0; source < 4; source++)
+                    for (var source = 0; source < SOURCE_COUNT; source++)
                     {
                         var sourceThisRB = _sourcesThisRB[source];
                         if (sourceThisRB > 0)
@@ -253,12 +282,14 @@ namespace jshepler.ngu.mods
 
         private static int sorter((string s, long l, float f) a, (string s, long l, float f) b) => b.f.CompareTo(a.f);
 
+        internal const int SOURCE_COUNT = 5;
         internal static class ExpSource
         {
-            internal static int Bosses = 0;
+            internal static int FightBoss = 0;
             internal static int Titans = 1;
             internal static int ITOPOD = 2;
             internal static int Fruit = 3;
+            internal static int AdvBosses = 4;
 
             internal static Func<int, string> Name = i => i switch
             {
@@ -266,6 +297,7 @@ namespace jshepler.ngu.mods
                 1 => "Titans",
                 2 => "ITOPOD",
                 3 => "Fruit",
+                4 => "Adv Bosses",
                 _ => string.Empty
             };
         }

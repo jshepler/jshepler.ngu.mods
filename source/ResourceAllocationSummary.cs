@@ -101,11 +101,14 @@ namespace jshepler.ngu.mods
                 values.Add(disp(wishes));
             }
 
+            labels.Add("Idle");
+            values.Add(disp(character.idleEnergy));
+
             var text = $"<color=#2E814A><b>Energy Allocation Summary</b></color>\n---------------------------------\n";
             if (labels.Count > 0)
             {
                 var maxLen = labels.Max(l => l.Length);
-                text += labels.Zip(values, (l, v) => $"<b>{l.PadLeft(maxLen)}:</b> {v}").Join(s => s, "\n");
+                text += string.Join("\n", labels.Zip(values, (l, v) => $"<b>{l.PadLeft(maxLen)}:</b> {v}"));
             }
 
             return text;
@@ -155,11 +158,14 @@ namespace jshepler.ngu.mods
                 values.Add(disp(wishes));
             }
 
+            labels.Add("Idle");
+            values.Add(disp(character.magic.idleMagic));
+
             var text = $"<color=#275AAD><b>Magic Allocation Summary</b></color>\n---------------------------------\n";
             if (labels.Count > 0)
             {
                 var maxLen = labels.Max(l => l.Length);
-                text += labels.Zip(values, (l, v) => $"<b>{l.PadLeft(maxLen)}:</b> {v}").Join(s => s, "\n");
+                text += string.Join("\n", labels.Zip(values, (l, v) => $"<b>{l.PadLeft(maxLen)}:</b> {v}"));
             }
 
             return text;
@@ -188,6 +194,9 @@ namespace jshepler.ngu.mods
                 values.Add(disp(wishes));
             }
 
+            labels.Add("Idle");
+            values.Add(disp(character.res3.idleRes3));
+
             var title = $"{character.res3.res3Name} Allocation Summary";
             var color = "#" + character.res3.colourHexString();
             var text = $"<color={color}><b>{title}</b></color>\n---------------------------------\n";
@@ -195,7 +204,7 @@ namespace jshepler.ngu.mods
             if (labels.Count > 0)
             {
                 var maxLen = labels.Max(l => l.Length);
-                text += labels.Zip(values, (l, v) => $"<b>{l.PadLeft(maxLen)}:</b> {v}").Join(s => s, "\n");
+                text += string.Join("\n", labels.Zip(values, (l, v) => $"<b>{l.PadLeft(maxLen)}:</b> {v}"));
             }
 
             return text;

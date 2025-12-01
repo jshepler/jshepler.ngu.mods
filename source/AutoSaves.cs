@@ -159,12 +159,17 @@ namespace jshepler.ngu.mods
             if (!folder.Exists)
                 return;
 
-            var quickSaves = folder.GetFiles("QuickSave*")
+            var quickSaves = folder.GetFiles("QuickSave*.txt")
                 .Where(f => !f.Name.Contains("(CLEAN)"))
                 .OrderByDescending(f => f.LastWriteTimeUtc)
                 .ToArray();
+
             if (quickSaves.Length == 0 || quickSaves[0] == null)
+            {
+                Plugin.LogInfo("no quick saves found");
+                Plugin.ShowOverrideNotification("No quicksaves found");
                 return;
+            }
 
             // modelled on OpenFileDialog.setLocalSaveSteam()
             var character = Plugin.Character;

@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Runtime.CompilerServices;
+using System.Reflection;
+using System.Reflection.Emit;
 using System.Text;
 using HarmonyLib;
 using UnityEngine;
@@ -103,20 +104,47 @@ namespace jshepler.ngu.mods
 
         internal static Equipment GetItem(this Inventory inv, int slotId)
         {
-            return slotId switch
+            try
             {
-                -1000 => null,
-                -6 => inv.weapon2,
-                -5 => inv.weapon,
-                -4 => inv.boots,
-                -3 => inv.legs,
-                -2 => inv.chest,
-                -1 => inv.head,
-                < 10000 => inv.inventory[slotId],
-                < 100000 => inv.accs[slotId - 10000],
-                < 1000000 => inv.daycare[slotId - 100000],
-                _ => inv.macguffins[slotId - 1000000]
-            };
+                if (slotId < 0)
+                    return slotId switch
+                    {
+                        -1000 => null, // nothing
+                        -100 => null, // inf cube
+                        -6 => inv.weapon2,
+                        -5 => inv.weapon,
+                        -4 => inv.boots,
+                        -3 => inv.legs,
+                        -2 => inv.chest,
+                        -1 => inv.head,
+                        _ => null
+                        //< 10000 => inv.inventory[slotId],
+                        //< 100000 => inv.accs[slotId - 10000],
+                        //< 1000000 => inv.daycare[slotId - 100000],
+                        //_ => inv.macguffins[slotId - 1000000]
+                    };
+
+                if (slotId < 10000)
+                    return (slotId < inv.inventory.Count) ? inv.inventory[slotId] : null;
+
+                if (slotId < 100000)
+                    return (slotId - 10000) < inv.accs.Count ? inv.accs[slotId - 10000] : null;
+
+                if (slotId < 1000000)
+                    return (slotId - 100000) < inv.daycare.Count ? inv.daycare[slotId - 100000] : null;
+
+                if (slotId < 10000000)
+                    return (slotId - 1000000) < inv.macguffins.Count ? inv.macguffins[slotId - 1000000] : null;
+
+                Plugin.LogInfo($"unknown slotId: {slotId}");
+                return null;
+            }
+
+            catch (Exception ex)
+            {
+                Plugin.LogInfo($"exception getting item for slotId: {slotId}\n{ex}");
+                return null;
+            }
         }
 
         #endregion
@@ -248,12 +276,6 @@ namespace jshepler.ngu.mods
         #endregion
 
         #region IEnumerables
-
-        internal static IEnumerable<CodeInstruction> DumpToLog(this IEnumerable<CodeInstruction> instructions)
-        {
-            Plugin.LogInfo($"\n{instructions.Join(i => $"{i}", "\n")}");
-            return instructions;
-        }
 
         // https://stackoverflow.com/a/23164737
         internal static IEnumerable<TResult> SelectWhere<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, Func<TSource, int, TResult> selector)
@@ -433,6 +455,87 @@ namespace jshepler.ngu.mods
                 return halfULP;
 
             return halfULP.NextFloat();
+        }
+
+        #endregion
+
+        #region BepinEx
+
+        internal static IEnumerable<CodeInstruction> DumpToLog(this IEnumerable<CodeInstruction> instructions)
+        {
+            //Plugin.LogInfo($"\n{instructions.Join(i => $"{i}", "\n")}");
+            //return instructions;
+
+            var codeList = new List<CodeInstruction>(instructions);
+            var sb = new StringBuilder();
+
+            for (int i = 0; i < codeList.Count; i++)
+            {
+                var instr = codeList[i];
+                string operandStr = string.Empty;
+
+                switch (instr.operand)
+                {
+                    case FieldInfo field:
+                        operandStr = $"{field.FieldType.Name} {field.DeclaringType.FullName}::{field.Name}";
+                        break;
+
+                    case MethodInfo method:
+                        var paramTypes = string.Join(", ", Array.ConvertAll(method.GetParameters(), p => p.ParameterType.Name));
+                        operandStr = $"{(method.IsStatic ? "static" : "instance")} {method.ReturnType.Name} {method.DeclaringType.FullName}::{method.Name}({paramTypes})";
+                        break;
+
+                    case Label label:
+                        int targetIndex = codeList.FindIndex(ci => ci.labels.Contains(label));
+                        operandStr = targetIndex >= 0 ? $"Label->{targetIndex:D3}" : "Label->?";
+                        break;
+
+                    case Label[] labels:
+                        var labelIndices = new List<string>();
+                        foreach (var l in labels)
+                        {
+                            int targetIndex2 = codeList.FindIndex(ci => ci.labels.Contains(l));
+                            labelIndices.Add(targetIndex2 >= 0 ? $"Label->{targetIndex2:D3}" : "Label->?");
+                        }
+                        operandStr = string.Join(", ", labelIndices);
+                        break;
+
+                    case string s:
+                        operandStr = $"\"{s}\"";
+                        break;
+
+                    default:
+                        operandStr = instr.operand?.ToString() ?? string.Empty;
+                        break;
+                }
+
+                string indexStr = instr.labels.Count > 0 ? $"*{i:D3}" : $" {i:D3}";
+                sb.AppendLine($"{indexStr}: {instr.opcode,-10} {operandStr}");
+            }
+
+            Plugin.LogInfo($"\n{sb}");
+            return instructions;
+        }
+
+        // bepinex's SetInstruction (and SetInstructionAndAdvance) don't keep labels, which I would assume you'd want to by default
+        internal static CodeMatcher ReplaceInstruction(this CodeMatcher m, CodeInstruction replacement, bool moveLabels = true)
+        {
+            if(moveLabels)
+                replacement.MoveLabelsFrom(m.Instruction);
+
+            m.SetInstruction(replacement);
+
+            return m;
+        }
+
+        internal static CodeMatcher ReplaceInstructionAndAdvance(this CodeMatcher m, CodeInstruction replacement, bool moveLabels = true)
+        {
+            if (moveLabels)
+                replacement.MoveLabelsFrom(m.Instruction);
+
+            m.SetInstructionAndAdvance(replacement);
+
+            return m;
         }
 
         #endregion

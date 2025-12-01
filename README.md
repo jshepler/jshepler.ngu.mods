@@ -417,6 +417,8 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 75. press F2 to open a popup to change titans' version without having to go to their zone
 
 76. on an item's tooltip, if there is another of that item in daycare, show the level of the item in daycare including levels gained and displays the total of the 2 items - helpful for looties and pendents to know when to pull daycare item out and merge
+    
+    if the pair can be merged to be level 100, the item gets a green border
 
 77. auto-sniping: skips normal enemies on adventure screen
 
@@ -1051,7 +1053,7 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 267. filter and order options to perk and quirk lists and affect the list of perks/quirks on the screen (not the f1 popup)
   - checkboxes are added to the perks/quirks screen (next to the filter options) as well as the f1 popup
   - if filter is enabled, an *additional* filter is applied to include on those perks/quirks in the list
-  - if order is enabled, the perks/quirks in the list are shown in list order before the other perks which will be in the selected base order
+  - if order is enabled, the perks/quirks in the list are shown in list order before the other perks/quirks which will be in the selected base order
   - if filter is enabled, but order is not, the displayed perks/quirks will be in the selected base order, *not in list order*
 
 268. adds total ITOPOD kills to the info 'n stuff - misc stats screen, replacing Highest Damage in a Single Hit
@@ -1065,3 +1067,15 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
       the perk search mod will be disabled if the other [perk search mod](https://github.com/postEntropy/NGU_Mods) is installed so won't conflict with it
 
 271. added alt-tooltip to the cards button to show tag order and next card/chonker and if it comes from being tagged or not
+
+272. persists move69's cooldown timer in the save file and advances it for offline time
+
+273. adds time remaining to THE END blood spell's tooltip
+
+274. tracks individual challenge completion times and per difficulty - hold alt when looking at challenge info
+
+275. displays current card spawn chances - hold shift when looking at the cards button tooltip
+
+276. shows summary of total estimated times to boost items - hold alt when looking at the WTF button tooltip on the inventory screen
+
+277. fix game bug that wasn't counting online titan AKs for "Titans Defeated" on the misc stats screen

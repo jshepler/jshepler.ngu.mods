@@ -96,7 +96,7 @@ namespace jshepler.ngu.mods
         }
 
         [HarmonyTranspiler, HarmonyPatch(typeof(ZoneSelector), "changeZone")]
-        private static IEnumerable<CodeInstruction> ZoneSelected_changeZone_prefix(IEnumerable<CodeInstruction> instructions)
+        private static IEnumerable<CodeInstruction> ZoneSelected_changeZone_transpiler(IEnumerable<CodeInstruction> instructions)
         {
             var dropdownField = typeof(ZoneSelector).GetField("dropdown");
             var cm = new CodeMatcher(instructions)
@@ -125,7 +125,7 @@ namespace jshepler.ngu.mods
             {
                 var z = Zones.Zone[zone - 1];
                 if (__instance.character.effectiveBossID() < z.effectiveBossId
-                    || (zone == 45 && !__instance.character.adventure.ratTitanDefeated)) // tippi kill required to unlock/select traitor's zone
+                    || (zone == 46 && !__instance.character.adventure.ratTitanDefeated)) // tippi kill required to unlock/select traitor's zone
                 {
                     __instance.dropdown.SetValueWithoutNotify(_currentZoneValue);
                     return false;

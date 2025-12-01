@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.TextCore;
 
 namespace jshepler.ngu.mods
 {
@@ -124,7 +125,7 @@ namespace jshepler.ngu.mods
             var iTarget = cooking.ingredients[index].targetLevel;
             var pTarget = pair.pairTarget;
 
-            __instance.nameText.text = $"P{pairIndex + 1}: {__instance.nameText.text} ({iTarget}:{pTarget})";
+            __instance.nameText.text = $"P{pairIndex + 1}: {__instance.nameText.text} ({iTarget}|{pTarget})";
             __instance.nameText.resizeTextForBestFit = true;
 
             var i1Level = cooking.ingredients[pair.i1Index].curLevel;
@@ -137,6 +138,12 @@ namespace jshepler.ngu.mods
             //Plugin.LogInfo($"[{index}] P{pairIndex}, PS: {curScore}, MS: {pair.maxScore}");
 
             __instance.nameText.color = _altIsDown && isMaxScore ? Plugin.ButtonColor_Green : Color.black;
+
+            var propIndex = cooking.ingredients[index].propertyIndex;
+            var multi = __instance.character.cookingController.ingredientProperties[propIndex].unitMultiplier;
+            var curLevel = cooking.ingredients[index].curLevel;
+            if (multi > 1)
+                __instance.ingredientUnitText.text = $"[{curLevel}] {__instance.ingredientUnitText.text}";
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(CookingController), "updateDishUI")]

@@ -10,6 +10,15 @@ namespace jshepler.ngu.mods
     [HarmonyPatch]
     internal class BasicTraining
     {
+        // game bug, checking if a skill is locked uses: attackTraining[id - 1] <= id * 5000
+        // should be < instead of <=
+        //
+        // the IL generated for <= is a little weird because there isn't a compare <=, it does:
+        //  CGT - compares 2 values, if first value is greater, the result is 1 else 0
+        //  then compares that result with 0, using CEQ (compare if equal), the result is 1 if they are the same
+        // so basically, CGT will have a 0 if value1 <= value2, and the CEQ with 0 to invert it (i.e. !(>=) )
+        //
+        // the fix is to change CGT to CLT and remove the subsequent CEQ with 0
         [HarmonyTranspiler, HarmonyPatch(typeof(DefenseTraining), "locked"), HarmonyPatch(typeof(OffenseTraining), "locked")]
         private static IEnumerable<CodeInstruction> locked_transpiler(IEnumerable<CodeInstruction> instructions)
         {
@@ -18,7 +27,7 @@ namespace jshepler.ngu.mods
                 .SetOpcodeAndAdvance(OpCodes.Clt)
                 .RemoveInstructions(2);
 
-            return cm.InstructionEnumeration();//.DumpToLog();
+            return cm.InstructionEnumeration();
         }
 
         [HarmonyPrefix, HarmonyPatch(typeof(OffenseTraining), "cap", new Type[0])]

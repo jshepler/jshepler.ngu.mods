@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Reflection.Emit;
 using HarmonyLib;
 using UnityEngine;
 
@@ -13,6 +15,22 @@ namespace jshepler.ngu.mods.BarTooltips
         private static void HacksController_Start_postfix(HacksController __instance)
         {
             _calc = __instance.character.hacks.hacks.Select((h, i) => new CapCalculators.HacksCalculator(__instance, i)).ToArray();
+        }
+
+        // this changes the time remaining for THE END hack to be time format instead of total seconds
+        [HarmonyTranspiler, HarmonyPatch(typeof(HacksController), "showTooltip", typeof(int))]
+        private static IEnumerable<CodeInstruction> HacksController_showTooltip_transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var endHackSpeed = typeof(HacksController).GetMethod("endHackSpeed");
+            var cm = new CodeMatcher(instructions)
+                .MatchForward(false, new CodeMatch(OpCodes.Call, endHackSpeed))
+                .ThrowIfInvalid("call method not found")
+                .Advance(4)
+                .SetInstructionAndAdvance(Transpilers.EmitDelegate((float f) => NumberOutput.timeOutput(f)))
+                .Advance(1)
+                .RemoveInstructions(4);
+
+            return cm.InstructionEnumeration();
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(HacksController), "showTooltip", typeof(int))]
