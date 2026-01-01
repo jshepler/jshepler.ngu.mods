@@ -87,7 +87,7 @@ namespace jshepler.ngu.mods
                 return;
 
             var item = character.inventory.GetItem(___id);
-            if (item == null || !item.isEquipment())
+            if (item == null || !item.isEquipment() || item.level >= 100)
                 return;
 
             var dcSlotId = character.inventory.daycare.FindIndex(e => e.id == item.id);

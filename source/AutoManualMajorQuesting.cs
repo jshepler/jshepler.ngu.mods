@@ -129,8 +129,18 @@ namespace jshepler.ngu.mods
         {
             var quest = _character.beastQuest;
 
-            if (!_enabled || (quest.inQuest && !quest.idleMode))
+            // safety check - should never be true
+            if (!_enabled)
                 return;
+
+            // if already doing a major quest, no need to do anything other than check if it's idle
+            if (quest.inQuest && !quest.reducedRewards)
+            {
+                if (quest.idleMode)
+                    _controller.toggleIdleMode();
+
+                return;
+            }
 
             if (quest.curBankedQuests < 1)
             {

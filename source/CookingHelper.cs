@@ -49,16 +49,17 @@ namespace jshepler.ngu.mods
             if (!_firstLoad)
                 return true;
 
+            var now = DateTime.UtcNow;
             var eatRate = __instance.eatRate();
             var maxBankedTime = __instance.maxBankedtime();
             ref float cookTimer = ref Plugin.Character.cooking.cookTimer;
 
-            if (cookTimer <= maxBankedTime)
+            if (cookTimer < maxBankedTime)
             {
                 if (cookTimer < eatRate)
-                    cookTimer = eatRate - (float)(CookingReadyAtUtc - DateTime.UtcNow).TotalSeconds;
+                    cookTimer = eatRate - (float)(CookingReadyAtUtc - now).TotalSeconds;
                 else
-                    cookTimer = eatRate + (float)(DateTime.UtcNow - CookingReadyAtUtc).TotalSeconds;
+                    cookTimer = eatRate + (float)(now - CookingReadyAtUtc).TotalSeconds;
             }
             else
             {

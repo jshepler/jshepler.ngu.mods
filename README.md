@@ -36,6 +36,8 @@ Bookmarklets are bookmarks that execute javascript instead of taking you to a sp
 
 The bookmarklets below are used in the [Gear Optimizer](https://gmiclotte.github.io/gear-optimizer) site to talk to NGU. They require you to use GO v0.9.2 or higher - check the [About](https://gmiclotte.github.io/gear-optimizer/#/about/) tab in GO. **You must be on GO when using these bookmarklets or they won't work.**
 
+**Brave users:** if a bookmarklet doesn't work, try clicking the Shields icon while on GO and disable *Cross-site trackers* for this page, or whitelist `http://localhost:8088` in Brave's Shield settings.
+
 Create a new bookmark. I like using the bookmark bar for easy access and in a sub-folder. You can name them whatever you want. Here's what I named mine:
 
 ![what I called mine](GO_bookmarklets.png)
@@ -1079,3 +1081,5 @@ If it continues to stay disconnected, please send me the `...\Steam\steamapps\co
 276. shows summary of total estimated times to boost items - hold alt when looking at the WTF button tooltip on the inventory screen
 
 277. fix game bug that wasn't counting online titan AKs for "Titans Defeated" on the misc stats screen
+
+278. changed the item set completion tooltips and notifications to show the total exp/ap gain instead of the base (contributed by discord user shadowevil)

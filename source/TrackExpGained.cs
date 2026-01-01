@@ -52,13 +52,18 @@ namespace jshepler.ngu.mods
 
             Plugin.OnSaveLoaded += (o, e) =>
             {
+                //Plugin.LogInfo($"_sourcesLastRB: {_sourcesLastRB.Length}, _sourcesThisRB: {_sourcesThisRB.Length}");
+
                 if (_sourcesLastRB.Length < SOURCE_COUNT)
                 {
                     var ar = new long[SOURCE_COUNT];
                     _sourcesLastRB.CopyTo(ar, 0);
                     _sourcesLastRB = ar;
+                }
 
-                    ar = new long[SOURCE_COUNT];
+                if (_sourcesThisRB.Length < SOURCE_COUNT)
+                {
+                    var ar = new long[SOURCE_COUNT];
                     _sourcesThisRB.CopyTo(ar, 0);
                     _sourcesThisRB = ar;
                 }

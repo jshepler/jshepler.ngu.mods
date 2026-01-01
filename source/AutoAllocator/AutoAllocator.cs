@@ -79,7 +79,11 @@ namespace jshepler.ngu.mods.AutoAllocator
                 }
 
             else
-                Allocators.Energy.Values.Do(a => a.DisableAll());
+                // since pressing r does not remove energy from BT, leave those allocators alone
+                Allocators.Energy
+                    .Where(kv => kv.Key != Allocators.Feature.BT_Attack && kv.Key != Allocators.Feature.BT_Defense)
+                    .Do(kv => kv.Value.DisableAll());
+                //Allocators.Energy.Values.Do(a => a.DisableAll());
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(Character), "removeMostMagic")]

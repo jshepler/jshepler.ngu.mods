@@ -538,6 +538,18 @@ namespace jshepler.ngu.mods
             return m;
         }
 
+        private static bool isStloc(CodeInstruction i) => i.opcode == OpCodes.Stloc || i.opcode == OpCodes.Stloc_S || i.opcode == OpCodes.Stloc_0 || i.opcode == OpCodes.Stloc_1 || i.opcode == OpCodes.Stloc_2 || i.opcode == OpCodes.Stloc_3;
+        public static bool IsStLoc(this CodeInstruction instruction, int localIndex)
+        {
+            return isStloc(instruction) && (instruction.operand as LocalBuilder)?.LocalIndex == localIndex;
+        }
+
+        private static bool isLdloc(CodeInstruction i) => i.opcode == OpCodes.Ldloc || i.opcode == OpCodes.Ldloc_S || i.opcode == OpCodes.Ldloc_0 || i.opcode == OpCodes.Ldloc_1 || i.opcode == OpCodes.Ldloc_2 || i.opcode == OpCodes.Ldloc_3;
+        public static bool IsLdLoc(this CodeInstruction instruction, int localIndex)
+        {
+            return isStloc(instruction) && (instruction.operand as LocalBuilder)?.LocalIndex == localIndex;
+        }
+
         #endregion
 
         internal static Menu CurrentMenu(this Character character)

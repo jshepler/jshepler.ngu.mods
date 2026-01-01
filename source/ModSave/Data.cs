@@ -252,7 +252,7 @@ namespace jshepler.ngu.mods.ModSave
 
         internal static long[] ExpSourcesThisRB
         {
-            get => Get<long[]>("ExpSourcesThisRB", new long[TrackExpGained.SOURCE_COUNT]);
+            get => Get("ExpSourcesThisRB", new long[TrackExpGained.SOURCE_COUNT]);
             set => Set("ExpSourcesThisRB", value);
         }
 
