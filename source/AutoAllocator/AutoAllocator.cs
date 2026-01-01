@@ -78,6 +78,9 @@ namespace jshepler.ngu.mods.AutoAllocator
                         break;
                 }
 
+            else if (_rebirthing)
+                Allocators.Energy.Values.Do(a => a.DisableAll());
+
             else
                 // since pressing r does not remove energy from BT, leave those allocators alone
                 Allocators.Energy
@@ -136,12 +139,16 @@ namespace jshepler.ngu.mods.AutoAllocator
                 Allocators.Res3.Values.Do(a => a.DisableAll());
         }
 
+        private static bool _rebirthing = false;
+
         [HarmonyPostfix, HarmonyPatch(typeof(Rebirth), "engage", typeof(bool))]
         internal static void ClearAllAllocators()
         {
+            _rebirthing = true;
             ClearEnergyAllocators();
             ClearMagicAllocators();
             ClearRes3Allocators();
+            _rebirthing = false;
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(Energy), "addEnergy")]
