@@ -11,7 +11,11 @@ namespace jshepler.ngu.mods
         private static Character _character;
         private static BeastQuestController _controller;
         
-        private static bool _enabled = false;
+        private static bool _enabled
+        {
+            get => ModSave.Data.AutoQuestingEnabled;
+            set => ModSave.Data.AutoQuestingEnabled = value;
+        }
 
         [HarmonyPrepare]
         private static void prep(MethodBase original)
