@@ -1,4 +1,7 @@
-﻿# jshepler.ngu.mods
+This fork is a selection of mods that I want to use.
+Below is original README.
+ 
+# jshepler.ngu.mods
 Collection of mods I wrote for myself.
 
 I had not intended to make these public, as I don't want to support them long-term (i.e. when no longer playing the game). A few people have asked that I share the code, so here you go.
