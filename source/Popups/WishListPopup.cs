@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using jshepler.ngu.mods.ModSave;
+//using jshepler.ngu.mods.ModSave; // ModSave not included in this fork
 using UnityEngine;
 
 namespace jshepler.ngu.mods.Popups
@@ -9,9 +9,13 @@ namespace jshepler.ngu.mods.Popups
         const float RECT_WIDTH = 660f;
         const float RECT_HEIGHT = 340f;
 
-        private static List<int> _wishes => Data.WishList;
-        private static List<int> _targets => Data.WishTargets;
-        private static List<int> _lastRunning => Data.WishesLastRunning;
+        //private static List<int> _wishes => Data.WishList;
+        //private static List<int> _targets => Data.WishTargets;
+        //private static List<int> _lastRunning => Data.WishesLastRunning;
+
+        private static List<int> _wishes => WishList.WishListIds;
+        private static List<int> _targets => WishList.WishTargetLevels;
+        private static List<int> _lastRunning => WishList.WishesLastRunning;
 
         private static bool _enabled
         {

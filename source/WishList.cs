@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection.Emit;
 using HarmonyLib;
 using jshepler.ngu.mods.AutoAllocator;
-using jshepler.ngu.mods.ModSave;
+//using jshepler.ngu.mods.ModSave; // ModSave not included in this fork - queue is in-memory only, see below
 using jshepler.ngu.mods.Popups;
 using UnityEngine;
 
@@ -13,11 +13,20 @@ namespace jshepler.ngu.mods
     [HarmonyPatch]
     internal class WishList
     {
-        private static DateTime _lastAutoSave = DateTime.UtcNow;
+        //private static DateTime _lastAutoSave = DateTime.UtcNow;
 
-        private static List<int> _wishList => Data.WishList;
-        private static List<int> _wishTargets => Data.WishTargets;
-        private static List<int> _lastRunning => Data.WishesLastRunning;
+        //private static List<int> _wishList => Data.WishList;
+        //private static List<int> _wishTargets => Data.WishTargets;
+        //private static List<int> _lastRunning => Data.WishesLastRunning;
+
+        // ModSave not included in this fork - these are in-memory only and reset on game restart
+        internal static readonly List<int> WishListIds = new();
+        internal static readonly List<int> WishTargetLevels = new();
+        internal static readonly List<int> WishesLastRunning = new();
+
+        private static List<int> _wishList => WishListIds;
+        private static List<int> _wishTargets => WishTargetLevels;
+        private static List<int> _lastRunning => WishesLastRunning;
 
         private static WishesController _controller;
         private static WishListPopup _popup;
@@ -38,12 +47,12 @@ namespace jshepler.ngu.mods
 
             Plugin.OnSaveLoaded += (o, e) =>
             {
-                if (Data.Values.ContainsKey("WishQueue"))
-                {
-                    _wishList.Clear();
-                    _wishList.AddRange((List<int>)Data.Values["WishQueue"]);
-                    Data.Values.Remove("WishQueue");
-                }
+                //if (Data.Values.ContainsKey("WishQueue"))
+                //{
+                //    _wishList.Clear();
+                //    _wishList.AddRange((List<int>)Data.Values["WishQueue"]);
+                //    Data.Values.Remove("WishQueue");
+                //}
 
                 if (_wishTargets.Count != _wishList.Count)
                 {
@@ -77,12 +86,13 @@ namespace jshepler.ngu.mods
                 if (Plugin.Character.InMenu(Menu.Wishes) && Input.GetKeyDown(KeyCode.F1))
                     _popup.Toggle();
 
-                if (Wishes.RunningWishes.Any(w => w.Progress >= 0.999f)
-                    && (DateTime.UtcNow - _lastAutoSave).TotalMinutes >= 3)
-                {
-                    AutoSaves.DoSave("Wishes_About_To_Level");
-                    _lastAutoSave = DateTime.UtcNow;
-                }
+                // AutoSaves not included in this fork
+                //if (Wishes.RunningWishes.Any(w => w.Progress >= 0.999f)
+                //    && (DateTime.UtcNow - _lastAutoSave).TotalMinutes >= 3)
+                //{
+                //    AutoSaves.DoSave("Wishes_About_To_Level");
+                //    _lastAutoSave = DateTime.UtcNow;
+                //}
             };
 
             Plugin.OnLateUpdate += (o, e) => updateTracked();
