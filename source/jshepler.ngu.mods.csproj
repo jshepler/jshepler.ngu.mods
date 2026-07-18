@@ -18,8 +18,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Reference Include="$(GameFolder)\NGUIdle_Data\Managed\Assembly-CSharp.dll" />
-        <Reference Include="$(GameFolder)\NGUIdle_Data\Managed\UnityEngine.UI.dll" />
+        <Reference Include="$(GameFolder)\NGUIdle_Data\Managed\Assembly-CSharp.dll" Private="false" />
+        <Reference Include="$(GameFolder)\NGUIdle_Data\Managed\UnityEngine.UI.dll" Private="false" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
@@ -32,6 +32,10 @@
     </ItemGroup>
 
     <Target Name="CopyDLL" AfterTargets="Build">
-        <Copy SourceFiles="$(TargetDir)$(AssemblyName).dll" DestinationFolder="$(GameFolder)\BepInEx\plugins" />
+        <ItemGroup>
+            <FilesToCopy Include="$(TargetDir)$(AssemblyName).dll" />
+            <FilesToCopy Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.Extension)' == '.dll'" />
+        </ItemGroup>
+        <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(GameFolder)\BepInEx\plugins" />
     </Target>
 </Project>
