@@ -40,6 +40,9 @@ namespace jshepler.ngu.mods
         {
             return e =>
             {
+                if (!Options.Cards.ShowTooltip.Value)
+                    return;
+
                 StopShowingTooltip();
                 _cor = Plugin.BeginCoroutine(ShowTooltip(podId));
             };
